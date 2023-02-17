@@ -1,0 +1,43 @@
+import { Controller } from "tsoa";
+import { IApp, IEditApp } from "../interfaces";
+export declare class AppsController extends Controller {
+    constructor();
+    createAdminApp(appInfo: IApp): Promise<IApp | {
+        message: string;
+    }>;
+    createBuildingApp(appInfo: IApp): Promise<IApp | {
+        message: string;
+    }>;
+    getAllAdminApps(): Promise<IApp[] | {
+        message: string;
+    }>;
+    getAllBuildingApps(): Promise<IApp[] | {
+        message: string;
+    }>;
+    getAdminApp(appId: string): Promise<IApp | {
+        message: string;
+    }>;
+    getBuildingApp(appId: string): Promise<IApp | {
+        message: string;
+    }>;
+    updateAdminApp(appId: string, newInfo: IEditApp): Promise<IApp | {
+        message: string;
+    }>;
+    updateBuildingApp(appId: string, newInfo: IEditApp): Promise<IApp | {
+        message: string;
+    }>;
+    deleteAdminApp(appId: string): Promise<{
+        message: string;
+    }>;
+    deleteBuildingApp(appId: string): Promise<{
+        message: string;
+    }>;
+    uploadAdminApp(file: any): Promise<IApp[] | {
+        message: string;
+    }>;
+    uploadBuildingApp(file: any): Promise<IApp[] | {
+        message: string;
+    }>;
+}
+declare const _default: AppsController;
+export default _default;

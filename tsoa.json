@@ -1,0 +1,27 @@
+{
+    "entryFile": "src/index.ts",
+    "noImplicitAdditionalProperties": "throw-on-extras",
+    "controllerPathGlobs": [
+        "src/controllers/**/*controller.ts"
+    ],
+    "spec": {
+        "outputDirectory": "./src/swagger",
+        "specVersion": 3,
+        "securityDefinitions": {
+            "admin": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT"
+            },
+            "all": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT"
+            }
+        }
+    },
+    "routes": {
+        "routesDir": "./src",
+        "authenticationModule": "./src/security/authentication.ts"
+    }
+}

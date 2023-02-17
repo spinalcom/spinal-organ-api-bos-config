@@ -1,0 +1,34 @@
+import { SpinalGraph, SpinalContext, SpinalNode } from 'spinal-env-viewer-graph-service';
+import { IProfile, IProfileAuthEdit, IProfileAuthRes, IProfileRes } from '../interfaces';
+export declare class UserProfileService {
+    private static instance;
+    context: SpinalContext;
+    private adminProfile;
+    private constructor();
+    static getInstance(): UserProfileService;
+    init(): Promise<SpinalContext>;
+    createUserProfile(userProfile: IProfile): Promise<IProfileRes>;
+    getUserProfile(userProfile: string | SpinalNode): Promise<IProfileRes>;
+    updateUserProfile(userProfileId: string, userProfile: IProfileAuthEdit): Promise<IProfileRes>;
+    getAllUserProfile(): Promise<IProfileRes[]>;
+    getAllUserProfileNodes(): Promise<SpinalNode<import("spinal-core-connectorjs").Model>[]>;
+    deleteUserProfile(userProfileId: string): Promise<string>;
+    getUserProfileNodeGraph(profileId: string, digitalTwinId?: string): Promise<SpinalGraph | void>;
+    authorizeProfileToAccessContext(userProfile: string | SpinalNode, contextIds: string | string[], digitalTwinId?: string): Promise<SpinalContext[]>;
+    authorizeProfileToAccessApps(userProfile: string | SpinalNode, appIds: string | string[]): Promise<SpinalNode<any>[]>;
+    authorizeProfileToAccessApis(userProfile: string | SpinalNode, apiIds: string | string[]): Promise<SpinalNode<any>[]>;
+    getAutorizationStructure(userProfile: string | SpinalNode, digitalTwinId?: string): Promise<IProfileAuthRes>;
+    unauthorizeProfileToAccessContext(userProfile: string | SpinalNode, contextIds: string | string[], digitalTwinId?: string): Promise<SpinalContext[]>;
+    unauthorizeProfileToAccessApps(userProfile: string | SpinalNode, appIds: string | string[]): Promise<SpinalNode[]>;
+    unauthorizeProfileToAccessApis(userProfile: string | SpinalNode, apiIds: string | string[]): Promise<SpinalNode[]>;
+    profileHasAccessToContext(userProfile: string | SpinalNode, contextId: string, digitalTwinId?: string): Promise<boolean>;
+    profileHasAccessToApp(userProfile: string | SpinalNode, appId: string): Promise<boolean>;
+    profileHasAccessToApi(userProfile: string | SpinalNode, apiId: string): Promise<boolean>;
+    getAuthorizedContexts(userProfile: string | SpinalNode, digitalTwinId?: string): Promise<SpinalContext[]>;
+    getAuthorizedApps(userProfile: string | SpinalNode): Promise<SpinalNode[]>;
+    getAuthorizedAdminApps(userProfile: string | SpinalNode): Promise<SpinalNode[]>;
+    getAuthorizedApis(userProfile: string | SpinalNode): Promise<SpinalNode[]>;
+    _getUserProfileNode(userProfileId: string): Promise<SpinalNode>;
+    private _renameProfile;
+    private _findChildInContext;
+}

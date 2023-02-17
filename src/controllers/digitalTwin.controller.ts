@@ -1,0 +1,222 @@
+/*
+ * Copyright 2022 SpinalCom - www.spinalcom.com
+ * 
+ * This file is part of SpinalCore.
+ * 
+ * Please read all of the following terms and conditions
+ * of the Free Software license Agreement ("Agreement")
+ * carefully.
+ * 
+ * This Agreement is a legally binding contract between
+ * the Licensee (as defined below) and SpinalCom that
+ * sets forth the terms and conditions that govern your
+ * use of the Program. By installing and/or using the
+ * Program, you agree to abide by all the terms and
+ * conditions stated or referenced herein.
+ * 
+ * If you do not agree to abide by these terms and
+ * conditions, do not demonstrate your acceptance and do
+ * not install or use the Program.
+ * You should have received a copy of the license along
+ * with this file. If not, see
+ * <http://resources.spinalcom.com/licenses.pdf>.
+ */
+
+import { DigitalTwinService } from "../services";
+import { HTTP_CODES, SECURITY_NAME } from "../constant";
+import { Body, Controller, Delete, Get, Path, Post, Put, Query, Route, Security, Tags } from "tsoa";
+
+const serviceInstance = DigitalTwinService.getInstance();
+
+@Route("/api/v2")
+@Tags("DigitalTwin")
+export class DigitaltwinController extends Controller {
+
+    public constructor() {
+        super();
+    }
+
+    @Security(SECURITY_NAME.admin)
+    @Post("/add_digitaltwin")
+    public async addDigitalTwin(@Body() data: { name: string; url: string }, @Query() set_as_actual_digitaltwin?: boolean) {
+        try {
+
+            if (!data.name || !data.name.trim()) {
+                this.setStatus(HTTP_CODES.BAD_REQUEST);
+                return { message: "The file name is mandatory" };
+            }
+
+            try {
+                const node = await serviceInstance.createDigitalTwin(data.name, data.url, set_as_actual_digitaltwin);
+                this.setStatus(HTTP_CODES.CREATED);
+                return node.info.get();
+
+            } catch (error) {
+                this.setStatus(HTTP_CODES.BAD_REQUEST);
+                return { message: error.message }
+            }
+
+        } catch (error) {
+            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+
+    @Security(SECURITY_NAME.admin)
+    @Get("/get_all_digitaltwins")
+    public async getAllDigitalTwins() {
+        try {
+            const digitalTwins = await serviceInstance.getAllDigitalTwins();
+            this.setStatus(HTTP_CODES.OK);
+            return digitalTwins.map(el => el.info.get());
+        } catch (error) {
+            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+
+    @Security(SECURITY_NAME.admin)
+    @Get("/get_digitaltwin/{digitaltwinId}")
+    public async getDigitalTwin(@Path() digitaltwinId: string) {
+        try {
+            const digitaltwin = await serviceInstance.getDigitalTwin(digitaltwinId);
+            if (digitaltwin) {
+                this.setStatus(HTTP_CODES.OK)
+                return digitaltwin.info.get();
+            }
+
+            this.setStatus(HTTP_CODES.NOT_FOUND);
+            return { message: `No digitalTwin found for ${digitaltwinId}` }
+        } catch (error) {
+            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+
+    @Security(SECURITY_NAME.admin)
+    @Put("/set_as_actual_digitaltwin/{digitaltwinId}")
+    public async setActualDigitalTwin(@Path() digitaltwinId: string) {
+        try {
+            const node = await serviceInstance.setActualDigitalTwin(digitaltwinId);
+            if (node) {
+                this.setStatus(HTTP_CODES.OK)
+                return node.info.get();
+            }
+
+            this.setStatus(HTTP_CODES.NOT_FOUND);
+            return { message: `No digitalTwin found for ${digitaltwinId}` }
+        } catch (error) {
+            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+
+    @Security(SECURITY_NAME.admin)
+    @Get("/get_actual_digitaltwin")
+    public async getActualDigitalTwin() {
+        try {
+            const node = await serviceInstance.getActualDigitalTwin();
+            if (node) {
+                this.setStatus(HTTP_CODES.OK)
+                return node.info.get();
+            }
+
+            this.setStatus(HTTP_CODES.NOT_FOUND);
+            return { message: `No digitaltwin is set up` }
+        } catch (error) {
+            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+
+
+    @Security(SECURITY_NAME.admin)
+    @Get("/get_digitaltwin_contexts")
+    public async getDefaultDigitalTwinContexts() {
+        try {
+            const contexts = await serviceInstance.getDigitalTwinContexts();
+            this.setStatus(HTTP_CODES.OK)
+            return contexts.map(el => el.info.get());
+        } catch (error) {
+            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+
+    @Security(SECURITY_NAME.admin)
+    @Get("/get_digitaltwin_contexts/{digitaltwinId}")
+    public async getDigitalTwinContexts(@Path() digitaltwinId: string) {
+        try {
+            const contexts = await serviceInstance.getDigitalTwinContexts(digitaltwinId);
+            this.setStatus(HTTP_CODES.OK)
+            return contexts.map(el => el.info.get());
+        } catch (error) {
+            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+
+    @Security(SECURITY_NAME.admin)
+    @Put("/update_digitaltwin/{digitaltwinId}")
+    public async editDigitalTwin(@Path() digitaltwinId: string, @Body() data: { name?: string; url?: string }) {
+        try {
+            const node = await serviceInstance.editDigitalTwin(digitaltwinId, data);
+            if (node) {
+                this.setStatus(HTTP_CODES.OK);
+                return node.info.get();
+            }
+
+            this.setStatus(HTTP_CODES.NOT_FOUND);
+            return { message: `No digitaltwin found for ${digitaltwinId}` }
+
+        } catch (error) {
+            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+
+    @Security(SECURITY_NAME.admin)
+    @Delete("/delete_digitaltwin/{digitaltwinId}")
+    public async removeDigitalTwin(@Path() digitaltwinId: string) {
+        try {
+            const deleted = await serviceInstance.removeDigitalTwin(digitaltwinId);
+            if (deleted) {
+                this.setStatus(HTTP_CODES.OK);
+                return { message: `digitaltwin deleted with success` }
+            }
+
+            this.setStatus(HTTP_CODES.BAD_REQUEST);
+            return { message: `sommething went wrong, please check digitaltwin id` };
+        } catch (error) {
+            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+
+    @Security(SECURITY_NAME.admin)
+    @Delete("/delete_actual_digitaltwin")
+    public async removeActualDigitaTwin() {
+        try {
+            try {
+                const deleted = await serviceInstance.removeActualDigitaTwin();
+                if (deleted) {
+                    this.setStatus(HTTP_CODES.OK);
+                    return { message: `actual digitaltwin deleted with success` }
+                }
+
+                this.setStatus(HTTP_CODES.BAD_REQUEST);
+                return { message: `sommething went wrong, please check if default digitaltwin is set up` };
+            } catch (error) {
+                this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+                return { message: error.message };
+            }
+        } catch (error) {
+            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+
+}
+
+
+export default new DigitaltwinController();
