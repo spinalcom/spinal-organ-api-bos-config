@@ -143,6 +143,7 @@ export const BUILDING_RELATION_NAME = 'hasBuilding';
 export const PROFILE_TO_AUTHORIZED_PORTOFOLIO_RELATION = "hasAccessToPortofolio";
 export const PROFILE_TO_AUTHORIZED_BOS_RELATION = "hasAccessToBos";
 export const PROFILE_TO_AUTHORIZED_DIGITAL_TWIN_RELATION_NAME = "hasAccessToDigitalTwin";
+export const USER_TO_FAVORITE_APP_RELATION = "hasFavoriteApp";
 
 // Relation Type
 export const PTR_LST_TYPE = SPINAL_RELATION_PTR_LST_TYPE;
@@ -184,7 +185,7 @@ export const routesToProxy = [
 ];
 
 export const BOS_BASE_URI = "/api/v1";
-export const BOS_CONFIG_BASE_URI = "/api/v2";
+export const BOS_CONFIG_BASE_URI = "/api/v1";
 
 // export const BOS_BASE_URI_V1 = "/api/v1/building";
 // export const BOS_BASE_URI_V1_2 = "/v1/building";

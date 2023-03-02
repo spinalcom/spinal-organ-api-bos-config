@@ -13,6 +13,7 @@ export declare class AppService {
     init(): Promise<SpinalContext>;
     createAdminApp(appInfo: IApp): Promise<SpinalNode>;
     createBuildingApp(appInfo: IApp): Promise<SpinalNode>;
+    createOrUpadteAdminApp(appInfo: IApp): Promise<SpinalNode>;
     getAllAdminApps(): Promise<SpinalNode[]>;
     getAllBuildingApps(): Promise<SpinalNode[]>;
     getAdminApp(appId: string): Promise<SpinalNode>;

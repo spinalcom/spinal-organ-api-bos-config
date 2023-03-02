@@ -29,7 +29,7 @@ import { Route, Tags, Controller, Post, Get, Put, Delete, Body, Path, Security, 
 import { _formatProfile, _getNodeListInfo } from '../utils/profileUtils'
 const serviceInstance = AppProfileService.getInstance();
 
-@Route("/api/v2/app_profile")
+@Route("/api/v1/app_profile")
 @Tags("App Profiles")
 export class AppProfileController extends Controller {
 

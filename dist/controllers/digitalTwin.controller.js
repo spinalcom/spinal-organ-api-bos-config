@@ -303,7 +303,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], DigitaltwinController.prototype, "removeActualDigitaTwin", null);
 DigitaltwinController = __decorate([
-    (0, tsoa_1.Route)("/api/v2"),
+    (0, tsoa_1.Route)("/api/v1"),
     (0, tsoa_1.Tags)("DigitalTwin"),
     __metadata("design:paramtypes", [])
 ], DigitaltwinController);

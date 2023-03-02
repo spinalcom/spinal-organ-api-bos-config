@@ -386,7 +386,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UserProfileController.prototype, "profileHasAccessToApp", null);
 UserProfileController = __decorate([
-    (0, tsoa_1.Route)("/api/v2/user_profile"),
+    (0, tsoa_1.Route)("/api/v1/user_profile"),
     (0, tsoa_1.Tags)("user Profiles"),
     __metadata("design:paramtypes", [])
 ], UserProfileController);

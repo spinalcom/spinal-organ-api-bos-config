@@ -22,11 +22,23 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
+import * as express from "express";
 import { Request } from 'express'
 import { SpinalNode } from 'spinal-env-viewer-graph-service';
 import { AppProfileService } from "../services/appProfile.service";
 import { APIService } from "../services/apis.service";
 
+
+
+export function getToken(request: express.Request): string {
+    const header = request.headers.authorization || request.headers.Authorization;
+    if (header) {
+        const [, token] = (<string>header).split(" ");
+        if (token) return token;
+    }
+
+    return request.body?.token || request.query?.token || request.headers["x-access-token"];
+}
 
 
 export async function profileHasAccessToApi(profile: SpinalNode, apiUrl: string, method: string): Promise<boolean> {
@@ -35,6 +47,8 @@ export async function profileHasAccessToApi(profile: SpinalNode, apiUrl: string,
 
     return AppProfileService.getInstance().profileHasAccessToApi(profile, api.getId().get());
 }
+
+
 
 
 // async function getProfileNode(profileId: string): Promise<SpinalNode> {

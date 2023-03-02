@@ -256,8 +256,8 @@ export default class AuthorizationService {
     }
 
     public async profileHasAccessToApp(profile: SpinalNode, appId: string): Promise<boolean> {
-        const contexts = await this.getAuthorizedApps(profile);
-        return contexts.some(el => el.getId().get() === appId);
+        const contexts = await Promise.all([this.getAuthorizedApps(profile), this.getAuthorizedAdminApps(profile)]);
+        return contexts.flat().some(el => el.getId().get() === appId);
     }
 
     public async profileHasAccessToApi(profile: SpinalNode, apiId: string): Promise<boolean> {

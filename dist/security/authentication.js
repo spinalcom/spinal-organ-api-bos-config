@@ -42,7 +42,7 @@ function expressAuthentication(request, securityName, scopes) {
         if (securityName === constant_1.SECURITY_NAME.all)
             return;
         // check token validity
-        const token = getToken(request);
+        const token = (0, utils_1.getToken)(request);
         if (!token)
             throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.INVALID_TOKEN);
         const tokenInstance = services_1.TokenService.getInstance();
@@ -70,14 +70,4 @@ function expressAuthentication(request, securityName, scopes) {
     });
 }
 exports.expressAuthentication = expressAuthentication;
-function getToken(request) {
-    var _a, _b;
-    const header = request.headers.authorization || request.headers.Authorization;
-    if (header) {
-        const [, token] = header.split(" ");
-        if (token)
-            return token;
-    }
-    return ((_a = request.body) === null || _a === void 0 ? void 0 : _a.token) || ((_b = request.query) === null || _b === void 0 ? void 0 : _b.token) || request.headers["x-access-token"];
-}
 //# sourceMappingURL=authentication.js.map

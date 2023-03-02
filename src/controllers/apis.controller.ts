@@ -30,7 +30,7 @@ import { IApiRoute } from "../interfaces";
 const apiService = APIService.getInstance();
 
 
-@Route("/api/v2")
+@Route("/api/v1")
 @Tags("Apis")
 export class APIController extends Controller {
 

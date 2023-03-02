@@ -25,7 +25,6 @@
 
 import * as cors from 'cors';
 import * as express from 'express';
-import * as morgan from "morgan";
 import * as path from "path";
 import { HTTP_CODES, SECURITY_NAME, routesToProxy } from "../constant";
 var proxy = require('express-http-proxy');
@@ -33,8 +32,9 @@ import * as swaggerUi from "swagger-ui-express";
 import { ValidateError } from 'tsoa';
 import { AuthError } from '../security/AuthError';
 import { expressAuthentication } from '../security/authentication';
-import { BASE_URI } from '../utils/pam_v1_utils/constants';
+import * as swaggerJSON from "../swagger/swagger.json";
 
+const adminRoutes = Object.keys(swaggerJSON.paths);
 
 
 export function useHubProxy(app: express.Express) {
@@ -111,10 +111,24 @@ export function authenticateRequest(app: express.Application) {
     app.all(/\/api\/v1\/*/, async (req: express.Request, res: express.Response, next: express.NextFunction) => {
         let err;
         try {
+            const isAdmin = isAdminRoute(req.url);
+            if (isAdmin) return next();
+
             await expressAuthentication(req, SECURITY_NAME.profile);
         } catch (error) {
             err = error
         }
         next(err)
+    })
+}
+
+
+function isAdminRoute(apiRoute: string): boolean {
+    const route = apiRoute.includes("?") ? apiRoute.substring(0, apiRoute.indexOf('?')) : apiRoute;
+
+    return adminRoutes.some(api => {
+        const routeFormatted = api.replace(/\{(.*?)\}/g, (el) => '(.*?)');
+        const regex = new RegExp(`^${routeFormatted}$`);
+        return apiRoute.match(regex);
     })
 }

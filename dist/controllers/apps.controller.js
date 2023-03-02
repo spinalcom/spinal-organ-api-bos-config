@@ -48,6 +48,9 @@ exports.AppsController = void 0;
 const services_1 = require("../services");
 const tsoa_1 = require("tsoa");
 const constant_1 = require("../constant");
+const express = require("express");
+const utils_1 = require("../security/utils");
+const AuthError_1 = require("../security/AuthError");
 const appServiceInstance = services_1.AppService.getInstance();
 let AppsController = class AppsController extends tsoa_1.Controller {
     constructor() {
@@ -264,6 +267,68 @@ let AppsController = class AppsController extends tsoa_1.Controller {
             }
         });
     }
+    getFavoriteApps(request) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const token = (0, utils_1.getToken)(request);
+                if (!token)
+                    throw { code: constant_1.HTTP_CODES.UNAUTHORIZED, message: constant_1.SECURITY_MESSAGES.INVALID_TOKEN };
+                const tokenInfo = yield services_1.TokenService.getInstance().tokenIsValid(token);
+                if (!tokenInfo)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.INVALID_TOKEN);
+                let userName = tokenInfo.userInfo.userName;
+                const nodes = yield services_1.UserListService.getInstance().getFavoriteApps(userName);
+                this.setStatus(constant_1.HTTP_CODES.OK);
+                return nodes.map(node => node.info.get());
+            }
+            catch (error) {
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+                return { message: error.message };
+            }
+        });
+    }
+    addAppToFavoris(request, data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const token = (0, utils_1.getToken)(request);
+                if (!token)
+                    throw { code: constant_1.HTTP_CODES.UNAUTHORIZED, message: constant_1.SECURITY_MESSAGES.INVALID_TOKEN };
+                const tokenInfo = yield services_1.TokenService.getInstance().tokenIsValid(token);
+                if (!tokenInfo)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.INVALID_TOKEN);
+                let profileId = tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId;
+                let userName = tokenInfo.userInfo.userName;
+                const nodes = yield services_1.UserListService.getInstance().addFavoriteApp(userName, profileId, data.appIds);
+                this.setStatus(constant_1.HTTP_CODES.OK);
+                return nodes.map(node => node.info.get());
+            }
+            catch (error) {
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+                return { message: error.message };
+            }
+        });
+    }
+    removeAppFromFavoris(request, data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const token = (0, utils_1.getToken)(request);
+                if (!token)
+                    throw { code: constant_1.HTTP_CODES.UNAUTHORIZED, message: constant_1.SECURITY_MESSAGES.INVALID_TOKEN };
+                const tokenInfo = yield services_1.TokenService.getInstance().tokenIsValid(token);
+                if (!tokenInfo)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.INVALID_TOKEN);
+                let profileId = tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId;
+                let userName = tokenInfo.userInfo.userName;
+                const nodes = yield services_1.UserListService.getInstance().removeFavoriteApp(userName, profileId, data.appIds);
+                this.setStatus(constant_1.HTTP_CODES.OK);
+                return nodes.map(node => node.info.get());
+            }
+            catch (error) {
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+                return { message: error.message };
+            }
+        });
+    }
 };
 __decorate([
     (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
@@ -361,8 +426,34 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "uploadBuildingApp", null);
+__decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.profile),
+    (0, tsoa_1.Get)("/get_favorite_apps"),
+    __param(0, (0, tsoa_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AppsController.prototype, "getFavoriteApps", null);
+__decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.profile),
+    (0, tsoa_1.Post)("/add_app_to_favoris"),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], AppsController.prototype, "addAppToFavoris", null);
+__decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.profile),
+    (0, tsoa_1.Post)("/remove_app_from_favoris"),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], AppsController.prototype, "removeAppFromFavoris", null);
 AppsController = __decorate([
-    (0, tsoa_1.Route)("/api/v2"),
+    (0, tsoa_1.Route)("/api/v1"),
     (0, tsoa_1.Tags)("Applications"),
     __metadata("design:paramtypes", [])
 ], AppsController);

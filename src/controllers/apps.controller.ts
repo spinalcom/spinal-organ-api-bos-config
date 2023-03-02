@@ -22,14 +22,17 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
-import { AppService, AppsType } from "../services";
-import { Body, Controller, Delete, Get, Path, Post, Put, Route, Security, Tags, UploadedFile } from "tsoa";
-import { HTTP_CODES, SECURITY_NAME } from "../constant";
+import { AppService, AppsType, TokenService, UserListService } from "../services";
+import { Body, Controller, Delete, Get, Path, Post, Put, Route, Security, Tags, UploadedFile, Request } from "tsoa";
+import { HTTP_CODES, SECURITY_MESSAGES, SECURITY_NAME } from "../constant";
 import { IApp, IEditApp } from "../interfaces";
+import * as express from "express";
+import { getToken } from "../security/utils";
+import { AuthError } from "../security/AuthError";
 
 const appServiceInstance = AppService.getInstance();
 
-@Route("/api/v2")
+@Route("/api/v1")
 @Tags("Applications")
 export class AppsController extends Controller {
 
@@ -267,6 +270,73 @@ export class AppsController extends Controller {
             return { message: "oops, something went wrong, please check your input data" };
         } catch (error) {
             this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+
+
+
+    @Security(SECURITY_NAME.profile)
+    @Get("/get_favorite_apps")
+    public async getFavoriteApps(@Request() request: express.Request) {
+        try {
+            const token = getToken(request);
+            if (!token) throw { code: HTTP_CODES.UNAUTHORIZED, message: SECURITY_MESSAGES.INVALID_TOKEN };
+            const tokenInfo: any = await TokenService.getInstance().tokenIsValid(token);
+            if (!tokenInfo) throw new AuthError(SECURITY_MESSAGES.INVALID_TOKEN);
+
+            let userName = tokenInfo.userInfo.userName;
+
+            const nodes = await UserListService.getInstance().getFavoriteApps(userName);
+            this.setStatus(HTTP_CODES.OK);
+            return nodes.map(node => node.info.get());
+
+        } catch (error) {
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+
+    @Security(SECURITY_NAME.profile)
+    @Post("/add_app_to_favoris")
+    public async addAppToFavoris(@Request() request: express.Request, @Body() data: { appIds: string[] }) {
+        try {
+            const token = getToken(request);
+            if (!token) throw { code: HTTP_CODES.UNAUTHORIZED, message: SECURITY_MESSAGES.INVALID_TOKEN };
+            const tokenInfo: any = await TokenService.getInstance().tokenIsValid(token);
+            if (!tokenInfo) throw new AuthError(SECURITY_MESSAGES.INVALID_TOKEN);
+
+            let profileId = tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId;
+            let userName = tokenInfo.userInfo.userName;
+
+            const nodes = await UserListService.getInstance().addFavoriteApp(userName, profileId, data.appIds);
+            this.setStatus(HTTP_CODES.OK);
+            return nodes.map(node => node.info.get());
+
+        } catch (error) {
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+
+    @Security(SECURITY_NAME.profile)
+    @Post("/remove_app_from_favoris")
+    public async removeAppFromFavoris(@Request() request: express.Request, @Body() data: { appIds: string[] }) {
+        try {
+            const token = getToken(request);
+            if (!token) throw { code: HTTP_CODES.UNAUTHORIZED, message: SECURITY_MESSAGES.INVALID_TOKEN };
+            const tokenInfo: any = await TokenService.getInstance().tokenIsValid(token);
+            if (!tokenInfo) throw new AuthError(SECURITY_MESSAGES.INVALID_TOKEN);
+
+            let profileId = tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId;
+            let userName = tokenInfo.userInfo.userName;
+
+            const nodes = await UserListService.getInstance().removeFavoriteApp(userName, profileId, data.appIds);
+            this.setStatus(HTTP_CODES.OK);
+            return nodes.map(node => node.info.get());
+
+        } catch (error) {
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }

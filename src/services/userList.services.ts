@@ -24,7 +24,7 @@
 
 import axios from "axios";
 import { SpinalContext, SpinalGraphService, SpinalNode } from "spinal-env-viewer-graph-service";
-import { USER_LIST_CONTEXT_TYPE, USER_LIST_CONTEXT_NAME, ADMIN_USERNAME, ADMIN_USER_TYPE, PTR_LST_TYPE, CONTEXT_TO_ADMIN_USER_RELATION, HTTP_CODES, TOKEN_TYPE, TOKEN_RELATION_NAME, CONTEXT_TO_USER_RELATION_NAME, USER_TYPES } from "../constant";
+import { USER_LIST_CONTEXT_TYPE, USER_LIST_CONTEXT_NAME, ADMIN_USERNAME, ADMIN_USER_TYPE, PTR_LST_TYPE, CONTEXT_TO_ADMIN_USER_RELATION, HTTP_CODES, TOKEN_TYPE, TOKEN_RELATION_NAME, CONTEXT_TO_USER_RELATION_NAME, USER_TYPES, USER_TO_FAVORITE_APP_RELATION } from "../constant";
 import { IPamCredential, IUserCredential, IUserInfo, IUserToken } from "../interfaces";
 import { configServiceInstance } from "./configFile.service";
 import { Model } from 'spinal-core-connectorjs_type';
@@ -33,6 +33,8 @@ import * as fileLog from "log-to-file";
 import * as path from "path";
 import { TokenService } from "./token.service";
 import { AuthentificationService } from './authentification.service'
+import { UserProfileService } from "./userProfile.service";
+import { AppService } from "./apps.service";
 
 
 export class UserListService {
@@ -69,19 +71,80 @@ export class UserListService {
 
         if (data.code === HTTP_CODES.OK) {
             const type = isAdmin ? USER_TYPES.ADMIN : USER_TYPES.USER;
-            const info = { userName: user.userName, type, userType: type, userId: data.data.userId }
+            const info = { name: user.userName, userName: user.userName, type, userType: type, userId: data.data.userId }
             const playload = data.data;
             const token = data.data.token;
             const node = await this._addUserToContext(info);
+            delete data.data.userInfo.password;
             await TokenService.getInstance().addUserToken(node, token, playload);
         }
 
         return data
     }
 
-    public async getUserByUser(username: string) {
+    public async getUser(username: string): Promise<SpinalNode> {
         const users = await this.context.getChildren([CONTEXT_TO_ADMIN_USER_RELATION, CONTEXT_TO_USER_RELATION_NAME]);
         return users.find(el => el.info.userName?.get() === username || el.info.userId?.get() === username);
+    }
+
+
+
+    public async getFavoriteApps(userId: string): Promise<SpinalNode[]> {
+        const user = await this.getUser(userId);
+        if (!user) return [];
+        return user.getChildren(USER_TO_FAVORITE_APP_RELATION);
+    }
+
+    public async addFavoriteApp(userId: string, userProfileId: string, appIds: string | string[]): Promise<SpinalNode[]> {
+        if (!Array.isArray(appIds)) appIds = [appIds];
+
+        return appIds.reduce(async (prom, appId) => {
+            const list = await prom;
+
+            try {
+                const hasAccess = await UserProfileService.getInstance().profileHasAccessToApp(userProfileId, appId);
+                if (!hasAccess) throw { code: HTTP_CODES.UNAUTHORIZED, message: "unauthorized" };;
+
+                const [user, app] = await Promise.all([this.getUser(userId), AppService.getInstance().getApps(appId)]);
+                if (!user) throw { code: HTTP_CODES.BAD_REQUEST, message: `No user found for ${userId}` };
+                if (!app) throw { code: HTTP_CODES.BAD_REQUEST, message: `No app found for ${appId}` };
+
+                await user.addChild(app, USER_TO_FAVORITE_APP_RELATION, PTR_LST_TYPE);
+                list.push(app);
+            } catch (error) {
+
+            }
+
+            return list
+
+        }, Promise.resolve([]))
+
+    }
+
+    public async removeFavoriteApp(userId: string, userProfileId: string, appIds: string | string[]): Promise<SpinalNode[]> {
+        if (!Array.isArray(appIds)) appIds = [appIds];
+
+        return appIds.reduce(async (prom, appId) => {
+            const list = await prom;
+
+            try {
+                const hasAccess = await UserProfileService.getInstance().profileHasAccessToApp(userProfileId, appId);
+                if (!hasAccess) throw { code: HTTP_CODES.UNAUTHORIZED, message: "unauthorized" };;
+
+                const [user, app] = await Promise.all([this.getUser(userId), AppService.getInstance().getApps(appId)]);
+                if (!user) throw { code: HTTP_CODES.BAD_REQUEST, message: `No user found for ${userId}` };
+                if (!app) throw { code: HTTP_CODES.BAD_REQUEST, message: `No app found for ${appId}` };
+
+                await user.removeChild(app, USER_TO_FAVORITE_APP_RELATION, PTR_LST_TYPE);
+                list.push(app);
+            } catch (error) {
+
+            }
+
+            return list
+
+        }, Promise.resolve([]))
+
     }
 
 

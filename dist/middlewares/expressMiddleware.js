@@ -42,6 +42,8 @@ const swaggerUi = require("swagger-ui-express");
 const tsoa_1 = require("tsoa");
 const AuthError_1 = require("../security/AuthError");
 const authentication_1 = require("../security/authentication");
+const swaggerJSON = require("../swagger/swagger.json");
+const adminRoutes = Object.keys(swaggerJSON.paths);
 function useHubProxy(app) {
     const HUB_HOST = `http://${process.env.HUB_HOST}:${process.env.HUB_PORT}`;
     const proxyHub = proxy(HUB_HOST, {
@@ -106,6 +108,9 @@ function authenticateRequest(app) {
     app.all(/\/api\/v1\/*/, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
         let err;
         try {
+            const isAdmin = isAdminRoute(req.url);
+            if (isAdmin)
+                return next();
             yield (0, authentication_1.expressAuthentication)(req, constant_1.SECURITY_NAME.profile);
         }
         catch (error) {
@@ -115,4 +120,12 @@ function authenticateRequest(app) {
     }));
 }
 exports.authenticateRequest = authenticateRequest;
+function isAdminRoute(apiRoute) {
+    const route = apiRoute.includes("?") ? apiRoute.substring(0, apiRoute.indexOf('?')) : apiRoute;
+    return adminRoutes.some(api => {
+        const routeFormatted = api.replace(/\{(.*?)\}/g, (el) => '(.*?)');
+        const regex = new RegExp(`^${routeFormatted}$`);
+        return apiRoute.match(regex);
+    });
+}
 //# sourceMappingURL=expressMiddleware.js.map

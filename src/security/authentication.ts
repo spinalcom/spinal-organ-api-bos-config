@@ -23,9 +23,9 @@
  */
 
 import * as express from "express";
-import { APP_PROFILE_TYPE, SECURITY_MESSAGES, SECURITY_NAME, USER_TYPES } from "../constant";
-import { AppProfileService, AuthentificationService, TokenService, UserProfileService } from "../services";
-import { profileHasAccessToApi } from "./utils";
+import { APP_PROFILE_TYPE, SECURITY_MESSAGES, SECURITY_NAME } from "../constant";
+import { AppProfileService, TokenService, UserProfileService } from "../services";
+import { profileHasAccessToApi, getToken } from "./utils";
 import { AuthError } from "./AuthError";
 
 
@@ -67,12 +67,3 @@ export async function expressAuthentication(request: express.Request, securityNa
 }
 
 
-function getToken(request: express.Request): string {
-    const header = request.headers.authorization || request.headers.Authorization;
-    if (header) {
-        const [, token] = (<string>header).split(" ");
-        if (token) return token;
-    }
-
-    return request.body?.token || request.query?.token || request.headers["x-access-token"];
-}

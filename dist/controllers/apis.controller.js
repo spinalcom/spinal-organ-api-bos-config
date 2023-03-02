@@ -199,7 +199,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], APIController.prototype, "uploadBosSwaggerFile", null);
 APIController = __decorate([
-    (0, tsoa_1.Route)("/api/v2"),
+    (0, tsoa_1.Route)("/api/v1"),
     (0, tsoa_1.Tags)("Apis"),
     __metadata("design:paramtypes", [])
 ], APIController);

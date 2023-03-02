@@ -262,8 +262,8 @@ class AuthorizationService {
     }
     profileHasAccessToApp(profile, appId) {
         return __awaiter(this, void 0, void 0, function* () {
-            const contexts = yield this.getAuthorizedApps(profile);
-            return contexts.some(el => el.getId().get() === appId);
+            const contexts = yield Promise.all([this.getAuthorizedApps(profile), this.getAuthorizedAdminApps(profile)]);
+            return contexts.flat().some(el => el.getId().get() === appId);
         });
     }
     profileHasAccessToApi(profile, apiId) {

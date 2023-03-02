@@ -48,12 +48,14 @@ import {
 export default async function initExpress(conn: spinal.FileSystem) {
 
   var app = express();
+
   app.use(morgan('dev'));
+
   authenticateRequest(app)
-  useApiMiddleWare(app);
   useHubProxy(app);
   useClientMiddleWare(app);
   initSwagger(app);
+  useApiMiddleWare(app);
 
   // configureBosProxy(app);
   // configureBosProxy(app, true);

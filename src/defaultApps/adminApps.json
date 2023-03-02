@@ -1,0 +1,69 @@
+[
+    {
+        "name": "Plateforme d'authentification",
+        "icon": "mdi-shield-crown",
+        "description": "Gestion de la plateforme d'authentification",
+        "tags": [
+            "ADMIN"
+        ],
+        "categoryName": "Administation",
+        "groupName": "Administration",
+        "packageName": "spinal-env-bos-config-auth-admin-manager"
+    },
+    {
+        "name": "Profils d'utilisateurs",
+        "icon": "mdi-face-man-profile",
+        "description": "Gestion de profils d'utilisateurs",
+        "tags": [
+            "PROFIL D'UTILISATEURS"
+        ],
+        "categoryName": "Administation",
+        "groupName": "Administration",
+        "packageName": "spinal-env-bos-config-user-profile-manager"
+    },
+    {
+        "name": "Profils d'applications",
+        "icon": "mdi-apps-box",
+        "description": "Gestion de profils d'applications",
+        "tags": [
+            "PROFIL D'APPLICATIONS"
+        ],
+        "categoryName": "Administation",
+        "groupName": "Administration",
+        "packageName": "spinal-env-bos-config-app-profile-manager"
+    },
+    {
+        "name": "Gestion d'applications",
+        "icon": "mdi-apps",
+        "description": "Gestion de types d'applications",
+        "tags": [
+            "APPLICATIONS"
+        ],
+        "categoryName": "Administation",
+        "groupName": "Administration",
+        "packageName": "spinal-env-bos-config-apps-manager"
+    },
+    {
+        "name": "Gestion de Routes d'API",
+        "icon": "mdi-api",
+        "description": "Gestion de routes d'API",
+        "tags": [
+            "APIS"
+        ],
+        "categoryName": "Administation",
+        "groupName": "Administration",
+        "packageName": "spinal-env-bos-config-apis-routes-manager"
+    },
+    {
+        "name": "Gestion du jumeau numérique",
+        "icon": "mdi-office-building-cog",
+        "description": "Gestion du jumeau numérique",
+        "tags": [
+            "Digitaltwin",
+            "Jumeau numerique"
+        ],
+        "categoryName": "Administation",
+        "groupName": "Administration",
+        "packageName": "spinal-env-bos-config-digitaltwin-manager"
+    }
+]

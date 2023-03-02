@@ -31,7 +31,7 @@ import { IAdmin, IAdminCredential, IAppCredential, IApplicationToken, IOAuth2Cre
 const serviceInstance = AuthentificationService.getInstance();
 const tokenService = TokenService.getInstance();
 
-@Route("/api/v2")
+@Route("/api/v1")
 @Tags("Auth")
 export class AuthController extends Controller {
 

@@ -28,7 +28,7 @@ import { Body, Controller, Delete, Get, Path, Post, Put, Query, Route, Security,
 
 const serviceInstance = DigitalTwinService.getInstance();
 
-@Route("/api/v2")
+@Route("/api/v1")
 @Tags("DigitalTwin")
 export class DigitaltwinController extends Controller {
 

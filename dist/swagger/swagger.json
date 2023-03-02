@@ -461,11 +461,7 @@
                 "scheme": "bearer",
                 "bearerFormat": "JWT"
             },
-            "all": {
-                "type": "http",
-                "scheme": "bearer",
-                "bearerFormat": "JWT"
-            }
+            "all": {}
         }
     },
     "info": {
@@ -478,7 +474,7 @@
     },
     "openapi": "3.0.0",
     "paths": {
-        "/api/v2/create_bos_api_route": {
+        "/api/v1/create_bos_api_route": {
             "post": {
                 "operationId": "CreateBosApiRoute",
                 "responses": {
@@ -529,7 +525,7 @@
                 }
             }
         },
-        "/api/v2/update_bos_api_route/{id}": {
+        "/api/v1/update_bos_api_route/{id}": {
             "put": {
                 "operationId": "UpdateBosApiRoute",
                 "responses": {
@@ -589,7 +585,7 @@
                 }
             }
         },
-        "/api/v2/get_bos_api_route/{id}": {
+        "/api/v1/get_bos_api_route/{id}": {
             "get": {
                 "operationId": "GetBosApiRouteById",
                 "responses": {
@@ -639,7 +635,7 @@
                 ]
             }
         },
-        "/api/v2/get_all_bos_api_route": {
+        "/api/v1/get_all_bos_api_route": {
             "get": {
                 "operationId": "GetAllBosApiRoute",
                 "responses": {
@@ -683,7 +679,7 @@
                 "parameters": []
             }
         },
-        "/api/v2/delete_bos_api_route/{id}": {
+        "/api/v1/delete_bos_api_route/{id}": {
             "delete": {
                 "operationId": "DeleteBosApiRoute",
                 "responses": {
@@ -726,7 +722,7 @@
                 ]
             }
         },
-        "/api/v2/upload_bos_apis_routes": {
+        "/api/v1/upload_bos_apis_routes": {
             "post": {
                 "operationId": "UploadBosSwaggerFile",
                 "responses": {
@@ -789,7 +785,7 @@
                 }
             }
         },
-        "/api/v2/app_profile/create_profile": {
+        "/api/v1/app_profile/create_profile": {
             "post": {
                 "operationId": "CreateAppProfile",
                 "responses": {
@@ -840,7 +836,7 @@
                 }
             }
         },
-        "/api/v2/app_profile/get_profile/{id}": {
+        "/api/v1/app_profile/get_profile/{id}": {
             "get": {
                 "operationId": "GetAppProfile",
                 "responses": {
@@ -890,7 +886,7 @@
                 ]
             }
         },
-        "/api/v2/app_profile/get_all_profile": {
+        "/api/v1/app_profile/get_all_profile": {
             "get": {
                 "operationId": "GetAllAppProfile",
                 "responses": {
@@ -934,7 +930,7 @@
                 "parameters": []
             }
         },
-        "/api/v2/app_profile/edit_profile/{id}": {
+        "/api/v1/app_profile/edit_profile/{id}": {
             "put": {
                 "operationId": "UpdateAppProfile",
                 "responses": {
@@ -994,7 +990,7 @@
                 }
             }
         },
-        "/api/v2/app_profile/delete_profile/{id}": {
+        "/api/v1/app_profile/delete_profile/{id}": {
             "delete": {
                 "operationId": "DeleteAppProfile",
                 "responses": {
@@ -1037,7 +1033,7 @@
                 ]
             }
         },
-        "/api/v2/app_profile/authorize_profile_to_access_contexts/{profileId}": {
+        "/api/v1/app_profile/authorize_profile_to_access_contexts/{profileId}": {
             "post": {
                 "operationId": "AuthorizeProfileToAccessContext",
                 "responses": {
@@ -1117,7 +1113,7 @@
                 }
             }
         },
-        "/api/v2/app_profile/authorize_profile_to_access_apis/{profileId}": {
+        "/api/v1/app_profile/authorize_profile_to_access_apis/{profileId}": {
             "post": {
                 "operationId": "AuthorizeProfileToAccessApis",
                 "responses": {
@@ -1194,7 +1190,7 @@
                 }
             }
         },
-        "/api/v2/app_profile/unauthorize_profile_to_access_contexts/{profileId}": {
+        "/api/v1/app_profile/unauthorize_profile_to_access_contexts/{profileId}": {
             "post": {
                 "operationId": "UnauthorizeProfileToAccessContext",
                 "responses": {
@@ -1274,7 +1270,7 @@
                 }
             }
         },
-        "/api/v2/app_profile/unauthorize_profile_to_access_apis/{profileId}": {
+        "/api/v1/app_profile/unauthorize_profile_to_access_apis/{profileId}": {
             "post": {
                 "operationId": "UnauthorizeProfileToAccessApis",
                 "responses": {
@@ -1351,7 +1347,7 @@
                 }
             }
         },
-        "/api/v2/app_profile/profile_has_access_to_context/{profileId}/{contextId}": {
+        "/api/v1/app_profile/profile_has_access_to_context/{profileId}/{contextId}": {
             "get": {
                 "operationId": "ProfileHasAccessToContext",
                 "responses": {
@@ -1415,7 +1411,7 @@
                 ]
             }
         },
-        "/api/v2/app_profile/profile_has_access_to_api/{profileId}/{apiId}": {
+        "/api/v1/app_profile/profile_has_access_to_api/{profileId}/{apiId}": {
             "get": {
                 "operationId": "ProfileHasAccessToApi",
                 "responses": {
@@ -1471,7 +1467,7 @@
                 ]
             }
         },
-        "/api/v2/app_profile/get_authorized_contexts/{profileId}": {
+        "/api/v1/app_profile/get_authorized_contexts/{profileId}": {
             "get": {
                 "operationId": "GetAuthorizedContexts",
                 "responses": {
@@ -1528,7 +1524,7 @@
                 ]
             }
         },
-        "/api/v2/app_profile/get_authorized_apis/{profileId}": {
+        "/api/v1/app_profile/get_authorized_apis/{profileId}": {
             "get": {
                 "operationId": "GetAuthorizedApis",
                 "responses": {
@@ -1577,7 +1573,7 @@
                 ]
             }
         },
-        "/api/v2/create_admin_app": {
+        "/api/v1/create_admin_app": {
             "post": {
                 "operationId": "CreateAdminApp",
                 "responses": {
@@ -1628,7 +1624,7 @@
                 }
             }
         },
-        "/api/v2/create_building_app": {
+        "/api/v1/create_building_app": {
             "post": {
                 "operationId": "CreateBuildingApp",
                 "responses": {
@@ -1679,7 +1675,7 @@
                 }
             }
         },
-        "/api/v2/get_all_admin_apps": {
+        "/api/v1/get_all_admin_apps": {
             "get": {
                 "operationId": "GetAllAdminApps",
                 "responses": {
@@ -1723,7 +1719,7 @@
                 "parameters": []
             }
         },
-        "/api/v2/get_all_building_apps": {
+        "/api/v1/get_all_building_apps": {
             "get": {
                 "operationId": "GetAllBuildingApps",
                 "responses": {
@@ -1767,7 +1763,7 @@
                 "parameters": []
             }
         },
-        "/api/v2/get_admin_app/{appId}": {
+        "/api/v1/get_admin_app/{appId}": {
             "get": {
                 "operationId": "GetAdminApp",
                 "responses": {
@@ -1817,7 +1813,7 @@
                 ]
             }
         },
-        "/api/v2/get_building_app/{appId}": {
+        "/api/v1/get_building_app/{appId}": {
             "get": {
                 "operationId": "GetBuildingApp",
                 "responses": {
@@ -1867,7 +1863,7 @@
                 ]
             }
         },
-        "/api/v2/update_admin_app/{appId}": {
+        "/api/v1/update_admin_app/{appId}": {
             "put": {
                 "operationId": "UpdateAdminApp",
                 "responses": {
@@ -1927,7 +1923,7 @@
                 }
             }
         },
-        "/api/v2/update_building_app/{appId}": {
+        "/api/v1/update_building_app/{appId}": {
             "put": {
                 "operationId": "UpdateBuildingApp",
                 "responses": {
@@ -1987,7 +1983,7 @@
                 }
             }
         },
-        "/api/v2/delete_admin_app/{appId}": {
+        "/api/v1/delete_admin_app/{appId}": {
             "delete": {
                 "operationId": "DeleteAdminApp",
                 "responses": {
@@ -2030,7 +2026,7 @@
                 ]
             }
         },
-        "/api/v2/delete_building_app/{appId}": {
+        "/api/v1/delete_building_app/{appId}": {
             "delete": {
                 "operationId": "DeleteBuildingApp",
                 "responses": {
@@ -2073,7 +2069,7 @@
                 ]
             }
         },
-        "/api/v2/upload_admin_apps": {
+        "/api/v1/upload_admin_apps": {
             "post": {
                 "operationId": "UploadAdminApp",
                 "responses": {
@@ -2136,7 +2132,7 @@
                 }
             }
         },
-        "/api/v2/upload_building_apps": {
+        "/api/v1/upload_building_apps": {
             "post": {
                 "operationId": "UploadBuildingApp",
                 "responses": {
@@ -2199,7 +2195,169 @@
                 }
             }
         },
-        "/api/v2/auth": {
+        "/api/v1/get_favorite_apps": {
+            "get": {
+                "operationId": "GetFavoriteApps",
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "anyOf": [
+                                        {
+                                            "items": {},
+                                            "type": "array"
+                                        },
+                                        {
+                                            "properties": {
+                                                "message": {}
+                                            },
+                                            "required": [
+                                                "message"
+                                            ],
+                                            "type": "object"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "Applications"
+                ],
+                "security": [
+                    {
+                        "profile": []
+                    }
+                ],
+                "parameters": []
+            }
+        },
+        "/api/v1/add_app_to_favoris": {
+            "post": {
+                "operationId": "AddAppToFavoris",
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "anyOf": [
+                                        {
+                                            "items": {},
+                                            "type": "array"
+                                        },
+                                        {
+                                            "properties": {
+                                                "message": {}
+                                            },
+                                            "required": [
+                                                "message"
+                                            ],
+                                            "type": "object"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "Applications"
+                ],
+                "security": [
+                    {
+                        "profile": []
+                    }
+                ],
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "appIds": {
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "type": "array"
+                                    }
+                                },
+                                "required": [
+                                    "appIds"
+                                ],
+                                "type": "object"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/remove_app_from_favoris": {
+            "post": {
+                "operationId": "RemoveAppFromFavoris",
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "anyOf": [
+                                        {
+                                            "items": {},
+                                            "type": "array"
+                                        },
+                                        {
+                                            "properties": {
+                                                "message": {}
+                                            },
+                                            "required": [
+                                                "message"
+                                            ],
+                                            "type": "object"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "Applications"
+                ],
+                "security": [
+                    {
+                        "profile": []
+                    }
+                ],
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "appIds": {
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "type": "array"
+                                    }
+                                },
+                                "required": [
+                                    "appIds"
+                                ],
+                                "type": "object"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth": {
             "post": {
                 "operationId": "Authenticate",
                 "responses": {
@@ -2266,7 +2424,7 @@
                 }
             }
         },
-        "/api/v2/register_admin": {
+        "/api/v1/register_admin": {
             "post": {
                 "operationId": "RegisterToAdmin",
                 "responses": {
@@ -2329,7 +2487,7 @@
                 }
             }
         },
-        "/api/v2/get_bos_to_auth_credential": {
+        "/api/v1/get_bos_to_auth_credential": {
             "get": {
                 "operationId": "GetBosToAdminCredential",
                 "responses": {
@@ -2370,7 +2528,7 @@
                 "parameters": []
             }
         },
-        "/api/v2/delete_admin": {
+        "/api/v1/delete_admin": {
             "delete": {
                 "operationId": "DeleteAdmin",
                 "responses": {
@@ -2404,7 +2562,7 @@
                 "parameters": []
             }
         },
-        "/api/v2/get_admin_to_bos_credential": {
+        "/api/v1/get_admin_to_bos_credential": {
             "get": {
                 "operationId": "GetAdminCredential",
                 "responses": {
@@ -2445,7 +2603,7 @@
                 "parameters": []
             }
         },
-        "/api/v2/update_data": {
+        "/api/v1/update_data": {
             "put": {
                 "operationId": "SyncDataToAdmin",
                 "responses": {
@@ -2479,7 +2637,7 @@
                 "parameters": []
             }
         },
-        "/api/v2/getTokenData": {
+        "/api/v1/getTokenData": {
             "post": {
                 "operationId": "TokenIsValid",
                 "responses": {
@@ -2563,7 +2721,7 @@
                 }
             }
         },
-        "/api/v2/add_digitaltwin": {
+        "/api/v1/add_digitaltwin": {
             "post": {
                 "operationId": "AddDigitalTwin",
                 "responses": {
@@ -2618,7 +2776,7 @@
                 }
             }
         },
-        "/api/v2/get_all_digitaltwins": {
+        "/api/v1/get_all_digitaltwins": {
             "get": {
                 "operationId": "GetAllDigitalTwins",
                 "responses": {
@@ -2658,7 +2816,7 @@
                 "parameters": []
             }
         },
-        "/api/v2/get_digitaltwin/{digitaltwinId}": {
+        "/api/v1/get_digitaltwin/{digitaltwinId}": {
             "get": {
                 "operationId": "GetDigitalTwin",
                 "responses": {
@@ -2691,7 +2849,7 @@
                 ]
             }
         },
-        "/api/v2/set_as_actual_digitaltwin/{digitaltwinId}": {
+        "/api/v1/set_as_actual_digitaltwin/{digitaltwinId}": {
             "put": {
                 "operationId": "SetActualDigitalTwin",
                 "responses": {
@@ -2724,7 +2882,7 @@
                 ]
             }
         },
-        "/api/v2/get_actual_digitaltwin": {
+        "/api/v1/get_actual_digitaltwin": {
             "get": {
                 "operationId": "GetActualDigitalTwin",
                 "responses": {
@@ -2748,7 +2906,7 @@
                 "parameters": []
             }
         },
-        "/api/v2/get_digitaltwin_contexts": {
+        "/api/v1/get_digitaltwin_contexts": {
             "get": {
                 "operationId": "GetDefaultDigitalTwinContexts",
                 "responses": {
@@ -2788,7 +2946,7 @@
                 "parameters": []
             }
         },
-        "/api/v2/get_digitaltwin_contexts/{digitaltwinId}": {
+        "/api/v1/get_digitaltwin_contexts/{digitaltwinId}": {
             "get": {
                 "operationId": "GetDigitalTwinContexts",
                 "responses": {
@@ -2837,7 +2995,7 @@
                 ]
             }
         },
-        "/api/v2/update_digitaltwin/{digitaltwinId}": {
+        "/api/v1/update_digitaltwin/{digitaltwinId}": {
             "put": {
                 "operationId": "EditDigitalTwin",
                 "responses": {
@@ -2888,7 +3046,7 @@
                 }
             }
         },
-        "/api/v2/delete_digitaltwin/{digitaltwinId}": {
+        "/api/v1/delete_digitaltwin/{digitaltwinId}": {
             "delete": {
                 "operationId": "RemoveDigitalTwin",
                 "responses": {
@@ -2929,7 +3087,7 @@
                 ]
             }
         },
-        "/api/v2/delete_actual_digitaltwin": {
+        "/api/v1/delete_actual_digitaltwin": {
             "delete": {
                 "operationId": "RemoveActualDigitaTwin",
                 "responses": {
@@ -2961,7 +3119,7 @@
                 "parameters": []
             }
         },
-        "/api/v2/user_profile/create_profile": {
+        "/api/v1/user_profile/create_profile": {
             "post": {
                 "operationId": "CreateUserProfile",
                 "responses": {
@@ -3012,7 +3170,7 @@
                 }
             }
         },
-        "/api/v2/user_profile/get_profile/{id}": {
+        "/api/v1/user_profile/get_profile/{id}": {
             "get": {
                 "operationId": "GetUserProfile",
                 "responses": {
@@ -3062,7 +3220,7 @@
                 ]
             }
         },
-        "/api/v2/user_profile/get_all_profile": {
+        "/api/v1/user_profile/get_all_profile": {
             "get": {
                 "operationId": "GetAllUserProfile",
                 "responses": {
@@ -3106,7 +3264,7 @@
                 "parameters": []
             }
         },
-        "/api/v2/user_profile/edit_profile/{id}": {
+        "/api/v1/user_profile/edit_profile/{id}": {
             "put": {
                 "operationId": "UpdateUserProfile",
                 "responses": {
@@ -3166,7 +3324,7 @@
                 }
             }
         },
-        "/api/v2/user_profile/delete_profile/{id}": {
+        "/api/v1/user_profile/delete_profile/{id}": {
             "delete": {
                 "operationId": "DeleteUserProfile",
                 "responses": {
@@ -3209,7 +3367,7 @@
                 ]
             }
         },
-        "/api/v2/user_profile/get_authorized_contexts/{profileId}": {
+        "/api/v1/user_profile/get_authorized_contexts/{profileId}": {
             "get": {
                 "operationId": "GetAuthorizedContexts",
                 "responses": {
@@ -3266,7 +3424,7 @@
                 ]
             }
         },
-        "/api/v2/user_profile/get_authorized_apps/{profileId}": {
+        "/api/v1/user_profile/get_authorized_apps/{profileId}": {
             "get": {
                 "operationId": "GetAuthorizedApps",
                 "responses": {
@@ -3315,7 +3473,7 @@
                 ]
             }
         },
-        "/api/v2/user_profile/get_authorized_admin_apps/{profileId}": {
+        "/api/v1/user_profile/get_authorized_admin_apps/{profileId}": {
             "get": {
                 "operationId": "GetAuthorizedAdminApps",
                 "responses": {
@@ -3364,7 +3522,7 @@
                 ]
             }
         },
-        "/api/v2/user_profile/authorize_profile_to_access_contexts/{profileId}": {
+        "/api/v1/user_profile/authorize_profile_to_access_contexts/{profileId}": {
             "post": {
                 "operationId": "AuthorizeProfileToAccessContext",
                 "responses": {
@@ -3444,7 +3602,7 @@
                 }
             }
         },
-        "/api/v2/user_profile/authorize_profile_to_access_apps/{profileId}": {
+        "/api/v1/user_profile/authorize_profile_to_access_apps/{profileId}": {
             "post": {
                 "operationId": "AuthorizeProfileToAccessApps",
                 "responses": {
@@ -3521,7 +3679,7 @@
                 }
             }
         },
-        "/api/v2/user_profile/unauthorize_profile_to_access_contexts/{profileId}": {
+        "/api/v1/user_profile/unauthorize_profile_to_access_contexts/{profileId}": {
             "post": {
                 "operationId": "UnauthorizeProfileToAccessContext",
                 "responses": {
@@ -3601,7 +3759,7 @@
                 }
             }
         },
-        "/api/v2/user_profile/unauthorize_profile_to_access_apps/{profileId}": {
+        "/api/v1/user_profile/unauthorize_profile_to_access_apps/{profileId}": {
             "post": {
                 "operationId": "UnauthorizeProfileToAccessApps",
                 "responses": {
@@ -3678,7 +3836,7 @@
                 }
             }
         },
-        "/api/v2/user_profile/profile_has_access_to_context/{profileId}/{contextId}": {
+        "/api/v1/user_profile/profile_has_access_to_context/{profileId}/{contextId}": {
             "get": {
                 "operationId": "ProfileHasAccessToContext",
                 "responses": {
@@ -3742,7 +3900,7 @@
                 ]
             }
         },
-        "/api/v2/user_profile/profile_has_access_to_app/{profileId}/{appId}": {
+        "/api/v1/user_profile/profile_has_access_to_app/{profileId}/{appId}": {
             "get": {
                 "operationId": "ProfileHasAccessToApp",
                 "responses": {

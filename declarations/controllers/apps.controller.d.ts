@@ -1,5 +1,6 @@
 import { Controller } from "tsoa";
 import { IApp, IEditApp } from "../interfaces";
+import * as express from "express";
 export declare class AppsController extends Controller {
     constructor();
     createAdminApp(appInfo: IApp): Promise<IApp | {
@@ -37,6 +38,19 @@ export declare class AppsController extends Controller {
     }>;
     uploadBuildingApp(file: any): Promise<IApp[] | {
         message: string;
+    }>;
+    getFavoriteApps(request: express.Request): Promise<any[] | {
+        message: any;
+    }>;
+    addAppToFavoris(request: express.Request, data: {
+        appIds: string[];
+    }): Promise<any[] | {
+        message: any;
+    }>;
+    removeAppFromFavoris(request: express.Request, data: {
+        appIds: string[];
+    }): Promise<any[] | {
+        message: any;
     }>;
 }
 declare const _default: AppsController;

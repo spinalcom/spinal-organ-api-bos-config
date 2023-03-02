@@ -98,6 +98,20 @@ class AppService {
             }));
         });
     }
+    createOrUpadteAdminApp(appInfo) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const groupNode = yield this._getApplicationGroupNode(constant_1.ADMIN_APPS_GROUP_NAME, constant_1.ADMIN_APPS_GROUP_TYPE, true);
+            if (!groupNode)
+                return;
+            const children = yield groupNode.getChildren([constant_1.APP_RELATION_NAME]);
+            const appExist = children.find(el => el.getName().get().toLowerCase() === appInfo.name.toLowerCase());
+            if (appExist) {
+                return this.updateAdminApp(appExist.getId().get(), appInfo);
+            }
+            ;
+            return this.createAdminApp(appInfo);
+        });
+    }
     //////////////////////////////////
     //              GET             //
     //////////////////////////////////

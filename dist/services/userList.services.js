@@ -43,6 +43,8 @@ const fileLog = require("log-to-file");
 const path = require("path");
 const token_service_1 = require("./token.service");
 const authentification_service_1 = require("./authentification.service");
+const userProfile_service_1 = require("./userProfile.service");
+const apps_service_1 = require("./apps.service");
 class UserListService {
     constructor() { }
     static getInstance() {
@@ -71,19 +73,78 @@ class UserListService {
             }
             if (data.code === constant_1.HTTP_CODES.OK) {
                 const type = isAdmin ? constant_1.USER_TYPES.ADMIN : constant_1.USER_TYPES.USER;
-                const info = { userName: user.userName, type, userType: type, userId: data.data.userId };
+                const info = { name: user.userName, userName: user.userName, type, userType: type, userId: data.data.userId };
                 const playload = data.data;
                 const token = data.data.token;
                 const node = yield this._addUserToContext(info);
+                delete data.data.userInfo.password;
                 yield token_service_1.TokenService.getInstance().addUserToken(node, token, playload);
             }
             return data;
         });
     }
-    getUserByUser(username) {
+    getUser(username) {
         return __awaiter(this, void 0, void 0, function* () {
             const users = yield this.context.getChildren([constant_1.CONTEXT_TO_ADMIN_USER_RELATION, constant_1.CONTEXT_TO_USER_RELATION_NAME]);
             return users.find(el => { var _a, _b; return ((_a = el.info.userName) === null || _a === void 0 ? void 0 : _a.get()) === username || ((_b = el.info.userId) === null || _b === void 0 ? void 0 : _b.get()) === username; });
+        });
+    }
+    getFavoriteApps(userId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const user = yield this.getUser(userId);
+            if (!user)
+                return [];
+            return user.getChildren(constant_1.USER_TO_FAVORITE_APP_RELATION);
+        });
+    }
+    addFavoriteApp(userId, userProfileId, appIds) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!Array.isArray(appIds))
+                appIds = [appIds];
+            return appIds.reduce((prom, appId) => __awaiter(this, void 0, void 0, function* () {
+                const list = yield prom;
+                try {
+                    const hasAccess = yield userProfile_service_1.UserProfileService.getInstance().profileHasAccessToApp(userProfileId, appId);
+                    if (!hasAccess)
+                        throw { code: constant_1.HTTP_CODES.UNAUTHORIZED, message: "unauthorized" };
+                    ;
+                    const [user, app] = yield Promise.all([this.getUser(userId), apps_service_1.AppService.getInstance().getApps(appId)]);
+                    if (!user)
+                        throw { code: constant_1.HTTP_CODES.BAD_REQUEST, message: `No user found for ${userId}` };
+                    if (!app)
+                        throw { code: constant_1.HTTP_CODES.BAD_REQUEST, message: `No app found for ${appId}` };
+                    yield user.addChild(app, constant_1.USER_TO_FAVORITE_APP_RELATION, constant_1.PTR_LST_TYPE);
+                    list.push(app);
+                }
+                catch (error) {
+                }
+                return list;
+            }), Promise.resolve([]));
+        });
+    }
+    removeFavoriteApp(userId, userProfileId, appIds) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!Array.isArray(appIds))
+                appIds = [appIds];
+            return appIds.reduce((prom, appId) => __awaiter(this, void 0, void 0, function* () {
+                const list = yield prom;
+                try {
+                    const hasAccess = yield userProfile_service_1.UserProfileService.getInstance().profileHasAccessToApp(userProfileId, appId);
+                    if (!hasAccess)
+                        throw { code: constant_1.HTTP_CODES.UNAUTHORIZED, message: "unauthorized" };
+                    ;
+                    const [user, app] = yield Promise.all([this.getUser(userId), apps_service_1.AppService.getInstance().getApps(appId)]);
+                    if (!user)
+                        throw { code: constant_1.HTTP_CODES.BAD_REQUEST, message: `No user found for ${userId}` };
+                    if (!app)
+                        throw { code: constant_1.HTTP_CODES.BAD_REQUEST, message: `No app found for ${appId}` };
+                    yield user.removeChild(app, constant_1.USER_TO_FAVORITE_APP_RELATION, constant_1.PTR_LST_TYPE);
+                    list.push(app);
+                }
+                catch (error) {
+                }
+                return list;
+            }), Promise.resolve([]));
         });
     }
     /////////////////////////////////////////////

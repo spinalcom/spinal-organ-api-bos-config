@@ -366,7 +366,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppProfileController.prototype, "getAuthorizedApis", null);
 AppProfileController = __decorate([
-    (0, tsoa_1.Route)("/api/v2/app_profile"),
+    (0, tsoa_1.Route)("/api/v1/app_profile"),
     (0, tsoa_1.Tags)("App Profiles"),
     __metadata("design:paramtypes", [])
 ], AppProfileController);

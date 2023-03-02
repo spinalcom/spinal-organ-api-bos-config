@@ -217,7 +217,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "tokenIsValid", null);
 AuthController = __decorate([
-    (0, tsoa_1.Route)("/api/v2"),
+    (0, tsoa_1.Route)("/api/v1"),
     (0, tsoa_1.Tags)("Auth"),
     __metadata("design:paramtypes", [])
 ], AuthController);

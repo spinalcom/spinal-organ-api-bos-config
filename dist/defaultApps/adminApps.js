@@ -34,66 +34,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createDefaultAdminApps = void 0;
 const services_1 = require("../services");
-const ADMIN_APPS = [
-    {
-        name: "Plateforme d'authentification",
-        icon: "mdi-shield-crown",
-        description: "Gestion de la plateforme d'authentification",
-        tags: ["ADMIN"],
-        categoryName: "Administation",
-        groupName: "Administration",
-        packageName: "spinal-env-bos-config-auth-admin-manager"
-    },
-    {
-        name: "Profils d'utilisateurs",
-        icon: "mdi-face-man-profile",
-        description: "Gestion de profils d'utilisateurs",
-        tags: ["PROFIL D'UTILISATEURS"],
-        categoryName: "Administation",
-        groupName: "Administration",
-        packageName: "spinal-env-bos-config-user-profile-manager"
-    },
-    {
-        name: "Profils d'applications",
-        icon: "mdi-apps-box",
-        description: "Gestion de profils d'applications",
-        tags: ["PROFIL D'APPLICATIONS"],
-        categoryName: "Administation",
-        groupName: "Administration",
-        packageName: "spinal-env-bos-config-app-profile-manager"
-    },
-    {
-        name: "Gestion d'applications",
-        icon: "mdi-apps",
-        description: "Gestion de types d'applications",
-        tags: ["APPLICATIONS"],
-        categoryName: "Administation",
-        groupName: "Administration",
-        packageName: "spinal-env-bos-config-apps-manager"
-    },
-    {
-        name: "Gestion de Routes d'apis",
-        icon: "mdi-api",
-        description: "Gestion de routes d'api",
-        tags: ["APIS"],
-        categoryName: "Administation",
-        groupName: "Administration",
-        packageName: "spinal-env-bos-config-apis-routes-manager"
-    },
-    {
-        name: "Gestion de Jumeau numerique",
-        icon: "mdi-office-building-cog",
-        description: "Gestion de Jumeau numerique",
-        tags: ["Digitaltwin", "Jumeau numerique"],
-        categoryName: "Administation",
-        groupName: "Administration",
-        packageName: "spinal-env-bos-config-digitaltwin-managerdigitaltwin"
-    }
-];
+const ADMIN_APPS = require("./adminApps.json");
 function createDefaultAdminApps() {
     return ADMIN_APPS.reduce((prom, app) => __awaiter(this, void 0, void 0, function* () {
         const liste = yield prom;
-        const node = yield services_1.AppService.getInstance().createAdminApp(app);
+        const node = yield services_1.AppService.getInstance().createOrUpadteAdminApp(app);
         liste.push(node);
         return liste;
     }), Promise.resolve([]));

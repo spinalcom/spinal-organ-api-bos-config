@@ -60,6 +60,7 @@ export class AppService {
   //////////////////////////////////
   //              CREATE          //
   //////////////////////////////////
+
   public async createAdminApp(appInfo: IApp): Promise<SpinalNode> {
     const groupNode = await this._getApplicationGroupNode(ADMIN_APPS_GROUP_NAME, ADMIN_APPS_GROUP_TYPE, true);
     if (!groupNode) return;
@@ -94,11 +95,24 @@ export class AppService {
     })
   }
 
+  public async createOrUpadteAdminApp(appInfo: IApp): Promise<SpinalNode> {
+    const groupNode = await this._getApplicationGroupNode(ADMIN_APPS_GROUP_NAME, ADMIN_APPS_GROUP_TYPE, true);
+    if (!groupNode) return;
+
+    const children = await groupNode.getChildren([APP_RELATION_NAME]);
+    const appExist = children.find(el => el.getName().get().toLowerCase() === appInfo.name.toLowerCase());
+    if (appExist) {
+      return this.updateAdminApp(appExist.getId().get(), appInfo);
+    };
+
+    return this.createAdminApp(appInfo);
+  }
 
 
   //////////////////////////////////
   //              GET             //
   //////////////////////////////////
+
   public async getAllAdminApps(): Promise<SpinalNode[]> {
     const groupNode = await this._getApplicationGroupNode(ADMIN_APPS_GROUP_NAME, ADMIN_APPS_GROUP_TYPE);
     if (!groupNode) return [];
@@ -133,6 +147,7 @@ export class AppService {
   //////////////////////////////////
   //              UPDATES         //
   //////////////////////////////////
+
   public async updateAdminApp(appId: string, newInfo: IEditApp): Promise<SpinalNode> {
     const appNode = await this.getAdminApp(appId);
 
@@ -164,8 +179,6 @@ export class AppService {
       return appNode;
     }
   }
-
-
 
 
   //////////////////////////////////

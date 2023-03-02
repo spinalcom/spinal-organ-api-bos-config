@@ -11,7 +11,10 @@ export declare class UserListService {
         code: number;
         data: string | IUserToken;
     }>;
-    getUserByUser(username: string): Promise<SpinalNode<any>>;
+    getUser(username: string): Promise<SpinalNode>;
+    getFavoriteApps(userId: string): Promise<SpinalNode[]>;
+    addFavoriteApp(userId: string, userProfileId: string, appIds: string | string[]): Promise<SpinalNode[]>;
+    removeFavoriteApp(userId: string, userProfileId: string, appIds: string | string[]): Promise<SpinalNode[]>;
     createAdminUser(userInfo?: IUserInfo): Promise<SpinalNode>;
     getAdminUser(userName: string): Promise<SpinalNode>;
     authAdmin(user: IUserCredential): Promise<{

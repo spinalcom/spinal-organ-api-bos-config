@@ -32,9 +32,20 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.profileHasAccessToApi = void 0;
+exports.profileHasAccessToApi = exports.getToken = void 0;
 const appProfile_service_1 = require("../services/appProfile.service");
 const apis_service_1 = require("../services/apis.service");
+function getToken(request) {
+    var _a, _b;
+    const header = request.headers.authorization || request.headers.Authorization;
+    if (header) {
+        const [, token] = header.split(" ");
+        if (token)
+            return token;
+    }
+    return ((_a = request.body) === null || _a === void 0 ? void 0 : _a.token) || ((_b = request.query) === null || _b === void 0 ? void 0 : _b.token) || request.headers["x-access-token"];
+}
+exports.getToken = getToken;
 function profileHasAccessToApi(profile, apiUrl, method) {
     return __awaiter(this, void 0, void 0, function* () {
         const api = yield apis_service_1.APIService.getInstance().getApiRouteByRoute({ route: apiUrl, method });

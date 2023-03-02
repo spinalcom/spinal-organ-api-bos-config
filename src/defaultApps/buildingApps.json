@@ -1,0 +1,13 @@
+[
+    {
+        "name": "Plateforme d'authentification",
+        "icon": "mdi-shield-crown",
+        "description": "Gestion de la plateforme d'authentification",
+        "tags": [
+            "ADMIN"
+        ],
+        "categoryName": "Administation",
+        "groupName": "Administration",
+        "packageName": "spinal-env-bos-config-auth-admin-manager"
+    }
+]

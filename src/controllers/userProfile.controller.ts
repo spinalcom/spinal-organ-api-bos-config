@@ -30,7 +30,7 @@ import { _formatProfile, _getNodeListInfo } from '../utils/profileUtils'
 
 const serviceInstance = UserProfileService.getInstance();
 
-@Route("/api/v2/user_profile")
+@Route("/api/v1/user_profile")
 @Tags("user Profiles")
 export class UserProfileController extends Controller {
 

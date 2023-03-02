@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 SpinalCom - www.spinalcom.com
+ * Copyright 2023 SpinalCom - www.spinalcom.com
  * 
  * This file is part of SpinalCore.
  * 
@@ -22,14 +22,4 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
-import { AppService } from "../services";
-import * as ADMIN_APPS from "./adminApps.json";
 
-export function createDefaultAdminApps() {
-    return ADMIN_APPS.reduce(async (prom, app) => {
-        const liste = await prom;
-        const node = await AppService.getInstance().createOrUpadteAdminApp(app);
-        liste.push(node);
-        return liste;
-    }, Promise.resolve([]))
-}

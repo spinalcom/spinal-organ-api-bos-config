@@ -90,6 +90,7 @@ export declare const BUILDING_RELATION_NAME = "hasBuilding";
 export declare const PROFILE_TO_AUTHORIZED_PORTOFOLIO_RELATION = "hasAccessToPortofolio";
 export declare const PROFILE_TO_AUTHORIZED_BOS_RELATION = "hasAccessToBos";
 export declare const PROFILE_TO_AUTHORIZED_DIGITAL_TWIN_RELATION_NAME = "hasAccessToDigitalTwin";
+export declare const USER_TO_FAVORITE_APP_RELATION = "hasFavoriteApp";
 export declare const PTR_LST_TYPE = "PtrLst";
 export declare const LST_PTR_TYPE = "LstPtr";
 export declare const REF_TYPE = "Ref";
@@ -105,7 +106,7 @@ export declare const USER_NOT_FOUND = "User Not Found";
 export declare const CANNOT_CREATE_INTERNAL_ERROR: string;
 export declare const routesToProxy: string[];
 export declare const BOS_BASE_URI = "/api/v1";
-export declare const BOS_CONFIG_BASE_URI = "/api/v2";
+export declare const BOS_CONFIG_BASE_URI = "/api/v1";
 export declare enum HTTP_CODES {
     OK = 200,
     CREATED = 201,
