@@ -42,12 +42,10 @@ function initExpress(conn) {
         var app = express();
         app.use(morgan('dev'));
         (0, expressMiddleware_1.authenticateRequest)(app);
-        (0, expressMiddleware_1.useHubProxy)(app);
         (0, expressMiddleware_1.useClientMiddleWare)(app);
-        (0, expressMiddleware_1.initSwagger)(app);
+        (0, expressMiddleware_1.useHubProxy)(app);
         (0, expressMiddleware_1.useApiMiddleWare)(app);
-        // configureBosProxy(app);
-        // configureBosProxy(app, true);
+        (0, expressMiddleware_1.initSwagger)(app);
         (0, routes_1.RegisterRoutes)(app);
         app.use(expressMiddleware_1.errorHandler);
         const server_port = process.env.SERVER_PORT || 2022;

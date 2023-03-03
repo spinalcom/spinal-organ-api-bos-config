@@ -52,15 +52,14 @@ export default async function initExpress(conn: spinal.FileSystem) {
   app.use(morgan('dev'));
 
   authenticateRequest(app)
-  useHubProxy(app);
   useClientMiddleWare(app);
-  initSwagger(app);
+
+  useHubProxy(app);
   useApiMiddleWare(app);
 
-  // configureBosProxy(app);
-  // configureBosProxy(app, true);
-
+  initSwagger(app);
   RegisterRoutes(app);
+
 
   app.use(errorHandler);
 

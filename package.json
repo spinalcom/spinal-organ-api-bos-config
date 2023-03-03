@@ -11,7 +11,7 @@
     "start": "npm run build && node dist/index.js",
     "predev": "npm run swagger",
     "prebuild": "npm run swagger",
-    "dev": "concurrently \"nodemon\" \"nodemon -x tsoa spec\"",
+    "dev": "concurrently \"nodemon\" \"nodemon -x tsoa spec-and-routes\"",
     "clean": "rm -rf dist declarations",
     "swagger": "tsoa spec && tsoa routes"
   },
@@ -60,7 +60,7 @@
     "@types/node-geocoder": "^3.24.4",
     "@types/q": "^1.5.5",
     "@types/swagger-ui-express": "^4.1.3",
-    "concurrently": "^7.4.0",
+    "concurrently": "^7.6.0",
     "nodemon": "^2.0.20",
     "swagger-jsdoc-generator": "^1.0.3",
     "ts-node": "^10.9.1",

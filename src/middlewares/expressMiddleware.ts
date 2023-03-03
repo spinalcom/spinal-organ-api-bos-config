@@ -33,9 +33,26 @@ import { ValidateError } from 'tsoa';
 import { AuthError } from '../security/AuthError';
 import { expressAuthentication } from '../security/authentication';
 import * as swaggerJSON from "../swagger/swagger.json";
+import * as bodyParser from "body-parser";
+
 
 const adminRoutes = Object.keys(swaggerJSON.paths);
 
+const swaggerOption = {
+    swaggerOptions: {
+        swaggerDefinition: {
+            info: {
+                "x-logo": {
+                    "url": "/admin/logo"
+                },
+                "x-favicon": {
+                    "url": "/admin/favicon"
+                }
+            }
+        }
+    },
+    customCss: '.topbar-wrapper img {content: url(/admin/logo);} .swagger-ui .topbar {background: #dbdbdb;}',
+}
 
 export function useHubProxy(app: express.Express) {
     const HUB_HOST = `http://${process.env.HUB_HOST}:${process.env.HUB_PORT}`;
@@ -59,26 +76,42 @@ export function useClientMiddleWare(app: express.Express) {
 }
 
 export function initSwagger(app: express.Express) {
-    app.use("/swagger.json", (req, res) => {
-        res.sendFile(path.resolve(__dirname, "./swagger/swagger.json"));
+    app.use("/admin/swagger.json", (req, res) => {
+        res.sendFile(path.resolve(__dirname, "../swagger/swagger.json"));
     })
 
-    app.get('/logo.png', (req, res) => {
-        res.sendFile('spinalcore.png', { root: path.resolve(__dirname, "./assets") });
+    app.get('/admin/logo', (req, res) => {
+        res.sendFile('spinalcore.png', { root: path.resolve(__dirname, "../../assets") });
     });
 
-    app.use("/admin_docs", swaggerUi.serve, async (req, res) => {
-        return res.send(
-            swaggerUi.generateHTML(await import("../swagger/swagger.json"))
-        )
-    }
-    );
+    // app.use("/admin_docs", swaggerUi.serve, async (req, res) => {
+    // return res.send(swaggerUi.generateHTML(await import("../swagger/swagger.json"), swaggerOption))
+    // });
+
+    app.use("/admin_docs", swaggerUi.serve, async (req, res, next) => {
+        return swaggerUi.setup(await import("../swagger/swagger.json"), swaggerOption)(req, res, next)
+    })
+
 }
 
 export function useApiMiddleWare(app: express.Express) {
     app.use(cors({ origin: '*' }));
-    app.use(express.json());
-    app.use(express.urlencoded({ extended: true }));
+
+    const bodyParserTicket = bodyParser.json({ limit: '500mb' });
+
+    // app.use((req, res, next) => {
+    //     res.set('Cache-Control', 'no-store')
+    //     next()
+    // })
+
+    app.use((req, res, next) => {
+        if (req.originalUrl === '/api/v1/node/convert_base_64' || req.originalUrl === '/api/v1/ticket/create_ticket')
+            return bodyParserTicket(req, res, next);
+        return bodyParser.json()(req, res, next);
+    });
+
+    // app.use(express.json());
+    app.use(bodyParser.urlencoded({ extended: true }));
 }
 
 export function errorHandler(err: unknown, req: express.Request, res: express.Response, next: express.NextFunction): express.Response | void {

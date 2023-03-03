@@ -76,11 +76,10 @@ export default class SpinalAPIMiddleware implements ISpinalAPIMiddleware {
         graph = await AppProfileService.getInstance().getAppProfileNodeGraph(profileId);
         if (!graph) graph = await UserProfileService.getInstance().getUserProfileNodeGraph(profileId);
 
-        if (graph) {
-            this.profilesToGraph.set(profileId, graph);
-            return graph;
-        }
+        if (!graph) throw { code: 401, message: `No graph found for ${profileId}` };
 
+        this.profilesToGraph.set(profileId, graph);
+        return graph;
     }
 
     addProfileToMap(profileId: string, graph: SpinalGraph) {

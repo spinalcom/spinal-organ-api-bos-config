@@ -90,10 +90,10 @@ class SpinalAPIMiddleware {
             graph = yield services_1.AppProfileService.getInstance().getAppProfileNodeGraph(profileId);
             if (!graph)
                 graph = yield services_1.UserProfileService.getInstance().getUserProfileNodeGraph(profileId);
-            if (graph) {
-                this.profilesToGraph.set(profileId, graph);
-                return graph;
-            }
+            if (!graph)
+                throw { code: 401, message: `No graph found for ${profileId}` };
+            this.profilesToGraph.set(profileId, graph);
+            return graph;
         });
     }
     addProfileToMap(profileId, graph) {
