@@ -68,10 +68,10 @@ export class DigitalTwinService {
     }
 
     public createDigitalTwin(name: string, directoryPath: string, setAsDefault: boolean = false): Promise<SpinalNode> {
+        if (directoryPath[directoryPath.length - 1] != '/') directoryPath += "/";
+
         return this._getOrCreateDigitalTwin(name, directoryPath)
             .then(async (graph) => {
-                if (directoryPath[directoryPath.length - 1] != '/') directoryPath += "/";
-
                 return this._createDigitalTwinNode(name, `${directoryPath}${name}`, graph, setAsDefault);
             })
     }
@@ -163,8 +163,10 @@ export class DigitalTwinService {
 
 
     private _getOrCreateDigitalTwin(name: string, directoryPath: string, createIfNotExist: boolean = false): Promise<SpinalGraph> {
+        if (directoryPath[directoryPath.length - 1] != '/') directoryPath += "/";
+        const file_path = path.resolve(`${directoryPath}${name}`);
+
         const connect = configServiceInstance.hubConnect;
-        const file_path = path.resolve(`${directoryPath}/${name}`);
 
         return new Promise((resolve, reject) => {
             try {
@@ -181,7 +183,6 @@ export class DigitalTwinService {
                             reject(`digitaltwin not found`)
                         }
                     }
-
                 )
             } catch (error) {
                 reject(`Something went wrong please check your digitaltwin path`)

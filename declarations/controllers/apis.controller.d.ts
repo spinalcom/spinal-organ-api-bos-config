@@ -1,8 +1,9 @@
 import { Controller } from "tsoa";
 import { IApiRoute } from "../interfaces";
+import * as express from "express";
 export declare class APIController extends Controller {
     constructor();
-    createBosApiRoute(data: IApiRoute): Promise<IApiRoute | {
+    createBosApiRoute(req: express.Request, data: IApiRoute): Promise<IApiRoute | {
         message: string;
     }>;
     updateBosApiRoute(data: IApiRoute, id: string): Promise<IApiRoute | {
@@ -11,7 +12,7 @@ export declare class APIController extends Controller {
     getBosApiRouteById(id: string): Promise<IApiRoute | {
         message: string;
     }>;
-    getAllBosApiRoute(): Promise<IApiRoute[] | {
+    getAllBosApiRoute(req: any): Promise<IApiRoute[] | {
         message: string;
     }>;
     deleteBosApiRoute(id: any): Promise<{

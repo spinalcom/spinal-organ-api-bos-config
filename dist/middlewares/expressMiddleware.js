@@ -75,7 +75,7 @@ function useClientMiddleWare(app) {
     const root = path.resolve(__dirname, '..');
     app.use(express.static(root));
     app.get("/", (req, res) => {
-        res.redirect("/admin_docs");
+        res.redirect("/spinalcom-api-docs");
     });
 }
 exports.useClientMiddleWare = useClientMiddleWare;
@@ -97,10 +97,6 @@ exports.initSwagger = initSwagger;
 function useApiMiddleWare(app) {
     app.use(cors({ origin: '*' }));
     const bodyParserTicket = bodyParser.json({ limit: '500mb' });
-    // app.use((req, res, next) => {
-    //     res.set('Cache-Control', 'no-store')
-    //     next()
-    // })
     app.use((req, res, next) => {
         if (req.originalUrl === '/api/v1/node/convert_base_64' || req.originalUrl === '/api/v1/ticket/create_ticket')
             return bodyParserTicket(req, res, next);
@@ -154,7 +150,7 @@ function isAdminRoute(apiRoute) {
     return adminRoutes.some(api => {
         const routeFormatted = api.replace(/\{(.*?)\}/g, (el) => '(.*?)');
         const regex = new RegExp(`^${routeFormatted}$`);
-        return apiRoute.match(regex);
+        return route.match(regex);
     });
 }
 //# sourceMappingURL=expressMiddleware.js.map

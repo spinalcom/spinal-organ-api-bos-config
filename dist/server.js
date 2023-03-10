@@ -34,18 +34,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const express = require("express");
 const morgan = require("morgan");
-var proxy = require('express-http-proxy');
 const routes_1 = require("./routes");
 const expressMiddleware_1 = require("./middlewares/expressMiddleware");
 function initExpress(conn) {
     return __awaiter(this, void 0, void 0, function* () {
         var app = express();
         app.use(morgan('dev'));
-        (0, expressMiddleware_1.authenticateRequest)(app);
-        (0, expressMiddleware_1.useClientMiddleWare)(app);
         (0, expressMiddleware_1.useHubProxy)(app);
-        (0, expressMiddleware_1.useApiMiddleWare)(app);
+        (0, expressMiddleware_1.useClientMiddleWare)(app);
         (0, expressMiddleware_1.initSwagger)(app);
+        (0, expressMiddleware_1.useApiMiddleWare)(app);
+        (0, expressMiddleware_1.authenticateRequest)(app);
         (0, routes_1.RegisterRoutes)(app);
         app.use(expressMiddleware_1.errorHandler);
         const server_port = process.env.SERVER_PORT || 2022;

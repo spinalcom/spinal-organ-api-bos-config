@@ -54,6 +54,7 @@ let UserProfileController = class UserProfileController extends tsoa_1.Controlle
     constructor() {
         super();
     }
+    // @Security(SECURITY_NAME.admin)
     createUserProfile(data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -88,6 +89,7 @@ let UserProfileController = class UserProfileController extends tsoa_1.Controlle
             }
         });
     }
+    // @Security(SECURITY_NAME.admin)
     getAllUserProfile() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -101,6 +103,7 @@ let UserProfileController = class UserProfileController extends tsoa_1.Controlle
             }
         });
     }
+    // @Security(SECURITY_NAME.admin)
     updateUserProfile(id, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -118,6 +121,7 @@ let UserProfileController = class UserProfileController extends tsoa_1.Controlle
             }
         });
     }
+    // @Security(SECURITY_NAME.admin)
     deleteUserProfile(id) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -131,6 +135,7 @@ let UserProfileController = class UserProfileController extends tsoa_1.Controlle
             }
         });
     }
+    // @Security(SECURITY_NAME.admin)
     getAuthorizedContexts(profileId, digitalTwinId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -144,6 +149,7 @@ let UserProfileController = class UserProfileController extends tsoa_1.Controlle
             }
         });
     }
+    // @Security(SECURITY_NAME.admin)
     getAuthorizedApps(profileId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -157,6 +163,7 @@ let UserProfileController = class UserProfileController extends tsoa_1.Controlle
             }
         });
     }
+    // @Security(SECURITY_NAME.admin)
     getAuthorizedAdminApps(profileId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -170,6 +177,7 @@ let UserProfileController = class UserProfileController extends tsoa_1.Controlle
             }
         });
     }
+    // @Security(SECURITY_NAME.admin)
     authorizeProfileToAccessContext(profileId, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -187,6 +195,7 @@ let UserProfileController = class UserProfileController extends tsoa_1.Controlle
             }
         });
     }
+    // @Security(SECURITY_NAME.admin)
     authorizeProfileToAccessApps(profileId, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -204,6 +213,7 @@ let UserProfileController = class UserProfileController extends tsoa_1.Controlle
             }
         });
     }
+    // @Security(SECURITY_NAME.admin)
     unauthorizeProfileToAccessContext(profileId, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -221,6 +231,7 @@ let UserProfileController = class UserProfileController extends tsoa_1.Controlle
             }
         });
     }
+    // @Security(SECURITY_NAME.admin)
     unauthorizeProfileToAccessApps(profileId, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -238,6 +249,7 @@ let UserProfileController = class UserProfileController extends tsoa_1.Controlle
             }
         });
     }
+    // @Security(SECURITY_NAME.admin)
     profileHasAccessToContext(profileId, contextId, digitalTwinId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -251,6 +263,7 @@ let UserProfileController = class UserProfileController extends tsoa_1.Controlle
             }
         });
     }
+    // @Security(SECURITY_NAME.admin)
     profileHasAccessToApp(profileId, appId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -266,7 +279,6 @@ let UserProfileController = class UserProfileController extends tsoa_1.Controlle
     }
 };
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Post)("/create_profile"),
     __param(0, (0, tsoa_1.Body)()),
     __metadata("design:type", Function),
@@ -282,14 +294,12 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UserProfileController.prototype, "getUserProfile", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Get)("/get_all_profile"),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], UserProfileController.prototype, "getAllUserProfile", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Put)("/edit_profile/{id}"),
     __param(0, (0, tsoa_1.Path)()),
     __param(1, (0, tsoa_1.Body)()),
@@ -298,7 +308,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UserProfileController.prototype, "updateUserProfile", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Delete)("/delete_profile/{id}"),
     __param(0, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
@@ -306,7 +315,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UserProfileController.prototype, "deleteUserProfile", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Get)("/get_authorized_contexts/{profileId}"),
     __param(0, (0, tsoa_1.Path)()),
     __param(1, (0, tsoa_1.Query)()),
@@ -315,7 +323,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UserProfileController.prototype, "getAuthorizedContexts", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Get)("/get_authorized_apps/{profileId}"),
     __param(0, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
@@ -323,7 +330,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UserProfileController.prototype, "getAuthorizedApps", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Get)("/get_authorized_admin_apps/{profileId}"),
     __param(0, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
@@ -331,7 +337,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UserProfileController.prototype, "getAuthorizedAdminApps", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Post)("/authorize_profile_to_access_contexts/{profileId}"),
     __param(0, (0, tsoa_1.Path)()),
     __param(1, (0, tsoa_1.Body)()),
@@ -340,7 +345,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UserProfileController.prototype, "authorizeProfileToAccessContext", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Post)("/authorize_profile_to_access_apps/{profileId}"),
     __param(0, (0, tsoa_1.Path)()),
     __param(1, (0, tsoa_1.Body)()),
@@ -349,7 +353,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UserProfileController.prototype, "authorizeProfileToAccessApps", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Post)("/unauthorize_profile_to_access_contexts/{profileId}"),
     __param(0, (0, tsoa_1.Path)()),
     __param(1, (0, tsoa_1.Body)()),
@@ -358,7 +361,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UserProfileController.prototype, "unauthorizeProfileToAccessContext", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Post)("/unauthorize_profile_to_access_apps/{profileId}"),
     __param(0, (0, tsoa_1.Path)()),
     __param(1, (0, tsoa_1.Body)()),
@@ -367,7 +369,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UserProfileController.prototype, "unauthorizeProfileToAccessApps", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Get)("/profile_has_access_to_context/{profileId}/{contextId}"),
     __param(0, (0, tsoa_1.Path)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -377,7 +378,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UserProfileController.prototype, "profileHasAccessToContext", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Get)("/profile_has_access_to_app/{profileId}/{appId}"),
     __param(0, (0, tsoa_1.Path)()),
     __param(1, (0, tsoa_1.Path)()),

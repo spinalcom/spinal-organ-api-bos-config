@@ -19,4 +19,5 @@ export declare class APIService {
     private _getTags;
     private _getScope;
     private _readBuffer;
+    private _formatRoute;
 }

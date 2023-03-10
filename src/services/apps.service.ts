@@ -24,7 +24,7 @@
 
 import { SpinalContext, SpinalGraphService, SpinalNode } from "spinal-env-viewer-graph-service";
 import { AVAILABLE_APPLICATIONS_CONTEXT_NAME, AVAILABLE_APPLICATIONS_CONTEXT_TYPE, PTR_LST_TYPE, CONTEXT_TO_APPS_GROUP, ADMIN_APPS_GROUP_NAME, ADMIN_APPS_GROUP_TYPE, APP_RELATION_NAME, ADMIN_APP_TYPE, BUILDING_APPS_GROUP_NAME, BUILDING_APPS_GROUP_TYPE, BUILDING_APP_TYPE } from "../constant";
-import { IApp, IEditApp } from "../interfaces";
+import { IApp } from "../interfaces";
 import { configServiceInstance } from "./configFile.service";
 import { SpinalExcelManager } from "spinal-env-viewer-plugin-excel-manager-service";
 import { AdminProfileService } from "./adminProfile.service";
@@ -148,7 +148,7 @@ export class AppService {
   //              UPDATES         //
   //////////////////////////////////
 
-  public async updateAdminApp(appId: string, newInfo: IEditApp): Promise<SpinalNode> {
+  public async updateAdminApp(appId: string, newInfo: IApp): Promise<SpinalNode> {
     const appNode = await this.getAdminApp(appId);
 
     if (appNode) {
@@ -165,7 +165,7 @@ export class AppService {
   }
 
 
-  public async updateBuildingApp(appId: string, newInfo: IEditApp): Promise<SpinalNode> {
+  public async updateBuildingApp(appId: string, newInfo: IApp): Promise<SpinalNode> {
     const appNode = await this.getBuildingApp(appId);
 
     if (appNode) {

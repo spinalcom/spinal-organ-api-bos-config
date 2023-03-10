@@ -74,10 +74,10 @@ class DigitalTwinService {
         });
     }
     createDigitalTwin(name, directoryPath, setAsDefault = false) {
+        if (directoryPath[directoryPath.length - 1] != '/')
+            directoryPath += "/";
         return this._getOrCreateDigitalTwin(name, directoryPath)
             .then((graph) => __awaiter(this, void 0, void 0, function* () {
-            if (directoryPath[directoryPath.length - 1] != '/')
-                directoryPath += "/";
             return this._createDigitalTwinNode(name, `${directoryPath}${name}`, graph, setAsDefault);
         }));
     }
@@ -165,8 +165,10 @@ class DigitalTwinService {
     //                      PRIVATE                        //
     /////////////////////////////////////////////////////////
     _getOrCreateDigitalTwin(name, directoryPath, createIfNotExist = false) {
+        if (directoryPath[directoryPath.length - 1] != '/')
+            directoryPath += "/";
+        const file_path = path.resolve(`${directoryPath}${name}`);
         const connect = configFile_service_1.configServiceInstance.hubConnect;
-        const file_path = path.resolve(`${directoryPath}/${name}`);
         return new Promise((resolve, reject) => {
             try {
                 spinal_core_connectorjs_type_1.spinalCore.load(connect, file_path, (graph) => {

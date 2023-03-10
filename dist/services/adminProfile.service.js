@@ -48,6 +48,9 @@ class AdminProfileService {
         }
         return this.instance;
     }
+    get adminNode() {
+        return this._adminNode;
+    }
     init(context) {
         return __awaiter(this, void 0, void 0, function* () {
             let node = yield this.getAdminProfile(context);

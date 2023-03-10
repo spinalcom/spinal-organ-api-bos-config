@@ -1,1 +1,1 @@
-{"version":3,"file":"AuthError.js","sourceRoot":"","sources":["../../src/security/AuthError.ts"],"names":[],"mappings":";AAAA;;;;;;;;;;;;;;;;;;;;;;GAsBG;;;AAKH,MAAa,SAAU,SAAQ,KAAK;IAEhC,YAAY,OAAe;QACvB,KAAK,CAAC,OAAO,CAAC,CAAC;IACnB,CAAC;CACJ;AALD,8BAKC"}
+{"version":3,"file":"AuthError.js","sourceRoot":"","sources":["../../src/security/AuthError.ts"],"names":[],"mappings":";AAAA;;;;;;;;;;;;;;;;;;;;;;GAsBG;;;AAEH,0CAAyC;AAGzC,MAAa,SAAU,SAAQ,KAAK;IAEhC,YAAY,OAAe;QACvB,KAAK,CAAC,OAAO,CAAC,CAAC;QAFnB,SAAI,GAAW,qBAAU,CAAC,YAAY,CAAC;IAGvC,CAAC;CACJ;AALD,8BAKC"}

@@ -32,11 +32,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.expressAuthentication = void 0;
+exports.checkIfItIsAdmin = exports.expressAuthentication = void 0;
 const constant_1 = require("../constant");
 const services_1 = require("../services");
 const utils_1 = require("./utils");
 const AuthError_1 = require("./AuthError");
+const adminProfile_service_1 = require("../services/adminProfile.service");
 function expressAuthentication(request, securityName, scopes) {
     return __awaiter(this, void 0, void 0, function* () {
         if (securityName === constant_1.SECURITY_NAME.all)
@@ -70,4 +71,21 @@ function expressAuthentication(request, securityName, scopes) {
     });
 }
 exports.expressAuthentication = expressAuthentication;
+function checkIfItIsAdmin(request) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const token = (0, utils_1.getToken)(request);
+        if (!token)
+            throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.INVALID_TOKEN);
+        const tokenInstance = services_1.TokenService.getInstance();
+        const tokenInfo = yield tokenInstance.tokenIsValid(token);
+        if (!tokenInfo)
+            throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.INVALID_TOKEN);
+        // get profile Node
+        let profileId = tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId || tokenInfo.profile.appProfileBosConfigId;
+        if (!profileId)
+            throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+        return adminProfile_service_1.AdminProfileService.getInstance().adminNode.getId().get() === profileId;
+    });
+}
+exports.checkIfItIsAdmin = checkIfItIsAdmin;
 //# sourceMappingURL=authentication.js.map

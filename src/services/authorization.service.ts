@@ -250,19 +250,19 @@ export default class AuthorizationService {
     //             VERIFICATION
     ///////////////////////////////////////////////
 
-    public async profileHasAccessToContext(profile: SpinalNode, digitalTwinId: string, contextId: string): Promise<boolean> {
+    public async profileHasAccessToContext(profile: SpinalNode, digitalTwinId: string, contextId: string): Promise<SpinalNode> {
         const contexts = await this.getAuthorizedContexts(profile, digitalTwinId);
-        return contexts.some(el => el.getId().get() === contextId);
+        return contexts.find(el => el.getId().get() === contextId);
     }
 
-    public async profileHasAccessToApp(profile: SpinalNode, appId: string): Promise<boolean> {
+    public async profileHasAccessToApp(profile: SpinalNode, appId: string): Promise<SpinalNode> {
         const contexts = await Promise.all([this.getAuthorizedApps(profile), this.getAuthorizedAdminApps(profile)]);
-        return contexts.flat().some(el => el.getId().get() === appId);
+        return contexts.flat().find(el => el.getId().get() === appId);
     }
 
-    public async profileHasAccessToApi(profile: SpinalNode, apiId: string): Promise<boolean> {
+    public async profileHasAccessToApi(profile: SpinalNode, apiId: string): Promise<SpinalNode> {
         const contexts = await this.getAuthorizedApis(profile);
-        return contexts.some(el => el.getId().get() === apiId);
+        return contexts.find(el => el.getId().get() === apiId);
     }
 
 

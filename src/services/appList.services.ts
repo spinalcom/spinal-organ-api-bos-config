@@ -64,7 +64,7 @@ export class AppListService {
         return axios.post(url, application).then(async (result) => {
             const data = result.data;
             data.profile = await this._getProfileInfo(data.token, adminCredential);
-            data.userInfo = await this._getApplicationInfo(data.userId, adminCredential, data.token);
+            data.userInfo = await this._getApplicationInfo(data.applicationId, adminCredential, data.token);
 
             const type = USER_TYPES.APP;
             const info = { clientId: application.clientId, type, userType: type }
@@ -126,7 +126,7 @@ export class AppListService {
                 "x-access-token": userToken
             },
         }
-        return axios.get(`${adminCredential.urlAdmin}/application/${applicationId}`, config).then((result) => {
+        return axios.get(`${adminCredential.urlAdmin}/applications/${applicationId}`, config).then((result) => {
             return result.data;
         }).catch((err) => {
             console.error(err);

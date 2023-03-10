@@ -4,6 +4,7 @@ export declare class AdminProfileService {
     private _adminNode;
     private constructor();
     static getInstance(): AdminProfileService;
+    get adminNode(): SpinalNode<any>;
     init(context: SpinalContext): Promise<SpinalNode>;
     getAdminProfile(argContext?: SpinalContext): Promise<SpinalNode>;
     addAppToProfil(apps: SpinalNode | SpinalNode[]): Promise<SpinalNode[]>;

@@ -26,7 +26,7 @@ import { HTTP_CODES } from "../constant";
 
 
 export class AuthError extends Error {
-    code: number;
+    code: number = HTTP_CODES.UNAUTHORIZED;
     constructor(message: string) {
         super(message);
     }

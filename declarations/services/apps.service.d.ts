@@ -1,6 +1,6 @@
 /// <reference types="node" />
 import { SpinalContext, SpinalNode } from "spinal-env-viewer-graph-service";
-import { IApp, IEditApp } from "../interfaces";
+import { IApp } from "../interfaces";
 export declare const AppsType: Readonly<{
     admin: "admin";
     building: "building";
@@ -19,8 +19,8 @@ export declare class AppService {
     getAdminApp(appId: string): Promise<SpinalNode>;
     getBuildingApp(appId: string): Promise<SpinalNode>;
     getApps(appId: string): Promise<SpinalNode>;
-    updateAdminApp(appId: string, newInfo: IEditApp): Promise<SpinalNode>;
-    updateBuildingApp(appId: string, newInfo: IEditApp): Promise<SpinalNode>;
+    updateAdminApp(appId: string, newInfo: IApp): Promise<SpinalNode>;
+    updateBuildingApp(appId: string, newInfo: IApp): Promise<SpinalNode>;
     deleteAdminApp(appId: string): Promise<boolean>;
     deleteBuildingApp(appId: string): Promise<boolean>;
     uploadApps(appType: string, fileData: Buffer, isExcel?: boolean): Promise<SpinalNode[]>;

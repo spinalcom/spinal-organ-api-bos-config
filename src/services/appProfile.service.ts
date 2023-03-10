@@ -23,7 +23,7 @@
  */
 
 import { SpinalGraphService, SpinalGraph, SpinalContext, SpinalNode } from 'spinal-env-viewer-graph-service';
-import { USER_PROFILE_TYPE, PTR_LST_TYPE, CONTEXT_TO_USER_PROFILE_RELATION_NAME, APP_PROFILE_CONTEXT_NAME, APP_PROFILE_CONTEXT_TYPE } from '../constant';
+import { APP_PROFILE_TYPE, PTR_LST_TYPE, CONTEXT_TO_USER_PROFILE_RELATION_NAME, APP_PROFILE_CONTEXT_NAME, APP_PROFILE_CONTEXT_TYPE } from '../constant';
 import { IProfile, IProfileAuthEdit, IProfileAuthRes, IProfileRes } from '../interfaces';
 import { authorizationInstance } from './authorization.service';
 import { configServiceInstance } from './configFile.service';
@@ -52,7 +52,7 @@ export class AppProfileService {
   /// CRUD BEGIN
 
   public async createAppProfile(appProfile: IProfile): Promise<IProfileRes> {
-    const profileNode = new SpinalNode(appProfile.name, USER_PROFILE_TYPE);
+    const profileNode = new SpinalNode(appProfile.name, APP_PROFILE_TYPE);
 
     const obj: IProfileRes = {
       node: profileNode

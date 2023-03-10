@@ -22,10 +22,14 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
-import { Route, Get, Post, Delete, Body, Controller, Tags, Put, Path, UploadedFile, Security } from "tsoa";
+import { Route, Get, Post, Delete, Body, Controller, Tags, Put, Path, UploadedFile, Security, Request } from "tsoa";
 import { APIService } from "../services";
-import { HTTP_CODES, SECURITY_NAME } from "../constant";
+import { HTTP_CODES, SECURITY_MESSAGES, SECURITY_NAME } from "../constant";
 import { IApiRoute } from "../interfaces";
+import { checkIfItIsAdmin } from "../security/authentication";
+import { AuthError } from "../security/AuthError";
+
+import * as express from "express";
 
 const apiService = APIService.getInstance();
 
@@ -39,37 +43,45 @@ export class APIController extends Controller {
     }
 
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Post("/create_bos_api_route")
-    public async createBosApiRoute(@Body() data: IApiRoute): Promise<IApiRoute | { message: string }> {
+    public async createBosApiRoute(@Request() req: express.Request, @Body() data: IApiRoute): Promise<IApiRoute | { message: string }> {
         try {
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
             const node = await apiService.createApiRoute(data);
             this.setStatus(HTTP_CODES.CREATED);
             return node.info.get();
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Put("/update_bos_api_route/{id}")
-    public async updateBosApiRoute(@Body() data: IApiRoute, @Path() id: string): Promise<IApiRoute | { message: string }> {
+    public async updateBosApiRoute(@Request() req: express.Request, @Body() data: IApiRoute, @Path() id: string): Promise<IApiRoute | { message: string }> {
         try {
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
             const node = await apiService.updateApiRoute(id, data);
             this.setStatus(HTTP_CODES.ACCEPTED)
             return node.info.get();
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR)
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
-    @Security(SECURITY_NAME.profile)
+    // @Security(SECURITY_NAME.admin)
     @Get("/get_bos_api_route/{id}")
-    public async getBosApiRouteById(@Path() id: string): Promise<IApiRoute | { message: string }> {
+    public async getBosApiRouteById(@Request() req: express.Request, @Path() id: string): Promise<IApiRoute | { message: string }> {
         try {
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
             const node = await apiService.getApiRouteById(id);
             if (node) {
                 this.setStatus(HTTP_CODES.OK)
@@ -79,41 +91,50 @@ export class APIController extends Controller {
             this.setStatus(HTTP_CODES.NOT_FOUND)
             return { message: `No api route found for ${id}` };
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR)
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Get("/get_all_bos_api_route")
-    public async getAllBosApiRoute(): Promise<IApiRoute[] | { message: string }> {
+    public async getAllBosApiRoute(@Request() req: any): Promise<IApiRoute[] | { message: string }> {
         try {
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
             const routes = await apiService.getAllApiRoute();
             this.setStatus(HTTP_CODES.OK)
             return routes.map(el => el.info.get());
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR)
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Delete("/delete_bos_api_route/{id}")
-    public async deleteBosApiRoute(@Path() id): Promise<{ message: string }> {
+    public async deleteBosApiRoute(@Request() req: any, @Path() id): Promise<{ message: string }> {
         try {
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
             await apiService.deleteApiRoute(id);
             this.setStatus(HTTP_CODES.OK)
             return { message: `${id} api route has been deleted` };
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR)
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Post("/upload_bos_apis_routes")
-    public async uploadBosSwaggerFile(@UploadedFile() file): Promise<IApiRoute[] | { message: string }> {
+    public async uploadBosSwaggerFile(@Request() req: any, @UploadedFile() file): Promise<IApiRoute[] | { message: string }> {
         try {
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
             if (!file) {
                 this.setStatus(HTTP_CODES.BAD_REQUEST);
                 return { message: "No file uploaded" }
@@ -135,7 +156,7 @@ export class APIController extends Controller {
             this.setStatus(HTTP_CODES.BAD_REQUEST)
             return { message: "No file uploaded" };
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR)
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }

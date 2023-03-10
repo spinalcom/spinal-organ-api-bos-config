@@ -56,7 +56,7 @@ class AppProfileService {
     /// CRUD BEGIN
     createAppProfile(appProfile) {
         return __awaiter(this, void 0, void 0, function* () {
-            const profileNode = new spinal_env_viewer_graph_service_1.SpinalNode(appProfile.name, constant_1.USER_PROFILE_TYPE);
+            const profileNode = new spinal_env_viewer_graph_service_1.SpinalNode(appProfile.name, constant_1.APP_PROFILE_TYPE);
             const obj = {
                 node: profileNode
             };

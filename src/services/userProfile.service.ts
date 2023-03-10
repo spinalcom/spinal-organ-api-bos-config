@@ -182,17 +182,17 @@ export class UserProfileService {
   //             VERIFICATION
   ///////////////////////////////////////////////
 
-  public async profileHasAccessToContext(userProfile: string | SpinalNode, contextId: string, digitalTwinId?: string): Promise<boolean> {
+  public async profileHasAccessToContext(userProfile: string | SpinalNode, contextId: string, digitalTwinId?: string): Promise<SpinalNode> {
     const profile = userProfile instanceof SpinalNode ? userProfile : await this._getUserProfileNode(userProfile);
     return authorizationInstance.profileHasAccessToContext(profile, digitalTwinId, contextId);
   }
 
-  public async profileHasAccessToApp(userProfile: string | SpinalNode, appId: string): Promise<boolean> {
+  public async profileHasAccessToApp(userProfile: string | SpinalNode, appId: string): Promise<SpinalNode> {
     const profile = userProfile instanceof SpinalNode ? userProfile : await this._getUserProfileNode(userProfile);
     return authorizationInstance.profileHasAccessToApp(profile, appId);
   }
 
-  public async profileHasAccessToApi(userProfile: string | SpinalNode, apiId: string): Promise<boolean> {
+  public async profileHasAccessToApi(userProfile: string | SpinalNode, apiId: string): Promise<SpinalNode> {
     const profile = userProfile instanceof SpinalNode ? userProfile : await this._getUserProfileNode(userProfile);
     return authorizationInstance.profileHasAccessToApi(profile, apiId);
   }

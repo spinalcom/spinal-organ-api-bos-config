@@ -181,39 +181,6 @@
                 "type": "object",
                 "additionalProperties": false
             },
-            "IEditApp": {
-                "properties": {
-                    "name": {
-                        "type": "string"
-                    },
-                    "icon": {
-                        "type": "string"
-                    },
-                    "description": {
-                        "type": "string"
-                    },
-                    "tags": {
-                        "items": {
-                            "type": "string"
-                        },
-                        "type": "array"
-                    },
-                    "categoryName": {
-                        "type": "string"
-                    },
-                    "groupName": {
-                        "type": "string"
-                    },
-                    "isExternalApp": {
-                        "type": "boolean"
-                    },
-                    "link": {
-                        "type": "string"
-                    }
-                },
-                "type": "object",
-                "additionalProperties": {}
-            },
             "IApplicationToken": {
                 "properties": {
                     "name": {
@@ -511,11 +478,7 @@
                 "tags": [
                     "Apis"
                 ],
-                "security": [
-                    {
-                        "admin": []
-                    }
-                ],
+                "security": [],
                 "parameters": [],
                 "requestBody": {
                     "required": true,
@@ -562,11 +525,7 @@
                 "tags": [
                     "Apis"
                 ],
-                "security": [
-                    {
-                        "admin": []
-                    }
-                ],
+                "security": [],
                 "parameters": [
                     {
                         "in": "path",
@@ -675,11 +634,7 @@
                 "tags": [
                     "Apis"
                 ],
-                "security": [
-                    {
-                        "admin": []
-                    }
-                ],
+                "security": [],
                 "parameters": []
             }
         },
@@ -709,11 +664,7 @@
                 "tags": [
                     "Apis"
                 ],
-                "security": [
-                    {
-                        "admin": []
-                    }
-                ],
+                "security": [],
                 "parameters": [
                     {
                         "in": "path",
@@ -762,11 +713,7 @@
                 "tags": [
                     "Apis"
                 ],
-                "security": [
-                    {
-                        "admin": []
-                    }
-                ],
+                "security": [],
                 "parameters": [],
                 "requestBody": {
                     "required": true,
@@ -822,11 +769,7 @@
                 "tags": [
                     "App Profiles"
                 ],
-                "security": [
-                    {
-                        "admin": []
-                    }
-                ],
+                "security": [],
                 "parameters": [],
                 "requestBody": {
                     "required": true,
@@ -926,11 +869,7 @@
                 "tags": [
                     "App Profiles"
                 ],
-                "security": [
-                    {
-                        "admin": []
-                    }
-                ],
+                "security": [],
                 "parameters": []
             }
         },
@@ -967,11 +906,7 @@
                 "tags": [
                     "App Profiles"
                 ],
-                "security": [
-                    {
-                        "admin": []
-                    }
-                ],
+                "security": [],
                 "parameters": [
                     {
                         "in": "path",
@@ -1020,11 +955,7 @@
                 "tags": [
                     "App Profiles"
                 ],
-                "security": [
-                    {
-                        "admin": []
-                    }
-                ],
+                "security": [],
                 "parameters": [
                     {
                         "in": "path",
@@ -1069,11 +1000,7 @@
                 "tags": [
                     "App Profiles"
                 ],
-                "security": [
-                    {
-                        "admin": []
-                    }
-                ],
+                "security": [],
                 "parameters": [
                     {
                         "in": "path",
@@ -1149,11 +1076,7 @@
                 "tags": [
                     "App Profiles"
                 ],
-                "security": [
-                    {
-                        "admin": []
-                    }
-                ],
+                "security": [],
                 "parameters": [
                     {
                         "in": "path",
@@ -1226,11 +1149,7 @@
                 "tags": [
                     "App Profiles"
                 ],
-                "security": [
-                    {
-                        "admin": []
-                    }
-                ],
+                "security": [],
                 "parameters": [
                     {
                         "in": "path",
@@ -1306,11 +1225,7 @@
                 "tags": [
                     "App Profiles"
                 ],
-                "security": [
-                    {
-                        "admin": []
-                    }
-                ],
+                "security": [],
                 "parameters": [
                     {
                         "in": "path",
@@ -1382,11 +1297,7 @@
                 "tags": [
                     "App Profiles"
                 ],
-                "security": [
-                    {
-                        "admin": []
-                    }
-                ],
+                "security": [],
                 "parameters": [
                     {
                         "in": "path",
@@ -1446,11 +1357,7 @@
                 "tags": [
                     "App Profiles"
                 ],
-                "security": [
-                    {
-                        "admin": []
-                    }
-                ],
+                "security": [],
                 "parameters": [
                     {
                         "in": "path",
@@ -1503,11 +1410,7 @@
                 "tags": [
                     "App Profiles"
                 ],
-                "security": [
-                    {
-                        "admin": []
-                    }
-                ],
+                "security": [],
                 "parameters": [
                     {
                         "in": "path",
@@ -1560,11 +1463,7 @@
                 "tags": [
                     "App Profiles"
                 ],
-                "security": [
-                    {
-                        "admin": []
-                    }
-                ],
+                "security": [],
                 "parameters": [
                     {
                         "in": "path",
@@ -1610,11 +1509,7 @@
                 "tags": [
                     "Applications"
                 ],
-                "security": [
-                    {
-                        "admin": []
-                    }
-                ],
+                "security": [],
                 "parameters": [],
                 "requestBody": {
                     "required": true,
@@ -1661,11 +1556,7 @@
                 "tags": [
                     "Applications"
                 ],
-                "security": [
-                    {
-                        "admin": []
-                    }
-                ],
+                "security": [],
                 "parameters": [],
                 "requestBody": {
                     "required": true,
@@ -1715,11 +1606,7 @@
                 "tags": [
                     "Applications"
                 ],
-                "security": [
-                    {
-                        "admin": []
-                    }
-                ],
+                "security": [],
                 "parameters": []
             }
         },
@@ -1759,11 +1646,7 @@
                 "tags": [
                     "Applications"
                 ],
-                "security": [
-                    {
-                        "admin": []
-                    }
-                ],
+                "security": [],
                 "parameters": []
             }
         },
@@ -1800,11 +1683,7 @@
                 "tags": [
                     "Applications"
                 ],
-                "security": [
-                    {
-                        "admin": []
-                    }
-                ],
+                "security": [],
                 "parameters": [
                     {
                         "in": "path",
@@ -1900,11 +1779,7 @@
                 "tags": [
                     "Applications"
                 ],
-                "security": [
-                    {
-                        "admin": []
-                    }
-                ],
+                "security": [],
                 "parameters": [
                     {
                         "in": "path",
@@ -1920,7 +1795,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/IEditApp"
+                                "$ref": "#/components/schemas/IApp"
                             }
                         }
                     }
@@ -1960,11 +1835,7 @@
                 "tags": [
                     "Applications"
                 ],
-                "security": [
-                    {
-                        "admin": []
-                    }
-                ],
+                "security": [],
                 "parameters": [
                     {
                         "in": "path",
@@ -1980,7 +1851,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/IEditApp"
+                                "$ref": "#/components/schemas/IApp"
                             }
                         }
                     }
@@ -2013,11 +1884,7 @@
                 "tags": [
                     "Applications"
                 ],
-                "security": [
-                    {
-                        "admin": []
-                    }
-                ],
+                "security": [],
                 "parameters": [
                     {
                         "in": "path",
@@ -2056,11 +1923,7 @@
                 "tags": [
                     "Applications"
                 ],
-                "security": [
-                    {
-                        "admin": []
-                    }
-                ],
+                "security": [],
                 "parameters": [
                     {
                         "in": "path",
@@ -2109,11 +1972,7 @@
                 "tags": [
                     "Applications"
                 ],
-                "security": [
-                    {
-                        "admin": []
-                    }
-                ],
+                "security": [],
                 "parameters": [],
                 "requestBody": {
                     "required": true,
@@ -2172,11 +2031,7 @@
                 "tags": [
                     "Applications"
                 ],
-                "security": [
-                    {
-                        "admin": []
-                    }
-                ],
+                "security": [],
                 "parameters": [],
                 "requestBody": {
                     "required": true,
@@ -2461,11 +2316,7 @@
                 "tags": [
                     "Auth"
                 ],
-                "security": [
-                    {
-                        "admin": []
-                    }
-                ],
+                "security": [],
                 "parameters": [],
                 "requestBody": {
                     "required": true,
@@ -2524,11 +2375,7 @@
                 "tags": [
                     "Auth"
                 ],
-                "security": [
-                    {
-                        "admin": []
-                    }
-                ],
+                "security": [],
                 "parameters": []
             }
         },
@@ -2558,11 +2405,7 @@
                 "tags": [
                     "Auth"
                 ],
-                "security": [
-                    {
-                        "admin": []
-                    }
-                ],
+                "security": [],
                 "parameters": []
             }
         },
@@ -2599,11 +2442,7 @@
                 "tags": [
                     "Auth"
                 ],
-                "security": [
-                    {
-                        "admin": []
-                    }
-                ],
+                "security": [],
                 "parameters": []
             }
         },
@@ -2633,11 +2472,7 @@
                 "tags": [
                     "Auth"
                 ],
-                "security": [
-                    {
-                        "admin": []
-                    }
-                ],
+                "security": [],
                 "parameters": []
             }
         },
@@ -2741,11 +2576,7 @@
                 "tags": [
                     "DigitalTwin"
                 ],
-                "security": [
-                    {
-                        "admin": []
-                    }
-                ],
+                "security": [],
                 "parameters": [
                     {
                         "in": "query",
@@ -2812,11 +2643,7 @@
                 "tags": [
                     "DigitalTwin"
                 ],
-                "security": [
-                    {
-                        "admin": []
-                    }
-                ],
+                "security": [],
                 "parameters": []
             }
         },
@@ -2836,11 +2663,7 @@
                 "tags": [
                     "DigitalTwin"
                 ],
-                "security": [
-                    {
-                        "admin": []
-                    }
-                ],
+                "security": [],
                 "parameters": [
                     {
                         "in": "path",
@@ -2869,11 +2692,7 @@
                 "tags": [
                     "DigitalTwin"
                 ],
-                "security": [
-                    {
-                        "admin": []
-                    }
-                ],
+                "security": [],
                 "parameters": [
                     {
                         "in": "path",
@@ -2902,11 +2721,7 @@
                 "tags": [
                     "DigitalTwin"
                 ],
-                "security": [
-                    {
-                        "admin": []
-                    }
-                ],
+                "security": [],
                 "parameters": []
             }
         },
@@ -2942,11 +2757,7 @@
                 "tags": [
                     "DigitalTwin"
                 ],
-                "security": [
-                    {
-                        "admin": []
-                    }
-                ],
+                "security": [],
                 "parameters": []
             }
         },
@@ -2982,11 +2793,7 @@
                 "tags": [
                     "DigitalTwin"
                 ],
-                "security": [
-                    {
-                        "admin": []
-                    }
-                ],
+                "security": [],
                 "parameters": [
                     {
                         "in": "path",
@@ -3015,11 +2822,7 @@
                 "tags": [
                     "DigitalTwin"
                 ],
-                "security": [
-                    {
-                        "admin": []
-                    }
-                ],
+                "security": [],
                 "parameters": [
                     {
                         "in": "path",
@@ -3074,11 +2877,7 @@
                 "tags": [
                     "DigitalTwin"
                 ],
-                "security": [
-                    {
-                        "admin": []
-                    }
-                ],
+                "security": [],
                 "parameters": [
                     {
                         "in": "path",
@@ -3115,11 +2914,7 @@
                 "tags": [
                     "DigitalTwin"
                 ],
-                "security": [
-                    {
-                        "admin": []
-                    }
-                ],
+                "security": [],
                 "parameters": []
             }
         },
@@ -3156,11 +2951,7 @@
                 "tags": [
                     "user Profiles"
                 ],
-                "security": [
-                    {
-                        "admin": []
-                    }
-                ],
+                "security": [],
                 "parameters": [],
                 "requestBody": {
                     "required": true,
@@ -3260,11 +3051,7 @@
                 "tags": [
                     "user Profiles"
                 ],
-                "security": [
-                    {
-                        "admin": []
-                    }
-                ],
+                "security": [],
                 "parameters": []
             }
         },
@@ -3301,11 +3088,7 @@
                 "tags": [
                     "user Profiles"
                 ],
-                "security": [
-                    {
-                        "admin": []
-                    }
-                ],
+                "security": [],
                 "parameters": [
                     {
                         "in": "path",
@@ -3354,11 +3137,7 @@
                 "tags": [
                     "user Profiles"
                 ],
-                "security": [
-                    {
-                        "admin": []
-                    }
-                ],
+                "security": [],
                 "parameters": [
                     {
                         "in": "path",
@@ -3403,11 +3182,7 @@
                 "tags": [
                     "user Profiles"
                 ],
-                "security": [
-                    {
-                        "admin": []
-                    }
-                ],
+                "security": [],
                 "parameters": [
                     {
                         "in": "path",
@@ -3460,11 +3235,7 @@
                 "tags": [
                     "user Profiles"
                 ],
-                "security": [
-                    {
-                        "admin": []
-                    }
-                ],
+                "security": [],
                 "parameters": [
                     {
                         "in": "path",
@@ -3509,11 +3280,7 @@
                 "tags": [
                     "user Profiles"
                 ],
-                "security": [
-                    {
-                        "admin": []
-                    }
-                ],
+                "security": [],
                 "parameters": [
                     {
                         "in": "path",
@@ -3558,11 +3325,7 @@
                 "tags": [
                     "user Profiles"
                 ],
-                "security": [
-                    {
-                        "admin": []
-                    }
-                ],
+                "security": [],
                 "parameters": [
                     {
                         "in": "path",
@@ -3638,11 +3401,7 @@
                 "tags": [
                     "user Profiles"
                 ],
-                "security": [
-                    {
-                        "admin": []
-                    }
-                ],
+                "security": [],
                 "parameters": [
                     {
                         "in": "path",
@@ -3715,11 +3474,7 @@
                 "tags": [
                     "user Profiles"
                 ],
-                "security": [
-                    {
-                        "admin": []
-                    }
-                ],
+                "security": [],
                 "parameters": [
                     {
                         "in": "path",
@@ -3795,11 +3550,7 @@
                 "tags": [
                     "user Profiles"
                 ],
-                "security": [
-                    {
-                        "admin": []
-                    }
-                ],
+                "security": [],
                 "parameters": [
                     {
                         "in": "path",
@@ -3871,11 +3622,7 @@
                 "tags": [
                     "user Profiles"
                 ],
-                "security": [
-                    {
-                        "admin": []
-                    }
-                ],
+                "security": [],
                 "parameters": [
                     {
                         "in": "path",
@@ -3935,11 +3682,7 @@
                 "tags": [
                     "user Profiles"
                 ],
-                "security": [
-                    {
-                        "admin": []
-                    }
-                ],
+                "security": [],
                 "parameters": [
                     {
                         "in": "path",

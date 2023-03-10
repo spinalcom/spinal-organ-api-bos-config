@@ -23,16 +23,9 @@
  */
 
 
-import * as cors from 'cors';
 import * as express from 'express';
 import * as morgan from "morgan";
-import * as path from "path";
-import { HTTP_CODES, routesToProxy } from "./constant";
-var proxy = require('express-http-proxy');
-import * as swaggerUi from "swagger-ui-express";
-import { ValidateError } from 'tsoa';
 import { RegisterRoutes } from './routes';
-import { AuthError } from './security/AuthError';
 
 import {
   useHubProxy,
@@ -51,13 +44,13 @@ export default async function initExpress(conn: spinal.FileSystem) {
 
   app.use(morgan('dev'));
 
-  authenticateRequest(app)
-  useClientMiddleWare(app);
 
   useHubProxy(app);
-  useApiMiddleWare(app);
 
+  useClientMiddleWare(app);
   initSwagger(app);
+  useApiMiddleWare(app);
+  authenticateRequest(app);
   RegisterRoutes(app);
 
 

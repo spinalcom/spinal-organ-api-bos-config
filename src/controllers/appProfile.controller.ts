@@ -22,11 +22,15 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
-import { HTTP_CODES, SECURITY_NAME } from "../constant";
+import { HTTP_CODES, SECURITY_MESSAGES, SECURITY_NAME } from "../constant";
 import { IProfile, IProfileAuthEdit, IProfileData } from "../interfaces";
 import { AppProfileService } from "../services";
-import { Route, Tags, Controller, Post, Get, Put, Delete, Body, Path, Security, Query } from "tsoa";
+import { Route, Tags, Controller, Post, Get, Put, Delete, Body, Path, Security, Query, Request } from "tsoa";
 import { _formatProfile, _getNodeListInfo } from '../utils/profileUtils'
+import * as express from "express";
+import { checkIfItIsAdmin } from "../security/authentication";
+import { AuthError } from "../security/AuthError";
+
 const serviceInstance = AppProfileService.getInstance();
 
 @Route("/api/v1/app_profile")
@@ -37,10 +41,14 @@ export class AppProfileController extends Controller {
         super();
     }
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Post("/create_profile")
-    public async createAppProfile(@Body() data: IProfile): Promise<IProfileData | { message: string }> {
+    public async createAppProfile(@Request() req: express.Request, @Body() data: IProfile): Promise<IProfileData | { message: string }> {
         try {
+
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
 
             if (!data.name) {
                 this.setStatus(HTTP_CODES.BAD_REQUEST)
@@ -52,15 +60,18 @@ export class AppProfileController extends Controller {
             return _formatProfile(profile);
 
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
-    @Security(SECURITY_NAME.profile)
+    // @Security(SECURITY_NAME.admin)
     @Get("/get_profile/{id}")
-    public async getAppProfile(@Path() id: string): Promise<IProfileData | { message: string }> {
+    public async getAppProfile(@Request() req: express.Request, @Path() id: string): Promise<IProfileData | { message: string }> {
         try {
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
             const data = await serviceInstance.getAppProfile(id);
             if (data) {
                 this.setStatus(HTTP_CODES.OK)
@@ -70,28 +81,36 @@ export class AppProfileController extends Controller {
             this.setStatus(HTTP_CODES.NOT_FOUND)
             return { message: `no profile found for ${id}` };
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Get("/get_all_profile")
-    public async getAllAppProfile(): Promise<IProfileData[] | { message: string }> {
+    public async getAllAppProfile(@Request() req: express.Request,): Promise<IProfileData[] | { message: string }> {
         try {
+
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
             const nodes = await serviceInstance.getAllAppProfile() || [];
             this.setStatus(HTTP_CODES.OK);
             return nodes.map(el => _formatProfile(el));
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Put("/edit_profile/{id}")
-    public async updateAppProfile(@Path() id: string, @Body() data: IProfileAuthEdit): Promise<IProfileData | { message: string }> {
+    public async updateAppProfile(@Request() req: express.Request, @Path() id: string, @Body() data: IProfileAuthEdit): Promise<IProfileData | { message: string }> {
         try {
+
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
             const node = await serviceInstance.updateAppProfile(id, data);
             if (node) {
                 this.setStatus(HTTP_CODES.OK);
@@ -102,22 +121,26 @@ export class AppProfileController extends Controller {
             return { message: `no profile found for ${id}` };
 
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Delete("/delete_profile/{id}")
-    public async deleteAppProfile(@Path() id: string): Promise<{ message: string }> {
+    public async deleteAppProfile(@Request() req: express.Request, @Path() id: string): Promise<{ message: string }> {
         try {
+
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
 
             await serviceInstance.deleteAppProfile(id);
             this.setStatus(HTTP_CODES.OK);
             return { message: "user profile deleted" };
 
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
@@ -125,10 +148,14 @@ export class AppProfileController extends Controller {
 
     //////////////////////////////////////////////////////////////////////////
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Post("/authorize_profile_to_access_contexts/{profileId}")
-    public async authorizeProfileToAccessContext(@Path() profileId: string, @Body() data: { contextIds: string | string[], digitalTwinId?: string }) {
+    public async authorizeProfileToAccessContext(@Request() req: express.Request, @Path() profileId: string, @Body() data: { contextIds: string | string[], digitalTwinId?: string }) {
         try {
+
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
             const contexts = await serviceInstance.authorizeProfileToAccessContext(profileId, data.contextIds, data.digitalTwinId);
             if (contexts) {
                 this.setStatus(HTTP_CODES.OK);
@@ -137,15 +164,19 @@ export class AppProfileController extends Controller {
             this.setStatus(HTTP_CODES.BAD_REQUEST);
             return { message: "something went wrong please check your input" };
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Post("/authorize_profile_to_access_apis/{profileId}")
-    public async authorizeProfileToAccessApis(@Path() profileId: string, @Body() data: { apiIds: string | string[] }) {
+    public async authorizeProfileToAccessApis(@Request() req: express.Request, @Path() profileId: string, @Body() data: { apiIds: string | string[] }) {
         try {
+
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
             const apis = await serviceInstance.authorizeProfileToAccessApis(profileId, data.apiIds);
             if (apis) {
                 this.setStatus(HTTP_CODES.OK);
@@ -154,16 +185,20 @@ export class AppProfileController extends Controller {
             this.setStatus(HTTP_CODES.BAD_REQUEST);
             return { message: "something went wrong please check your input" };
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Post("/unauthorize_profile_to_access_contexts/{profileId}")
-    public async unauthorizeProfileToAccessContext(@Path() profileId: string, @Body() data: { contextIds: string | string[], digitalTwinId?: string }) {
+    public async unauthorizeProfileToAccessContext(@Request() req: express.Request, @Path() profileId: string, @Body() data: { contextIds: string | string[], digitalTwinId?: string }) {
         try {
+
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
             const contexts = await serviceInstance.unauthorizeProfileToAccessContext(profileId, data.contextIds, data.digitalTwinId);
             if (contexts) {
                 this.setStatus(HTTP_CODES.OK);
@@ -173,15 +208,19 @@ export class AppProfileController extends Controller {
             return { message: "something went wrong please check your input" };
 
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Post("/unauthorize_profile_to_access_apis/{profileId}")
-    public async unauthorizeProfileToAccessApis(@Path() profileId: string, @Body() data: { apiIds: string | string[] }) {
+    public async unauthorizeProfileToAccessApis(@Request() req: express.Request, @Path() profileId: string, @Body() data: { apiIds: string | string[] }) {
         try {
+
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
             const apis = await serviceInstance.unauthorizeProfileToAccessApis(profileId, data.apiIds);
             if (apis) {
                 this.setStatus(HTTP_CODES.OK);
@@ -191,59 +230,75 @@ export class AppProfileController extends Controller {
             return { message: "something went wrong please check your input" };
 
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Get("/profile_has_access_to_context/{profileId}/{contextId}")
-    public async profileHasAccessToContext(@Path() profileId: string, @Path() contextId: string, @Query() digitalTwinId?: string) {
+    public async profileHasAccessToContext(@Request() req: express.Request, @Path() profileId: string, @Path() contextId: string, @Query() digitalTwinId?: string) {
         try {
+
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
             const hasAccess = await serviceInstance.profileHasAccessToContext(profileId, contextId, digitalTwinId);
             this.setStatus(HTTP_CODES.OK)
             return hasAccess;
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Get("/profile_has_access_to_api/{profileId}/{apiId}")
-    public async profileHasAccessToApi(@Path() profileId: string, @Path() apiId: string) {
+    public async profileHasAccessToApi(@Request() req: express.Request, @Path() profileId: string, @Path() apiId: string) {
         try {
+
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
             const hasAccess = await serviceInstance.profileHasAccessToApi(profileId, apiId);
             this.setStatus(HTTP_CODES.OK)
             return hasAccess;
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Get("/get_authorized_contexts/{profileId}")
-    public async getAuthorizedContexts(@Path() profileId: string, @Query() digitalTwinId?: string) {
+    public async getAuthorizedContexts(@Request() req: express.Request, @Path() profileId: string, @Query() digitalTwinId?: string) {
         try {
+
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
             const contexts = await serviceInstance.getAuthorizedContexts(profileId, digitalTwinId);
             this.setStatus(HTTP_CODES.OK);
             return _getNodeListInfo(contexts);
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Get("/get_authorized_apis/{profileId}")
-    public async getAuthorizedApis(@Path() profileId: string) {
+    public async getAuthorizedApis(@Request() req: express.Request, @Path() profileId: string) {
         try {
+
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
             const contexts = await serviceInstance.getAuthorizedApis(profileId);
             this.setStatus(HTTP_CODES.OK);
             return _getNodeListInfo(contexts);
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }

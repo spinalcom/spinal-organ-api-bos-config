@@ -24,9 +24,11 @@
 
 import { AuthentificationService, TokenService } from "../services";
 import * as express from "express";
-import { HTTP_CODES, SECURITY_NAME } from "../constant";
-import { Body, Route, Tags, Controller, Post, Get, Put, Delete, Security } from "tsoa";
+import { HTTP_CODES, SECURITY_MESSAGES, SECURITY_NAME } from "../constant";
+import { Body, Route, Tags, Controller, Post, Get, Put, Delete, Security, Request } from "tsoa";
 import { IAdmin, IAdminCredential, IAppCredential, IApplicationToken, IOAuth2Credential, IPamCredential, IPamInfo, IUserCredential, IUserToken } from "../interfaces";
+import { AuthError } from "../security/AuthError";
+import { checkIfItIsAdmin } from "../security/authentication";
 
 const serviceInstance = AuthentificationService.getInstance();
 const tokenService = TokenService.getInstance();
@@ -53,24 +55,30 @@ export class AuthController extends Controller {
     }
 
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Post("/register_admin")
-    public async registerToAdmin(@Body() data: { pamInfo: IPamInfo, adminInfo: IAdmin }): Promise<IPamCredential | { message: string }> {
+    public async registerToAdmin(@Request() req: express.Request, @Body() data: { pamInfo: IPamInfo, adminInfo: IAdmin }): Promise<IPamCredential | { message: string }> {
         try {
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
             const registeredData = await serviceInstance.registerToAdmin(data.pamInfo, data.adminInfo);
             await serviceInstance.sendDataToAdmin();
             this.setStatus(HTTP_CODES.OK)
             return registeredData;
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR)
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Get("/get_bos_to_auth_credential")
-    public async getBosToAdminCredential(): Promise<IPamCredential | { message: string }> {
+    public async getBosToAdminCredential(@Request() req: express.Request,): Promise<IPamCredential | { message: string }> {
         try {
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
             const bosCredential = await serviceInstance.getPamToAdminCredential();
             if (bosCredential) {
                 this.setStatus(HTTP_CODES.OK)
@@ -79,31 +87,37 @@ export class AuthController extends Controller {
             this.setStatus(HTTP_CODES.NOT_FOUND)
             return { message: "No admin registered" };
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR)
-            return { message: error.message }
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
         }
     }
 
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Delete("/delete_admin")
-    public async deleteAdmin(): Promise<{ message: string }> {
+    public async deleteAdmin(@Request() req: express.Request,): Promise<{ message: string }> {
         try {
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
             const deleted = await serviceInstance.deleteCredentials();
             const status = deleted ? HTTP_CODES.OK : HTTP_CODES.BAD_REQUEST;
             const message = deleted ? "deleted with success" : "something went wrong, please check your input data";
             this.setStatus(status);
             return { message };
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR)
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Get("/get_admin_to_bos_credential")
-    public async getAdminCredential(): Promise<IAdminCredential | { message: string }> {
+    public async getAdminCredential(@Request() req: express.Request,): Promise<IAdminCredential | { message: string }> {
         try {
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
             const adminCredential = await serviceInstance.getAdminCredential();
             if (adminCredential) {
                 this.setStatus(HTTP_CODES.OK)
@@ -114,21 +128,21 @@ export class AuthController extends Controller {
             this.setStatus(HTTP_CODES.NOT_FOUND)
             return { message: "No admin registered" };
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR)
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Put("/update_data")
-    public async syncDataToAdmin(): Promise<{ message: string }> {
+    public async syncDataToAdmin(@Request() req: express.Request,): Promise<{ message: string }> {
         try {
             const resp = await serviceInstance.sendDataToAdmin(true);
             this.setStatus(HTTP_CODES.OK)
             return { message: "updated" };
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR)
-            return { message: error.message }
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
         }
     }
 

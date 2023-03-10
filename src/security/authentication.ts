@@ -23,10 +23,11 @@
  */
 
 import * as express from "express";
-import { APP_PROFILE_TYPE, SECURITY_MESSAGES, SECURITY_NAME } from "../constant";
+import { APP_PROFILE_TYPE, SECURITY_MESSAGES, SECURITY_NAME, USER_TYPES } from "../constant";
 import { AppProfileService, TokenService, UserProfileService } from "../services";
 import { profileHasAccessToApi, getToken } from "./utils";
 import { AuthError } from "./AuthError";
+import { AdminProfileService } from "../services/adminProfile.service";
 
 
 export async function expressAuthentication(request: express.Request, securityName: string, scopes?: string[]): Promise<any> {
@@ -42,7 +43,6 @@ export async function expressAuthentication(request: express.Request, securityNa
     const tokenInfo: any = await tokenInstance.tokenIsValid(token);
     if (!tokenInfo) throw new AuthError(SECURITY_MESSAGES.INVALID_TOKEN);
     //end of token validity checking
-
 
     // get profile Node
     let profileId = tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId || tokenInfo.profile.appProfileBosConfigId;
@@ -67,3 +67,29 @@ export async function expressAuthentication(request: express.Request, securityNa
 }
 
 
+export async function checkIfItIsAdmin(request: express.Request): Promise<boolean> {
+    const token = getToken(request);
+    if (!token) throw new AuthError(SECURITY_MESSAGES.INVALID_TOKEN);
+
+    const tokenInstance = TokenService.getInstance();
+
+    const tokenInfo: any = await tokenInstance.tokenIsValid(token);
+    if (!tokenInfo) throw new AuthError(SECURITY_MESSAGES.INVALID_TOKEN);
+
+    // get profile Node
+    let profileId = tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId || tokenInfo.profile.appProfileBosConfigId;
+    if (!profileId) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
+    return AdminProfileService.getInstance().adminNode.getId().get() === profileId;
+}
+
+
+export async function getProfileId(request: express.Request): Promise<string> {
+    const token = getToken(request);
+    if (!token) throw new AuthError(SECURITY_MESSAGES.INVALID_TOKEN);
+
+    const profileId = await TokenService.getInstance().getProfileIdByToken(token);
+    if (!profileId) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
+    return profileId;
+}

@@ -62,7 +62,7 @@ class AppListService {
             return axios_1.default.post(url, application).then((result) => __awaiter(this, void 0, void 0, function* () {
                 const data = result.data;
                 data.profile = yield this._getProfileInfo(data.token, adminCredential);
-                data.userInfo = yield this._getApplicationInfo(data.userId, adminCredential, data.token);
+                data.userInfo = yield this._getApplicationInfo(data.applicationId, adminCredential, data.token);
                 const type = constant_1.USER_TYPES.APP;
                 const info = { clientId: application.clientId, type, userType: type };
                 const node = yield this._addUserToContext(info);
@@ -118,7 +118,7 @@ class AppListService {
                 "x-access-token": userToken
             },
         };
-        return axios_1.default.get(`${adminCredential.urlAdmin}/application/${applicationId}`, config).then((result) => {
+        return axios_1.default.get(`${adminCredential.urlAdmin}/applications/${applicationId}`, config).then((result) => {
             return result.data;
         }).catch((err) => {
             console.error(err);

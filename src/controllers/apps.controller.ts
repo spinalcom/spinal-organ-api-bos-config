@@ -22,13 +22,14 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
-import { AppService, AppsType, TokenService, UserListService } from "../services";
+import { AppService, AppsType, TokenService, UserListService, UserProfileService } from "../services";
 import { Body, Controller, Delete, Get, Path, Post, Put, Route, Security, Tags, UploadedFile, Request } from "tsoa";
 import { HTTP_CODES, SECURITY_MESSAGES, SECURITY_NAME } from "../constant";
-import { IApp, IEditApp } from "../interfaces";
+import { IApp } from "../interfaces";
 import * as express from "express";
 import { getToken } from "../security/utils";
 import { AuthError } from "../security/AuthError";
+import { checkIfItIsAdmin, getProfileId } from "../security/authentication";
 
 const appServiceInstance = AppService.getInstance();
 
@@ -40,10 +41,13 @@ export class AppsController extends Controller {
         super();
     }
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Post("/create_admin_app")
-    public async createAdminApp(@Body() appInfo: IApp): Promise<IApp | { message: string }> {
+    public async createAdminApp(@Request() req: express.Request, @Body() appInfo: IApp): Promise<IApp | { message: string }> {
         try {
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
             const node = await appServiceInstance.createAdminApp(appInfo);
             if (node) {
                 this.setStatus(HTTP_CODES.CREATED);
@@ -52,15 +56,18 @@ export class AppsController extends Controller {
             this.setStatus(HTTP_CODES.BAD_REQUEST);
             return { message: "oops, something went wrong, please check your input data" };
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Post("/create_building_app")
-    public async createBuildingApp(@Body() appInfo: IApp): Promise<IApp | { message: string }> {
+    public async createBuildingApp(@Request() req: express.Request, @Body() appInfo: IApp): Promise<IApp | { message: string }> {
         try {
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
             const node = await appServiceInstance.createBuildingApp(appInfo);
             if (node) {
                 this.setStatus(HTTP_CODES.CREATED);
@@ -69,44 +76,54 @@ export class AppsController extends Controller {
             this.setStatus(HTTP_CODES.BAD_REQUEST);
             return { message: "oops, something went wrong, please check your input data" };
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Get("/get_all_admin_apps")
-    public async getAllAdminApps(): Promise<IApp[] | { message: string }> {
+    public async getAllAdminApps(@Request() req: express.Request,): Promise<IApp[] | { message: string }> {
         try {
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
             const nodes = await appServiceInstance.getAllAdminApps();
             this.setStatus(HTTP_CODES.OK);
             return nodes.map(el => el.info.get());
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Get("/get_all_building_apps")
-    public async getAllBuildingApps(): Promise<IApp[] | { message: string }> {
+    public async getAllBuildingApps(@Request() req: express.Request,): Promise<IApp[] | { message: string }> {
         try {
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
             const nodes = await appServiceInstance.getAllBuildingApps();
             this.setStatus(HTTP_CODES.OK);
             return nodes.map(el => el.info.get());
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Get("/get_admin_app/{appId}")
-    public async getAdminApp(@Path() appId: string): Promise<IApp | { message: string }> {
+    public async getAdminApp(@Request() req: express.Request, @Path() appId: string): Promise<IApp | { message: string }> {
         try {
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
+
             const node = await appServiceInstance.getAdminApp(appId);
             if (node) {
                 this.setStatus(HTTP_CODES.OK);
@@ -117,17 +134,23 @@ export class AppsController extends Controller {
             return { message: `No application found for this id (${appId})` };
 
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
 
-    @Security(SECURITY_NAME.profile)
+    // @Security(SECURITY_NAME.profile)
     @Get("/get_building_app/{appId}")
-    public async getBuildingApp(@Path() appId: string): Promise<IApp | { message: string }> {
+    public async getBuildingApp(@Request() req: express.Request, @Path() appId: string): Promise<IApp | { message: string }> {
         try {
-            const node = await appServiceInstance.getBuildingApp(appId);
+            const profileId = await getProfileId(req);
+            const node = await UserProfileService.getInstance().profileHasAccessToApp(profileId, appId);
+
+            if (!node) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
+            // const node = await appServiceInstance.getBuildingApp(appId);
+
             if (node) {
                 this.setStatus(HTTP_CODES.OK);
                 return node.info.get();
@@ -137,16 +160,19 @@ export class AppsController extends Controller {
             return { message: `No application found for this id (${appId})` };
 
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Put("/update_admin_app/{appId}")
-    public async updateAdminApp(@Path() appId: string, @Body() newInfo: IEditApp): Promise<IApp | { message: string }> {
+    public async updateAdminApp(@Request() req: express.Request, @Path() appId: string, @Body() newInfo: IApp): Promise<IApp | { message: string }> {
         try {
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
             const node = await appServiceInstance.updateAdminApp(appId, newInfo);
             if (node) {
                 this.setStatus(HTTP_CODES.OK);
@@ -157,15 +183,18 @@ export class AppsController extends Controller {
             return { message: `Something went wrong, please check your input data.` }
 
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Put("/update_building_app/{appId}")
-    public async updateBuildingApp(@Path() appId: string, @Body() newInfo: IEditApp): Promise<IApp | { message: string }> {
+    public async updateBuildingApp(@Request() req: express.Request, @Path() appId: string, @Body() newInfo: IApp): Promise<IApp | { message: string }> {
         try {
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
             const node = await appServiceInstance.updateBuildingApp(appId, newInfo);
             if (node) {
                 this.setStatus(HTTP_CODES.OK);
@@ -176,47 +205,61 @@ export class AppsController extends Controller {
             return { message: `Something went wrong, please check your input data.` }
 
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Delete("/delete_admin_app/{appId}")
-    public async deleteAdminApp(@Path() appId: string): Promise<{ message: string }> {
+    public async deleteAdminApp(@Request() req: express.Request, @Path() appId: string): Promise<{ message: string }> {
         try {
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
+
             const isDeleted = await appServiceInstance.deleteAdminApp(appId);
             const status = isDeleted ? HTTP_CODES.OK : HTTP_CODES.BAD_REQUEST;
             const message = isDeleted ? `${appId} is deleted with success` : "something went wrong, please check your input data";
             this.setStatus(status);
             return { message };
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Delete("/delete_building_app/{appId}")
-    public async deleteBuildingApp(@Path() appId: string): Promise<{ message: string }> {
+    public async deleteBuildingApp(@Request() req: express.Request, @Path() appId: string): Promise<{ message: string }> {
         try {
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
+
             const isDeleted = await appServiceInstance.deleteBuildingApp(appId);
             const status = isDeleted ? HTTP_CODES.OK : HTTP_CODES.BAD_REQUEST;
             const message = isDeleted ? `${appId} is deleted with success` : "something went wrong, please check your input data";
             this.setStatus(status);
             return { message };
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Post("/upload_admin_apps")
-    public async uploadAdminApp(@UploadedFile() file): Promise<IApp[] | { message: string }> {
+    public async uploadAdminApp(@Request() req: express.Request, @UploadedFile() file): Promise<IApp[] | { message: string }> {
         try {
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
+
             if (!file) {
                 this.setStatus(HTTP_CODES.BAD_REQUEST);
                 return { message: "No file uploaded" }
@@ -239,15 +282,18 @@ export class AppsController extends Controller {
             this.setStatus(HTTP_CODES.BAD_REQUEST);
             return { message: "oops, something went wrong, please check your input data" };
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Post("/upload_building_apps")
-    public async uploadBuildingApp(@UploadedFile() file): Promise<IApp[] | { message: string }> {
+    public async uploadBuildingApp(@Request() req: express.Request, @UploadedFile() file): Promise<IApp[] | { message: string }> {
         try {
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
             if (!file) {
                 this.setStatus(HTTP_CODES.BAD_REQUEST);
                 return { message: "No file uploaded" }
@@ -269,14 +315,14 @@ export class AppsController extends Controller {
             this.setStatus(HTTP_CODES.BAD_REQUEST);
             return { message: "oops, something went wrong, please check your input data" };
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
 
 
-    @Security(SECURITY_NAME.profile)
+    // @Security(SECURITY_NAME.profile)
     @Get("/get_favorite_apps")
     public async getFavoriteApps(@Request() request: express.Request) {
         try {
@@ -297,7 +343,7 @@ export class AppsController extends Controller {
         }
     }
 
-    @Security(SECURITY_NAME.profile)
+    // @Security(SECURITY_NAME.profile)
     @Post("/add_app_to_favoris")
     public async addAppToFavoris(@Request() request: express.Request, @Body() data: { appIds: string[] }) {
         try {
@@ -319,7 +365,7 @@ export class AppsController extends Controller {
         }
     }
 
-    @Security(SECURITY_NAME.profile)
+    // @Security(SECURITY_NAME.profile)
     @Post("/remove_app_from_favoris")
     public async removeAppFromFavoris(@Request() request: express.Request, @Body() data: { appIds: string[] }) {
         try {

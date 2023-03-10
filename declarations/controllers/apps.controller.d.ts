@@ -1,5 +1,5 @@
 import { Controller } from "tsoa";
-import { IApp, IEditApp } from "../interfaces";
+import { IApp } from "../interfaces";
 import * as express from "express";
 export declare class AppsController extends Controller {
     constructor();
@@ -21,10 +21,10 @@ export declare class AppsController extends Controller {
     getBuildingApp(appId: string): Promise<IApp | {
         message: string;
     }>;
-    updateAdminApp(appId: string, newInfo: IEditApp): Promise<IApp | {
+    updateAdminApp(appId: string, newInfo: IApp): Promise<IApp | {
         message: string;
     }>;
-    updateBuildingApp(appId: string, newInfo: IEditApp): Promise<IApp | {
+    updateBuildingApp(appId: string, newInfo: IApp): Promise<IApp | {
         message: string;
     }>;
     deleteAdminApp(appId: string): Promise<{

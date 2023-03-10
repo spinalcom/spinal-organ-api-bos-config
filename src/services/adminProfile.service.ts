@@ -37,12 +37,17 @@ export class AdminProfileService {
 
     private constructor() { }
 
+
     public static getInstance(): AdminProfileService {
         if (!this.instance) {
             this.instance = new AdminProfileService();
         }
 
         return this.instance;
+    }
+
+    public get adminNode() {
+        return this._adminNode;
     }
 
     public async init(context: SpinalContext): Promise<SpinalNode> {

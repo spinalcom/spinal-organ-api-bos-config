@@ -71,7 +71,7 @@ export function useClientMiddleWare(app: express.Express) {
     app.use(express.static(root));
 
     app.get("/", (req, res) => {
-        res.redirect("/admin_docs");
+        res.redirect("/spinalcom-api-docs");
     })
 }
 
@@ -98,11 +98,6 @@ export function useApiMiddleWare(app: express.Express) {
     app.use(cors({ origin: '*' }));
 
     const bodyParserTicket = bodyParser.json({ limit: '500mb' });
-
-    // app.use((req, res, next) => {
-    //     res.set('Cache-Control', 'no-store')
-    //     next()
-    // })
 
     app.use((req, res, next) => {
         if (req.originalUrl === '/api/v1/node/convert_base_64' || req.originalUrl === '/api/v1/ticket/create_ticket')
@@ -162,6 +157,6 @@ function isAdminRoute(apiRoute: string): boolean {
     return adminRoutes.some(api => {
         const routeFormatted = api.replace(/\{(.*?)\}/g, (el) => '(.*?)');
         const regex = new RegExp(`^${routeFormatted}$`);
-        return apiRoute.match(regex);
+        return route.match(regex);
     })
 }

@@ -92,10 +92,15 @@ class APIService {
     getApiRouteByRoute(apiRoute) {
         return __awaiter(this, void 0, void 0, function* () {
             const children = yield this.context.getChildrenInContext(this.context);
+            if (apiRoute.route.includes("?"))
+                apiRoute.route = apiRoute.route.substring(0, apiRoute.route.indexOf('?'));
             return children.find(el => {
                 const { route, method } = el.info.get();
-                if (route && method)
-                    return route.toLowerCase() === apiRoute.route.toLowerCase() && method.toLowerCase() === apiRoute.method.toLowerCase();
+                if (route && method && method.toLowerCase() === apiRoute.method.toLowerCase()) {
+                    const routeFormatted = this._formatRoute(route);
+                    // return routeFormatted.toLowerCase() === apiRoute.route.toLowerCase() || apiRoute.route.match(routeFormatted);
+                    return apiRoute.route.match(routeFormatted);
+                }
                 return false;
             });
         });
@@ -178,6 +183,12 @@ class APIService {
     }
     _readBuffer(buffer) {
         return JSON.parse(buffer.toString());
+    }
+    _formatRoute(route) {
+        if (route.includes("?"))
+            route = route.substring(0, route.indexOf('?'));
+        const routeFormatted = route.replace(/\{(.*?)\}/g, (el) => '(.*?)');
+        return new RegExp(`^${routeFormatted}$`);
     }
 }
 exports.APIService = APIService;

@@ -67,6 +67,7 @@ let AuthController = class AuthController extends tsoa_1.Controller {
             }
         });
     }
+    // @Security(SECURITY_NAME.admin)
     registerToAdmin(data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -81,6 +82,7 @@ let AuthController = class AuthController extends tsoa_1.Controller {
             }
         });
     }
+    // @Security(SECURITY_NAME.admin)
     getBosToAdminCredential() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -98,6 +100,7 @@ let AuthController = class AuthController extends tsoa_1.Controller {
             }
         });
     }
+    // @Security(SECURITY_NAME.admin)
     deleteAdmin() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -113,6 +116,7 @@ let AuthController = class AuthController extends tsoa_1.Controller {
             }
         });
     }
+    // @Security(SECURITY_NAME.admin)
     getAdminCredential() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -130,6 +134,7 @@ let AuthController = class AuthController extends tsoa_1.Controller {
             }
         });
     }
+    // @Security(SECURITY_NAME.admin)
     syncDataToAdmin() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -173,7 +178,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "authenticate", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Post)("/register_admin"),
     __param(0, (0, tsoa_1.Body)()),
     __metadata("design:type", Function),
@@ -181,28 +185,24 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "registerToAdmin", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Get)("/get_bos_to_auth_credential"),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "getBosToAdminCredential", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Delete)("/delete_admin"),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "deleteAdmin", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Get)("/get_admin_to_bos_credential"),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "getAdminCredential", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Put)("/update_data"),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),

@@ -23,8 +23,11 @@
  */
 
 import { DigitalTwinService } from "../services";
-import { HTTP_CODES, SECURITY_NAME } from "../constant";
-import { Body, Controller, Delete, Get, Path, Post, Put, Query, Route, Security, Tags } from "tsoa";
+import { HTTP_CODES, SECURITY_MESSAGES, SECURITY_NAME } from "../constant";
+import { Body, Controller, Delete, Get, Path, Post, Put, Query, Request, Route, Security, Tags } from "tsoa";
+import * as express from 'express';
+import { checkIfItIsAdmin } from "../security/authentication";
+import { AuthError } from "../security/AuthError";
 
 const serviceInstance = DigitalTwinService.getInstance();
 
@@ -36,10 +39,13 @@ export class DigitaltwinController extends Controller {
         super();
     }
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Post("/add_digitaltwin")
-    public async addDigitalTwin(@Body() data: { name: string; url: string }, @Query() set_as_actual_digitaltwin?: boolean) {
+    public async addDigitalTwin(@Request() req: express.Request, @Body() data: { name: string; url: string }, @Query() set_as_actual_digitaltwin?: boolean) {
         try {
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
 
             if (!data.name || !data.name.trim()) {
                 this.setStatus(HTTP_CODES.BAD_REQUEST);
@@ -57,28 +63,34 @@ export class DigitaltwinController extends Controller {
             }
 
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Get("/get_all_digitaltwins")
-    public async getAllDigitalTwins() {
+    public async getAllDigitalTwins(@Request() req: express.Request,) {
         try {
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
             const digitalTwins = await serviceInstance.getAllDigitalTwins();
             this.setStatus(HTTP_CODES.OK);
             return digitalTwins.map(el => el.info.get());
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Get("/get_digitaltwin/{digitaltwinId}")
-    public async getDigitalTwin(@Path() digitaltwinId: string) {
+    public async getDigitalTwin(@Request() req: express.Request, @Path() digitaltwinId: string) {
         try {
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
             const digitaltwin = await serviceInstance.getDigitalTwin(digitaltwinId);
             if (digitaltwin) {
                 this.setStatus(HTTP_CODES.OK)
@@ -88,15 +100,18 @@ export class DigitaltwinController extends Controller {
             this.setStatus(HTTP_CODES.NOT_FOUND);
             return { message: `No digitalTwin found for ${digitaltwinId}` }
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Put("/set_as_actual_digitaltwin/{digitaltwinId}")
-    public async setActualDigitalTwin(@Path() digitaltwinId: string) {
+    public async setActualDigitalTwin(@Request() req: express.Request, @Path() digitaltwinId: string) {
         try {
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
             const node = await serviceInstance.setActualDigitalTwin(digitaltwinId);
             if (node) {
                 this.setStatus(HTTP_CODES.OK)
@@ -106,15 +121,18 @@ export class DigitaltwinController extends Controller {
             this.setStatus(HTTP_CODES.NOT_FOUND);
             return { message: `No digitalTwin found for ${digitaltwinId}` }
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Get("/get_actual_digitaltwin")
-    public async getActualDigitalTwin() {
+    public async getActualDigitalTwin(@Request() req: express.Request,) {
         try {
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
             const node = await serviceInstance.getActualDigitalTwin();
             if (node) {
                 this.setStatus(HTTP_CODES.OK)
@@ -124,42 +142,51 @@ export class DigitaltwinController extends Controller {
             this.setStatus(HTTP_CODES.NOT_FOUND);
             return { message: `No digitaltwin is set up` }
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Get("/get_digitaltwin_contexts")
-    public async getDefaultDigitalTwinContexts() {
+    public async getDefaultDigitalTwinContexts(@Request() req: express.Request,) {
         try {
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
             const contexts = await serviceInstance.getDigitalTwinContexts();
             this.setStatus(HTTP_CODES.OK)
             return contexts.map(el => el.info.get());
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Get("/get_digitaltwin_contexts/{digitaltwinId}")
-    public async getDigitalTwinContexts(@Path() digitaltwinId: string) {
+    public async getDigitalTwinContexts(@Request() req: express.Request, @Path() digitaltwinId: string) {
         try {
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
             const contexts = await serviceInstance.getDigitalTwinContexts(digitaltwinId);
             this.setStatus(HTTP_CODES.OK)
             return contexts.map(el => el.info.get());
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Put("/update_digitaltwin/{digitaltwinId}")
-    public async editDigitalTwin(@Path() digitaltwinId: string, @Body() data: { name?: string; url?: string }) {
+    public async editDigitalTwin(@Request() req: express.Request, @Path() digitaltwinId: string, @Body() data: { name?: string; url?: string }) {
         try {
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
             const node = await serviceInstance.editDigitalTwin(digitaltwinId, data);
             if (node) {
                 this.setStatus(HTTP_CODES.OK);
@@ -170,15 +197,18 @@ export class DigitaltwinController extends Controller {
             return { message: `No digitaltwin found for ${digitaltwinId}` }
 
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Delete("/delete_digitaltwin/{digitaltwinId}")
-    public async removeDigitalTwin(@Path() digitaltwinId: string) {
+    public async removeDigitalTwin(@Request() req: express.Request, @Path() digitaltwinId: string) {
         try {
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
             const deleted = await serviceInstance.removeDigitalTwin(digitaltwinId);
             if (deleted) {
                 this.setStatus(HTTP_CODES.OK);
@@ -188,30 +218,29 @@ export class DigitaltwinController extends Controller {
             this.setStatus(HTTP_CODES.BAD_REQUEST);
             return { message: `sommething went wrong, please check digitaltwin id` };
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }
 
-    @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.admin)
     @Delete("/delete_actual_digitaltwin")
-    public async removeActualDigitaTwin() {
+    public async removeActualDigitaTwin(@Request() req: express.Request,) {
         try {
-            try {
-                const deleted = await serviceInstance.removeActualDigitaTwin();
-                if (deleted) {
-                    this.setStatus(HTTP_CODES.OK);
-                    return { message: `actual digitaltwin deleted with success` }
-                }
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
-                this.setStatus(HTTP_CODES.BAD_REQUEST);
-                return { message: `sommething went wrong, please check if default digitaltwin is set up` };
-            } catch (error) {
-                this.setStatus(HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
+            const deleted = await serviceInstance.removeActualDigitaTwin();
+            if (deleted) {
+                this.setStatus(HTTP_CODES.OK);
+                return { message: `actual digitaltwin deleted with success` }
             }
+
+            this.setStatus(HTTP_CODES.BAD_REQUEST);
+            return { message: `sommething went wrong, please check if default digitaltwin is set up` };
+
         } catch (error) {
-            this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
     }

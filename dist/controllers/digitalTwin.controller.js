@@ -53,6 +53,7 @@ let DigitaltwinController = class DigitaltwinController extends tsoa_1.Controlle
     constructor() {
         super();
     }
+    // @Security(SECURITY_NAME.admin)
     addDigitalTwin(data, set_as_actual_digitaltwin) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -76,6 +77,7 @@ let DigitaltwinController = class DigitaltwinController extends tsoa_1.Controlle
             }
         });
     }
+    // @Security(SECURITY_NAME.admin)
     getAllDigitalTwins() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -89,6 +91,7 @@ let DigitaltwinController = class DigitaltwinController extends tsoa_1.Controlle
             }
         });
     }
+    // @Security(SECURITY_NAME.admin)
     getDigitalTwin(digitaltwinId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -106,6 +109,7 @@ let DigitaltwinController = class DigitaltwinController extends tsoa_1.Controlle
             }
         });
     }
+    // @Security(SECURITY_NAME.admin)
     setActualDigitalTwin(digitaltwinId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -123,6 +127,7 @@ let DigitaltwinController = class DigitaltwinController extends tsoa_1.Controlle
             }
         });
     }
+    // @Security(SECURITY_NAME.admin)
     getActualDigitalTwin() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -140,6 +145,7 @@ let DigitaltwinController = class DigitaltwinController extends tsoa_1.Controlle
             }
         });
     }
+    // @Security(SECURITY_NAME.admin)
     getDefaultDigitalTwinContexts() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -153,6 +159,7 @@ let DigitaltwinController = class DigitaltwinController extends tsoa_1.Controlle
             }
         });
     }
+    // @Security(SECURITY_NAME.admin)
     getDigitalTwinContexts(digitaltwinId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -166,6 +173,7 @@ let DigitaltwinController = class DigitaltwinController extends tsoa_1.Controlle
             }
         });
     }
+    // @Security(SECURITY_NAME.admin)
     editDigitalTwin(digitaltwinId, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -183,6 +191,7 @@ let DigitaltwinController = class DigitaltwinController extends tsoa_1.Controlle
             }
         });
     }
+    // @Security(SECURITY_NAME.admin)
     removeDigitalTwin(digitaltwinId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -200,6 +209,7 @@ let DigitaltwinController = class DigitaltwinController extends tsoa_1.Controlle
             }
         });
     }
+    // @Security(SECURITY_NAME.admin)
     removeActualDigitaTwin() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -225,7 +235,6 @@ let DigitaltwinController = class DigitaltwinController extends tsoa_1.Controlle
     }
 };
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Post)("/add_digitaltwin"),
     __param(0, (0, tsoa_1.Body)()),
     __param(1, (0, tsoa_1.Query)()),
@@ -234,14 +243,12 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], DigitaltwinController.prototype, "addDigitalTwin", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Get)("/get_all_digitaltwins"),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], DigitaltwinController.prototype, "getAllDigitalTwins", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Get)("/get_digitaltwin/{digitaltwinId}"),
     __param(0, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
@@ -249,7 +256,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], DigitaltwinController.prototype, "getDigitalTwin", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Put)("/set_as_actual_digitaltwin/{digitaltwinId}"),
     __param(0, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
@@ -257,21 +263,18 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], DigitaltwinController.prototype, "setActualDigitalTwin", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Get)("/get_actual_digitaltwin"),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], DigitaltwinController.prototype, "getActualDigitalTwin", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Get)("/get_digitaltwin_contexts"),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], DigitaltwinController.prototype, "getDefaultDigitalTwinContexts", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Get)("/get_digitaltwin_contexts/{digitaltwinId}"),
     __param(0, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
@@ -279,7 +282,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], DigitaltwinController.prototype, "getDigitalTwinContexts", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Put)("/update_digitaltwin/{digitaltwinId}"),
     __param(0, (0, tsoa_1.Path)()),
     __param(1, (0, tsoa_1.Body)()),
@@ -288,7 +290,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], DigitaltwinController.prototype, "editDigitalTwin", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Delete)("/delete_digitaltwin/{digitaltwinId}"),
     __param(0, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
@@ -296,7 +297,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], DigitaltwinController.prototype, "removeDigitalTwin", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.admin),
     (0, tsoa_1.Delete)("/delete_actual_digitaltwin"),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
