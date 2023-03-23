@@ -49,15 +49,21 @@ const constant_1 = require("../constant");
 const services_1 = require("../services");
 const tsoa_1 = require("tsoa");
 const profileUtils_1 = require("../utils/profileUtils");
+const express = require("express");
+const authentication_1 = require("../security/authentication");
+const AuthError_1 = require("../security/AuthError");
 const serviceInstance = services_1.AppProfileService.getInstance();
 let AppProfileController = class AppProfileController extends tsoa_1.Controller {
     constructor() {
         super();
     }
     // @Security(SECURITY_NAME.admin)
-    createAppProfile(data) {
+    createAppProfile(req, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 if (!data.name) {
                     this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
                     return { message: "The profile name is required" };
@@ -67,14 +73,18 @@ let AppProfileController = class AppProfileController extends tsoa_1.Controller 
                 return (0, profileUtils_1._formatProfile)(profile);
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
-    getAppProfile(id) {
+    // @Security(SECURITY_NAME.admin)
+    getAppProfile(req, id) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const data = yield serviceInstance.getAppProfile(id);
                 if (data) {
                     this.setStatus(constant_1.HTTP_CODES.OK);
@@ -84,29 +94,35 @@ let AppProfileController = class AppProfileController extends tsoa_1.Controller 
                 return { message: `no profile found for ${id}` };
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
     // @Security(SECURITY_NAME.admin)
-    getAllAppProfile() {
+    getAllAppProfile(req) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const nodes = (yield serviceInstance.getAllAppProfile()) || [];
                 this.setStatus(constant_1.HTTP_CODES.OK);
                 return nodes.map(el => (0, profileUtils_1._formatProfile)(el));
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
     // @Security(SECURITY_NAME.admin)
-    updateAppProfile(id, data) {
+    updateAppProfile(req, id, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const node = yield serviceInstance.updateAppProfile(id, data);
                 if (node) {
                     this.setStatus(constant_1.HTTP_CODES.OK);
@@ -116,30 +132,36 @@ let AppProfileController = class AppProfileController extends tsoa_1.Controller 
                 return { message: `no profile found for ${id}` };
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
     // @Security(SECURITY_NAME.admin)
-    deleteAppProfile(id) {
+    deleteAppProfile(req, id) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 yield serviceInstance.deleteAppProfile(id);
                 this.setStatus(constant_1.HTTP_CODES.OK);
                 return { message: "user profile deleted" };
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
     //////////////////////////////////////////////////////////////////////////
     // @Security(SECURITY_NAME.admin)
-    authorizeProfileToAccessContext(profileId, data) {
+    authorizeProfileToAccessContext(req, profileId, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const contexts = yield serviceInstance.authorizeProfileToAccessContext(profileId, data.contextIds, data.digitalTwinId);
                 if (contexts) {
                     this.setStatus(constant_1.HTTP_CODES.OK);
@@ -149,15 +171,18 @@ let AppProfileController = class AppProfileController extends tsoa_1.Controller 
                 return { message: "something went wrong please check your input" };
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
     // @Security(SECURITY_NAME.admin)
-    authorizeProfileToAccessApis(profileId, data) {
+    authorizeProfileToAccessApis(req, profileId, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const apis = yield serviceInstance.authorizeProfileToAccessApis(profileId, data.apiIds);
                 if (apis) {
                     this.setStatus(constant_1.HTTP_CODES.OK);
@@ -167,15 +192,18 @@ let AppProfileController = class AppProfileController extends tsoa_1.Controller 
                 return { message: "something went wrong please check your input" };
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
     // @Security(SECURITY_NAME.admin)
-    unauthorizeProfileToAccessContext(profileId, data) {
+    unauthorizeProfileToAccessContext(req, profileId, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const contexts = yield serviceInstance.unauthorizeProfileToAccessContext(profileId, data.contextIds, data.digitalTwinId);
                 if (contexts) {
                     this.setStatus(constant_1.HTTP_CODES.OK);
@@ -185,15 +213,18 @@ let AppProfileController = class AppProfileController extends tsoa_1.Controller 
                 return { message: "something went wrong please check your input" };
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
     // @Security(SECURITY_NAME.admin)
-    unauthorizeProfileToAccessApis(profileId, data) {
+    unauthorizeProfileToAccessApis(req, profileId, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const apis = yield serviceInstance.unauthorizeProfileToAccessApis(profileId, data.apiIds);
                 if (apis) {
                     this.setStatus(constant_1.HTTP_CODES.OK);
@@ -203,63 +234,77 @@ let AppProfileController = class AppProfileController extends tsoa_1.Controller 
                 return { message: "something went wrong please check your input" };
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
     // @Security(SECURITY_NAME.admin)
-    profileHasAccessToContext(profileId, contextId, digitalTwinId) {
+    profileHasAccessToContext(req, profileId, contextId, digitalTwinId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const hasAccess = yield serviceInstance.profileHasAccessToContext(profileId, contextId, digitalTwinId);
                 this.setStatus(constant_1.HTTP_CODES.OK);
-                return hasAccess;
+                return hasAccess ? true : false;
+                ;
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
     // @Security(SECURITY_NAME.admin)
-    profileHasAccessToApi(profileId, apiId) {
+    profileHasAccessToApi(req, profileId, apiId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const hasAccess = yield serviceInstance.profileHasAccessToApi(profileId, apiId);
                 this.setStatus(constant_1.HTTP_CODES.OK);
-                return hasAccess;
+                return hasAccess ? true : false;
+                ;
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
     // @Security(SECURITY_NAME.admin)
-    getAuthorizedContexts(profileId, digitalTwinId) {
+    getAuthorizedContexts(req, profileId, digitalTwinId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const contexts = yield serviceInstance.getAuthorizedContexts(profileId, digitalTwinId);
                 this.setStatus(constant_1.HTTP_CODES.OK);
                 return (0, profileUtils_1._getNodeListInfo)(contexts);
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
     // @Security(SECURITY_NAME.admin)
-    getAuthorizedApis(profileId) {
+    getAuthorizedApis(req, profileId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const contexts = yield serviceInstance.getAuthorizedApis(profileId);
                 this.setStatus(constant_1.HTTP_CODES.OK);
                 return (0, profileUtils_1._getNodeListInfo)(contexts);
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
@@ -267,102 +312,114 @@ let AppProfileController = class AppProfileController extends tsoa_1.Controller 
 };
 __decorate([
     (0, tsoa_1.Post)("/create_profile"),
-    __param(0, (0, tsoa_1.Body)()),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], AppProfileController.prototype, "createAppProfile", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.profile),
     (0, tsoa_1.Get)("/get_profile/{id}"),
-    __param(0, (0, tsoa_1.Path)()),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], AppProfileController.prototype, "getAppProfile", null);
 __decorate([
     (0, tsoa_1.Get)("/get_all_profile"),
+    __param(0, (0, tsoa_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AppProfileController.prototype, "getAllAppProfile", null);
 __decorate([
     (0, tsoa_1.Put)("/edit_profile/{id}"),
-    __param(0, (0, tsoa_1.Path)()),
-    __param(1, (0, tsoa_1.Body)()),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Path)()),
+    __param(2, (0, tsoa_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", [Object, String, Object]),
     __metadata("design:returntype", Promise)
 ], AppProfileController.prototype, "updateAppProfile", null);
 __decorate([
     (0, tsoa_1.Delete)("/delete_profile/{id}"),
-    __param(0, (0, tsoa_1.Path)()),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], AppProfileController.prototype, "deleteAppProfile", null);
 __decorate([
     (0, tsoa_1.Post)("/authorize_profile_to_access_contexts/{profileId}"),
-    __param(0, (0, tsoa_1.Path)()),
-    __param(1, (0, tsoa_1.Body)()),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Path)()),
+    __param(2, (0, tsoa_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", [Object, String, Object]),
     __metadata("design:returntype", Promise)
 ], AppProfileController.prototype, "authorizeProfileToAccessContext", null);
 __decorate([
     (0, tsoa_1.Post)("/authorize_profile_to_access_apis/{profileId}"),
-    __param(0, (0, tsoa_1.Path)()),
-    __param(1, (0, tsoa_1.Body)()),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Path)()),
+    __param(2, (0, tsoa_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", [Object, String, Object]),
     __metadata("design:returntype", Promise)
 ], AppProfileController.prototype, "authorizeProfileToAccessApis", null);
 __decorate([
     (0, tsoa_1.Post)("/unauthorize_profile_to_access_contexts/{profileId}"),
-    __param(0, (0, tsoa_1.Path)()),
-    __param(1, (0, tsoa_1.Body)()),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Path)()),
+    __param(2, (0, tsoa_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", [Object, String, Object]),
     __metadata("design:returntype", Promise)
 ], AppProfileController.prototype, "unauthorizeProfileToAccessContext", null);
 __decorate([
     (0, tsoa_1.Post)("/unauthorize_profile_to_access_apis/{profileId}"),
-    __param(0, (0, tsoa_1.Path)()),
-    __param(1, (0, tsoa_1.Body)()),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Path)()),
+    __param(2, (0, tsoa_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", [Object, String, Object]),
     __metadata("design:returntype", Promise)
 ], AppProfileController.prototype, "unauthorizeProfileToAccessApis", null);
 __decorate([
     (0, tsoa_1.Get)("/profile_has_access_to_context/{profileId}/{contextId}"),
-    __param(0, (0, tsoa_1.Path)()),
+    __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
-    __param(2, (0, tsoa_1.Query)()),
+    __param(2, (0, tsoa_1.Path)()),
+    __param(3, (0, tsoa_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String]),
+    __metadata("design:paramtypes", [Object, String, String, String]),
     __metadata("design:returntype", Promise)
 ], AppProfileController.prototype, "profileHasAccessToContext", null);
 __decorate([
     (0, tsoa_1.Get)("/profile_has_access_to_api/{profileId}/{apiId}"),
-    __param(0, (0, tsoa_1.Path)()),
+    __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
+    __param(2, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:paramtypes", [Object, String, String]),
     __metadata("design:returntype", Promise)
 ], AppProfileController.prototype, "profileHasAccessToApi", null);
 __decorate([
     (0, tsoa_1.Get)("/get_authorized_contexts/{profileId}"),
-    __param(0, (0, tsoa_1.Path)()),
-    __param(1, (0, tsoa_1.Query)()),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Path)()),
+    __param(2, (0, tsoa_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:paramtypes", [Object, String, String]),
     __metadata("design:returntype", Promise)
 ], AppProfileController.prototype, "getAuthorizedContexts", null);
 __decorate([
     (0, tsoa_1.Get)("/get_authorized_apis/{profileId}"),
-    __param(0, (0, tsoa_1.Path)()),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], AppProfileController.prototype, "getAuthorizedApis", null);
 AppProfileController = __decorate([

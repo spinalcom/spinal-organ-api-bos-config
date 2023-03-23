@@ -153,9 +153,10 @@ export class AppService {
 
     if (appNode) {
       for (const key in newInfo) {
-        if (Object.prototype.hasOwnProperty.call(newInfo, key) && appNode.info[key]) {
+        if (Object.prototype.hasOwnProperty.call(newInfo, key) && appNode.info[key] || key === "documentationLink") {
           const element = newInfo[key];
-          appNode.info[key].set(element);
+          if (appNode.info[key]) appNode.info[key].set(element);
+          else appNode.info.add_attr({ [key]: element });
         }
       }
 
@@ -170,9 +171,10 @@ export class AppService {
 
     if (appNode) {
       for (const key in newInfo) {
-        if (Object.prototype.hasOwnProperty.call(newInfo, key) && appNode.info[key]) {
+        if (Object.prototype.hasOwnProperty.call(newInfo, key) && appNode.info[key] || key === "documentationLink") {
           const element = newInfo[key];
-          appNode.info[key].set(element);
+          if (appNode.info[key]) appNode.info[key].set(element);
+          else appNode.info.add_attr({ [key]: element });
         }
       }
 
@@ -279,7 +281,6 @@ export class AppService {
     const node = new SpinalNode(name, type);
     return this.context.addChildInContext(node, CONTEXT_TO_APPS_GROUP, PTR_LST_TYPE, this.context);
   }
-
 
   private async _convertExcelToJson(excelData: Buffer) {
     const data = await SpinalExcelManager.convertExcelToJson(excelData);

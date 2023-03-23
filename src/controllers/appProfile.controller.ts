@@ -239,13 +239,12 @@ export class AppProfileController extends Controller {
     @Get("/profile_has_access_to_context/{profileId}/{contextId}")
     public async profileHasAccessToContext(@Request() req: express.Request, @Path() profileId: string, @Path() contextId: string, @Query() digitalTwinId?: string) {
         try {
-
             const isAdmin = await checkIfItIsAdmin(req);
             if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
             const hasAccess = await serviceInstance.profileHasAccessToContext(profileId, contextId, digitalTwinId);
             this.setStatus(HTTP_CODES.OK)
-            return hasAccess;
+            return hasAccess ? true : false;;
         } catch (error) {
             this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
@@ -262,7 +261,7 @@ export class AppProfileController extends Controller {
 
             const hasAccess = await serviceInstance.profileHasAccessToApi(profileId, apiId);
             this.setStatus(HTTP_CODES.OK)
-            return hasAccess;
+            return hasAccess ? true : false;;
         } catch (error) {
             this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };

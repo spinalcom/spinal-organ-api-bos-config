@@ -159,9 +159,12 @@ class AppService {
             const appNode = yield this.getAdminApp(appId);
             if (appNode) {
                 for (const key in newInfo) {
-                    if (Object.prototype.hasOwnProperty.call(newInfo, key) && appNode.info[key]) {
+                    if (Object.prototype.hasOwnProperty.call(newInfo, key) && appNode.info[key] || key === "documentationLink") {
                         const element = newInfo[key];
-                        appNode.info[key].set(element);
+                        if (appNode.info[key])
+                            appNode.info[key].set(element);
+                        else
+                            appNode.info.add_attr({ [key]: element });
                     }
                 }
                 return appNode;
@@ -173,9 +176,12 @@ class AppService {
             const appNode = yield this.getBuildingApp(appId);
             if (appNode) {
                 for (const key in newInfo) {
-                    if (Object.prototype.hasOwnProperty.call(newInfo, key) && appNode.info[key]) {
+                    if (Object.prototype.hasOwnProperty.call(newInfo, key) && appNode.info[key] || key === "documentationLink") {
                         const element = newInfo[key];
-                        appNode.info[key].set(element);
+                        if (appNode.info[key])
+                            appNode.info[key].set(element);
+                        else
+                            appNode.info.add_attr({ [key]: element });
                     }
                 }
                 return appNode;

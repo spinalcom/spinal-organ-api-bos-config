@@ -21,9 +21,9 @@ export declare class UserProfileService {
     unauthorizeProfileToAccessContext(userProfile: string | SpinalNode, contextIds: string | string[], digitalTwinId?: string): Promise<SpinalContext[]>;
     unauthorizeProfileToAccessApps(userProfile: string | SpinalNode, appIds: string | string[]): Promise<SpinalNode[]>;
     unauthorizeProfileToAccessApis(userProfile: string | SpinalNode, apiIds: string | string[]): Promise<SpinalNode[]>;
-    profileHasAccessToContext(userProfile: string | SpinalNode, contextId: string, digitalTwinId?: string): Promise<boolean>;
-    profileHasAccessToApp(userProfile: string | SpinalNode, appId: string): Promise<boolean>;
-    profileHasAccessToApi(userProfile: string | SpinalNode, apiId: string): Promise<boolean>;
+    profileHasAccessToContext(userProfile: string | SpinalNode, contextId: string, digitalTwinId?: string): Promise<SpinalNode>;
+    profileHasAccessToApp(userProfile: string | SpinalNode, appId: string): Promise<SpinalNode>;
+    profileHasAccessToApi(userProfile: string | SpinalNode, apiId: string): Promise<SpinalNode>;
     getAuthorizedContexts(userProfile: string | SpinalNode, digitalTwinId?: string): Promise<SpinalContext[]>;
     getAuthorizedApps(userProfile: string | SpinalNode): Promise<SpinalNode[]>;
     getAuthorizedAdminApps(userProfile: string | SpinalNode): Promise<SpinalNode[]>;

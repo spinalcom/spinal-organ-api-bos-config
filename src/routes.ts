@@ -47,6 +47,7 @@ const models: TsoaRoute.Models = {
             "categoryName": {"dataType":"string","required":true},
             "groupName": {"dataType":"string","required":true},
             "hasViewer": {"dataType":"boolean"},
+            "documentationLink": {"dataType":"string"},
             "packageName": {"dataType":"string"},
             "isExternalApp": {"dataType":"boolean"},
             "link": {"dataType":"string"},
@@ -239,6 +240,7 @@ export function RegisterRoutes(app: express.Router) {
 
             function APIController_updateBosApiRoute(request: any, response: any, next: any) {
             const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
                     data: {"in":"body","name":"data","required":true,"ref":"IApiRoute"},
                     id: {"in":"path","name":"id","required":true,"dataType":"string"},
             };
@@ -260,12 +262,12 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/get_bos_api_route/:id',
-            authenticateMiddleware([{"profile":[]}]),
             ...(fetchMiddlewares<RequestHandler>(APIController)),
             ...(fetchMiddlewares<RequestHandler>(APIController.prototype.getBosApiRouteById)),
 
             function APIController_getBosApiRouteById(request: any, response: any, next: any) {
             const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
                     id: {"in":"path","name":"id","required":true,"dataType":"string"},
             };
 
@@ -316,6 +318,7 @@ export function RegisterRoutes(app: express.Router) {
 
             function APIController_deleteBosApiRoute(request: any, response: any, next: any) {
             const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
                     id: {"in":"path","name":"id","required":true,"dataType":"any"},
             };
 
@@ -342,6 +345,7 @@ export function RegisterRoutes(app: express.Router) {
 
             function APIController_uploadBosSwaggerFile(request: any, response: any, next: any) {
             const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
                     file: {"in":"formData","name":"file","required":true,"dataType":"file"},
             };
 
@@ -367,6 +371,7 @@ export function RegisterRoutes(app: express.Router) {
 
             function AppProfileController_createAppProfile(request: any, response: any, next: any) {
             const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
                     data: {"in":"body","name":"data","required":true,"ref":"IProfile"},
             };
 
@@ -387,12 +392,12 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/app_profile/get_profile/:id',
-            authenticateMiddleware([{"profile":[]}]),
             ...(fetchMiddlewares<RequestHandler>(AppProfileController)),
             ...(fetchMiddlewares<RequestHandler>(AppProfileController.prototype.getAppProfile)),
 
             function AppProfileController_getAppProfile(request: any, response: any, next: any) {
             const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
                     id: {"in":"path","name":"id","required":true,"dataType":"string"},
             };
 
@@ -418,6 +423,7 @@ export function RegisterRoutes(app: express.Router) {
 
             function AppProfileController_getAllAppProfile(request: any, response: any, next: any) {
             const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -442,6 +448,7 @@ export function RegisterRoutes(app: express.Router) {
 
             function AppProfileController_updateAppProfile(request: any, response: any, next: any) {
             const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
                     id: {"in":"path","name":"id","required":true,"dataType":"string"},
                     data: {"in":"body","name":"data","required":true,"ref":"IProfileAuthEdit"},
             };
@@ -468,6 +475,7 @@ export function RegisterRoutes(app: express.Router) {
 
             function AppProfileController_deleteAppProfile(request: any, response: any, next: any) {
             const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
                     id: {"in":"path","name":"id","required":true,"dataType":"string"},
             };
 
@@ -493,6 +501,7 @@ export function RegisterRoutes(app: express.Router) {
 
             function AppProfileController_authorizeProfileToAccessContext(request: any, response: any, next: any) {
             const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
                     profileId: {"in":"path","name":"profileId","required":true,"dataType":"string"},
                     data: {"in":"body","name":"data","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"digitalTwinId":{"dataType":"string"},"contextIds":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"array","array":{"dataType":"string"}}],"required":true}}},
             };
@@ -519,6 +528,7 @@ export function RegisterRoutes(app: express.Router) {
 
             function AppProfileController_authorizeProfileToAccessApis(request: any, response: any, next: any) {
             const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
                     profileId: {"in":"path","name":"profileId","required":true,"dataType":"string"},
                     data: {"in":"body","name":"data","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"apiIds":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"array","array":{"dataType":"string"}}],"required":true}}},
             };
@@ -545,6 +555,7 @@ export function RegisterRoutes(app: express.Router) {
 
             function AppProfileController_unauthorizeProfileToAccessContext(request: any, response: any, next: any) {
             const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
                     profileId: {"in":"path","name":"profileId","required":true,"dataType":"string"},
                     data: {"in":"body","name":"data","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"digitalTwinId":{"dataType":"string"},"contextIds":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"array","array":{"dataType":"string"}}],"required":true}}},
             };
@@ -571,6 +582,7 @@ export function RegisterRoutes(app: express.Router) {
 
             function AppProfileController_unauthorizeProfileToAccessApis(request: any, response: any, next: any) {
             const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
                     profileId: {"in":"path","name":"profileId","required":true,"dataType":"string"},
                     data: {"in":"body","name":"data","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"apiIds":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"array","array":{"dataType":"string"}}],"required":true}}},
             };
@@ -597,6 +609,7 @@ export function RegisterRoutes(app: express.Router) {
 
             function AppProfileController_profileHasAccessToContext(request: any, response: any, next: any) {
             const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
                     profileId: {"in":"path","name":"profileId","required":true,"dataType":"string"},
                     contextId: {"in":"path","name":"contextId","required":true,"dataType":"string"},
                     digitalTwinId: {"in":"query","name":"digitalTwinId","dataType":"string"},
@@ -624,6 +637,7 @@ export function RegisterRoutes(app: express.Router) {
 
             function AppProfileController_profileHasAccessToApi(request: any, response: any, next: any) {
             const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
                     profileId: {"in":"path","name":"profileId","required":true,"dataType":"string"},
                     apiId: {"in":"path","name":"apiId","required":true,"dataType":"string"},
             };
@@ -650,6 +664,7 @@ export function RegisterRoutes(app: express.Router) {
 
             function AppProfileController_getAuthorizedContexts(request: any, response: any, next: any) {
             const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
                     profileId: {"in":"path","name":"profileId","required":true,"dataType":"string"},
                     digitalTwinId: {"in":"query","name":"digitalTwinId","dataType":"string"},
             };
@@ -676,6 +691,7 @@ export function RegisterRoutes(app: express.Router) {
 
             function AppProfileController_getAuthorizedApis(request: any, response: any, next: any) {
             const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
                     profileId: {"in":"path","name":"profileId","required":true,"dataType":"string"},
             };
 
@@ -701,6 +717,7 @@ export function RegisterRoutes(app: express.Router) {
 
             function AppsController_createAdminApp(request: any, response: any, next: any) {
             const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
                     appInfo: {"in":"body","name":"appInfo","required":true,"ref":"IApp"},
             };
 
@@ -726,6 +743,7 @@ export function RegisterRoutes(app: express.Router) {
 
             function AppsController_createBuildingApp(request: any, response: any, next: any) {
             const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
                     appInfo: {"in":"body","name":"appInfo","required":true,"ref":"IApp"},
             };
 
@@ -751,6 +769,7 @@ export function RegisterRoutes(app: express.Router) {
 
             function AppsController_getAllAdminApps(request: any, response: any, next: any) {
             const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -775,6 +794,7 @@ export function RegisterRoutes(app: express.Router) {
 
             function AppsController_getAllBuildingApps(request: any, response: any, next: any) {
             const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -799,6 +819,7 @@ export function RegisterRoutes(app: express.Router) {
 
             function AppsController_getAdminApp(request: any, response: any, next: any) {
             const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
                     appId: {"in":"path","name":"appId","required":true,"dataType":"string"},
             };
 
@@ -819,12 +840,12 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/get_building_app/:appId',
-            authenticateMiddleware([{"profile":[]}]),
             ...(fetchMiddlewares<RequestHandler>(AppsController)),
             ...(fetchMiddlewares<RequestHandler>(AppsController.prototype.getBuildingApp)),
 
             function AppsController_getBuildingApp(request: any, response: any, next: any) {
             const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
                     appId: {"in":"path","name":"appId","required":true,"dataType":"string"},
             };
 
@@ -850,6 +871,7 @@ export function RegisterRoutes(app: express.Router) {
 
             function AppsController_updateAdminApp(request: any, response: any, next: any) {
             const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
                     appId: {"in":"path","name":"appId","required":true,"dataType":"string"},
                     newInfo: {"in":"body","name":"newInfo","required":true,"ref":"IApp"},
             };
@@ -876,6 +898,7 @@ export function RegisterRoutes(app: express.Router) {
 
             function AppsController_updateBuildingApp(request: any, response: any, next: any) {
             const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
                     appId: {"in":"path","name":"appId","required":true,"dataType":"string"},
                     newInfo: {"in":"body","name":"newInfo","required":true,"ref":"IApp"},
             };
@@ -902,6 +925,7 @@ export function RegisterRoutes(app: express.Router) {
 
             function AppsController_deleteAdminApp(request: any, response: any, next: any) {
             const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
                     appId: {"in":"path","name":"appId","required":true,"dataType":"string"},
             };
 
@@ -927,6 +951,7 @@ export function RegisterRoutes(app: express.Router) {
 
             function AppsController_deleteBuildingApp(request: any, response: any, next: any) {
             const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
                     appId: {"in":"path","name":"appId","required":true,"dataType":"string"},
             };
 
@@ -953,6 +978,7 @@ export function RegisterRoutes(app: express.Router) {
 
             function AppsController_uploadAdminApp(request: any, response: any, next: any) {
             const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
                     file: {"in":"formData","name":"file","required":true,"dataType":"file"},
             };
 
@@ -979,6 +1005,7 @@ export function RegisterRoutes(app: express.Router) {
 
             function AppsController_uploadBuildingApp(request: any, response: any, next: any) {
             const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
                     file: {"in":"formData","name":"file","required":true,"dataType":"file"},
             };
 
@@ -999,7 +1026,6 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/get_favorite_apps',
-            authenticateMiddleware([{"profile":[]}]),
             ...(fetchMiddlewares<RequestHandler>(AppsController)),
             ...(fetchMiddlewares<RequestHandler>(AppsController.prototype.getFavoriteApps)),
 
@@ -1025,7 +1051,6 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/api/v1/add_app_to_favoris',
-            authenticateMiddleware([{"profile":[]}]),
             ...(fetchMiddlewares<RequestHandler>(AppsController)),
             ...(fetchMiddlewares<RequestHandler>(AppsController.prototype.addAppToFavoris)),
 
@@ -1052,7 +1077,6 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/api/v1/remove_app_from_favoris',
-            authenticateMiddleware([{"profile":[]}]),
             ...(fetchMiddlewares<RequestHandler>(AppsController)),
             ...(fetchMiddlewares<RequestHandler>(AppsController.prototype.removeAppFromFavoris)),
 
@@ -1110,6 +1134,7 @@ export function RegisterRoutes(app: express.Router) {
 
             function AuthController_registerToAdmin(request: any, response: any, next: any) {
             const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
                     data: {"in":"body","name":"data","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"adminInfo":{"ref":"IAdmin","required":true},"pamInfo":{"ref":"IPamInfo","required":true}}},
             };
 
@@ -1135,6 +1160,7 @@ export function RegisterRoutes(app: express.Router) {
 
             function AuthController_getBosToAdminCredential(request: any, response: any, next: any) {
             const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -1159,6 +1185,7 @@ export function RegisterRoutes(app: express.Router) {
 
             function AuthController_deleteAdmin(request: any, response: any, next: any) {
             const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -1183,6 +1210,7 @@ export function RegisterRoutes(app: express.Router) {
 
             function AuthController_getAdminCredential(request: any, response: any, next: any) {
             const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -1207,6 +1235,7 @@ export function RegisterRoutes(app: express.Router) {
 
             function AuthController_syncDataToAdmin(request: any, response: any, next: any) {
             const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -1257,6 +1286,7 @@ export function RegisterRoutes(app: express.Router) {
 
             function DigitaltwinController_addDigitalTwin(request: any, response: any, next: any) {
             const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
                     data: {"in":"body","name":"data","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"url":{"dataType":"string","required":true},"name":{"dataType":"string","required":true}}},
                     set_as_actual_digitaltwin: {"in":"query","name":"set_as_actual_digitaltwin","dataType":"boolean"},
             };
@@ -1283,6 +1313,7 @@ export function RegisterRoutes(app: express.Router) {
 
             function DigitaltwinController_getAllDigitalTwins(request: any, response: any, next: any) {
             const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -1307,6 +1338,7 @@ export function RegisterRoutes(app: express.Router) {
 
             function DigitaltwinController_getDigitalTwin(request: any, response: any, next: any) {
             const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
                     digitaltwinId: {"in":"path","name":"digitaltwinId","required":true,"dataType":"string"},
             };
 
@@ -1332,6 +1364,7 @@ export function RegisterRoutes(app: express.Router) {
 
             function DigitaltwinController_setActualDigitalTwin(request: any, response: any, next: any) {
             const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
                     digitaltwinId: {"in":"path","name":"digitaltwinId","required":true,"dataType":"string"},
             };
 
@@ -1357,6 +1390,7 @@ export function RegisterRoutes(app: express.Router) {
 
             function DigitaltwinController_getActualDigitalTwin(request: any, response: any, next: any) {
             const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -1381,6 +1415,7 @@ export function RegisterRoutes(app: express.Router) {
 
             function DigitaltwinController_getDefaultDigitalTwinContexts(request: any, response: any, next: any) {
             const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -1405,6 +1440,7 @@ export function RegisterRoutes(app: express.Router) {
 
             function DigitaltwinController_getDigitalTwinContexts(request: any, response: any, next: any) {
             const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
                     digitaltwinId: {"in":"path","name":"digitaltwinId","required":true,"dataType":"string"},
             };
 
@@ -1430,6 +1466,7 @@ export function RegisterRoutes(app: express.Router) {
 
             function DigitaltwinController_editDigitalTwin(request: any, response: any, next: any) {
             const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
                     digitaltwinId: {"in":"path","name":"digitaltwinId","required":true,"dataType":"string"},
                     data: {"in":"body","name":"data","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"url":{"dataType":"string"},"name":{"dataType":"string"}}},
             };
@@ -1456,6 +1493,7 @@ export function RegisterRoutes(app: express.Router) {
 
             function DigitaltwinController_removeDigitalTwin(request: any, response: any, next: any) {
             const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
                     digitaltwinId: {"in":"path","name":"digitaltwinId","required":true,"dataType":"string"},
             };
 
@@ -1481,6 +1519,7 @@ export function RegisterRoutes(app: express.Router) {
 
             function DigitaltwinController_removeActualDigitaTwin(request: any, response: any, next: any) {
             const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -1505,6 +1544,7 @@ export function RegisterRoutes(app: express.Router) {
 
             function UserProfileController_createUserProfile(request: any, response: any, next: any) {
             const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
                     data: {"in":"body","name":"data","required":true,"ref":"IProfile"},
             };
 
@@ -1525,12 +1565,12 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/user_profile/get_profile/:id',
-            authenticateMiddleware([{"profile":[]}]),
             ...(fetchMiddlewares<RequestHandler>(UserProfileController)),
             ...(fetchMiddlewares<RequestHandler>(UserProfileController.prototype.getUserProfile)),
 
             function UserProfileController_getUserProfile(request: any, response: any, next: any) {
             const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
                     id: {"in":"path","name":"id","required":true,"dataType":"string"},
             };
 
@@ -1550,12 +1590,38 @@ export function RegisterRoutes(app: express.Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.get('/api/v1/user_profile/get_profile',
+            ...(fetchMiddlewares<RequestHandler>(UserProfileController)),
+            ...(fetchMiddlewares<RequestHandler>(UserProfileController.prototype.getUserProfileByToken)),
+
+            function UserProfileController_getUserProfileByToken(request: any, response: any, next: any) {
+            const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+
+                const controller = new UserProfileController();
+
+
+              const promise = controller.getUserProfileByToken.apply(controller, validatedArgs as any);
+              promiseHandler(controller, promise, response, undefined, next);
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/user_profile/get_all_profile',
             ...(fetchMiddlewares<RequestHandler>(UserProfileController)),
             ...(fetchMiddlewares<RequestHandler>(UserProfileController.prototype.getAllUserProfile)),
 
             function UserProfileController_getAllUserProfile(request: any, response: any, next: any) {
             const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -1580,6 +1646,7 @@ export function RegisterRoutes(app: express.Router) {
 
             function UserProfileController_updateUserProfile(request: any, response: any, next: any) {
             const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
                     id: {"in":"path","name":"id","required":true,"dataType":"string"},
                     data: {"in":"body","name":"data","required":true,"ref":"IProfileAuthEdit"},
             };
@@ -1606,6 +1673,7 @@ export function RegisterRoutes(app: express.Router) {
 
             function UserProfileController_deleteUserProfile(request: any, response: any, next: any) {
             const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
                     id: {"in":"path","name":"id","required":true,"dataType":"string"},
             };
 
@@ -1631,6 +1699,7 @@ export function RegisterRoutes(app: express.Router) {
 
             function UserProfileController_getAuthorizedContexts(request: any, response: any, next: any) {
             const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
                     profileId: {"in":"path","name":"profileId","required":true,"dataType":"string"},
                     digitalTwinId: {"in":"query","name":"digitalTwinId","dataType":"string"},
             };
@@ -1657,6 +1726,7 @@ export function RegisterRoutes(app: express.Router) {
 
             function UserProfileController_getAuthorizedApps(request: any, response: any, next: any) {
             const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
                     profileId: {"in":"path","name":"profileId","required":true,"dataType":"string"},
             };
 
@@ -1682,6 +1752,7 @@ export function RegisterRoutes(app: express.Router) {
 
             function UserProfileController_getAuthorizedAdminApps(request: any, response: any, next: any) {
             const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
                     profileId: {"in":"path","name":"profileId","required":true,"dataType":"string"},
             };
 
@@ -1707,6 +1778,7 @@ export function RegisterRoutes(app: express.Router) {
 
             function UserProfileController_authorizeProfileToAccessContext(request: any, response: any, next: any) {
             const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
                     profileId: {"in":"path","name":"profileId","required":true,"dataType":"string"},
                     data: {"in":"body","name":"data","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"digitalTwinId":{"dataType":"string"},"contextIds":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"array","array":{"dataType":"string"}}],"required":true}}},
             };
@@ -1733,6 +1805,7 @@ export function RegisterRoutes(app: express.Router) {
 
             function UserProfileController_authorizeProfileToAccessApps(request: any, response: any, next: any) {
             const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
                     profileId: {"in":"path","name":"profileId","required":true,"dataType":"string"},
                     data: {"in":"body","name":"data","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"appIds":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"array","array":{"dataType":"string"}}],"required":true}}},
             };
@@ -1759,6 +1832,7 @@ export function RegisterRoutes(app: express.Router) {
 
             function UserProfileController_unauthorizeProfileToAccessContext(request: any, response: any, next: any) {
             const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
                     profileId: {"in":"path","name":"profileId","required":true,"dataType":"string"},
                     data: {"in":"body","name":"data","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"digitalTwinId":{"dataType":"string"},"contextIds":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"array","array":{"dataType":"string"}}],"required":true}}},
             };
@@ -1785,6 +1859,7 @@ export function RegisterRoutes(app: express.Router) {
 
             function UserProfileController_unauthorizeProfileToAccessApps(request: any, response: any, next: any) {
             const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
                     profileId: {"in":"path","name":"profileId","required":true,"dataType":"string"},
                     data: {"in":"body","name":"data","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"appIds":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"array","array":{"dataType":"string"}}],"required":true}}},
             };
@@ -1811,6 +1886,7 @@ export function RegisterRoutes(app: express.Router) {
 
             function UserProfileController_profileHasAccessToContext(request: any, response: any, next: any) {
             const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
                     profileId: {"in":"path","name":"profileId","required":true,"dataType":"string"},
                     contextId: {"in":"path","name":"contextId","required":true,"dataType":"string"},
                     digitalTwinId: {"in":"query","name":"digitalTwinId","dataType":"string"},
@@ -1838,6 +1914,7 @@ export function RegisterRoutes(app: express.Router) {
 
             function UserProfileController_profileHasAccessToApp(request: any, response: any, next: any) {
             const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
                     profileId: {"in":"path","name":"profileId","required":true,"dataType":"string"},
                     appId: {"in":"path","name":"appId","required":true,"dataType":"string"},
             };

@@ -50,7 +50,7 @@ function profileHasAccessToApi(profile, apiUrl, method) {
     return __awaiter(this, void 0, void 0, function* () {
         const api = yield apis_service_1.APIService.getInstance().getApiRouteByRoute({ route: apiUrl, method });
         if (!api)
-            return false;
+            return;
         return appProfile_service_1.AppProfileService.getInstance().profileHasAccessToApi(profile, api.getId().get());
     });
 }

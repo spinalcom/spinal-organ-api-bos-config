@@ -1,30 +1,31 @@
 import { Controller } from "tsoa";
+import * as express from 'express';
 export declare class DigitaltwinController extends Controller {
     constructor();
-    addDigitalTwin(data: {
+    addDigitalTwin(req: express.Request, data: {
         name: string;
         url: string;
     }, set_as_actual_digitaltwin?: boolean): Promise<any>;
-    getAllDigitalTwins(): Promise<any[] | {
+    getAllDigitalTwins(req: express.Request): Promise<any[] | {
         message: any;
     }>;
-    getDigitalTwin(digitaltwinId: string): Promise<any>;
-    setActualDigitalTwin(digitaltwinId: string): Promise<any>;
-    getActualDigitalTwin(): Promise<any>;
-    getDefaultDigitalTwinContexts(): Promise<any[] | {
+    getDigitalTwin(req: express.Request, digitaltwinId: string): Promise<any>;
+    setActualDigitalTwin(req: express.Request, digitaltwinId: string): Promise<any>;
+    getActualDigitalTwin(req: express.Request): Promise<any>;
+    getDefaultDigitalTwinContexts(req: express.Request): Promise<any[] | {
         message: any;
     }>;
-    getDigitalTwinContexts(digitaltwinId: string): Promise<any[] | {
+    getDigitalTwinContexts(req: express.Request, digitaltwinId: string): Promise<any[] | {
         message: any;
     }>;
-    editDigitalTwin(digitaltwinId: string, data: {
+    editDigitalTwin(req: express.Request, digitaltwinId: string, data: {
         name?: string;
         url?: string;
     }): Promise<any>;
-    removeDigitalTwin(digitaltwinId: string): Promise<{
+    removeDigitalTwin(req: express.Request, digitaltwinId: string): Promise<{
         message: any;
     }>;
-    removeActualDigitaTwin(): Promise<{
+    removeActualDigitaTwin(req: express.Request): Promise<{
         message: any;
     }>;
 }

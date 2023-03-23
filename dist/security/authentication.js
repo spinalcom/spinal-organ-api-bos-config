@@ -32,7 +32,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkIfItIsAdmin = exports.expressAuthentication = void 0;
+exports.getProfileId = exports.checkIfItIsAdmin = exports.expressAuthentication = void 0;
 const constant_1 = require("../constant");
 const services_1 = require("../services");
 const utils_1 = require("./utils");
@@ -88,4 +88,16 @@ function checkIfItIsAdmin(request) {
     });
 }
 exports.checkIfItIsAdmin = checkIfItIsAdmin;
+function getProfileId(request) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const token = (0, utils_1.getToken)(request);
+        if (!token)
+            throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.INVALID_TOKEN);
+        const profileId = yield services_1.TokenService.getInstance().getProfileIdByToken(token);
+        if (!profileId)
+            throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+        return profileId;
+    });
+}
+exports.getProfileId = getProfileId;
 //# sourceMappingURL=authentication.js.map

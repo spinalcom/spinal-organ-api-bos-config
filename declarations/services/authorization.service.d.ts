@@ -15,9 +15,9 @@ export default class AuthorizationService {
     unauthorizeProfileToAccessContext(profile: SpinalNode, digitalTwinId: string, contextIds: string | string[]): Promise<SpinalContext[]>;
     unauthorizeProfileToAccessApps(profile: SpinalNode, appIds: string | string[]): Promise<SpinalNode[]>;
     unauthorizeProfileToAccessApis(profile: SpinalNode, apiIds: string | string[]): Promise<SpinalNode[]>;
-    profileHasAccessToContext(profile: SpinalNode, digitalTwinId: string, contextId: string): Promise<boolean>;
-    profileHasAccessToApp(profile: SpinalNode, appId: string): Promise<boolean>;
-    profileHasAccessToApi(profile: SpinalNode, apiId: string): Promise<boolean>;
+    profileHasAccessToContext(profile: SpinalNode, digitalTwinId: string, contextId: string): Promise<SpinalNode>;
+    profileHasAccessToApp(profile: SpinalNode, appId: string): Promise<SpinalNode>;
+    profileHasAccessToApi(profile: SpinalNode, apiId: string): Promise<SpinalNode>;
     private _createNodeReference;
     private _addRefToNode;
     private _getRealNode;

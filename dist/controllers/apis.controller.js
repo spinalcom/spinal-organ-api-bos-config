@@ -74,22 +74,29 @@ let APIController = class APIController extends tsoa_1.Controller {
         });
     }
     // @Security(SECURITY_NAME.admin)
-    updateBosApiRoute(data, id) {
+    updateBosApiRoute(req, data, id) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const node = yield apiService.updateApiRoute(id, data);
                 this.setStatus(constant_1.HTTP_CODES.ACCEPTED);
                 return node.info.get();
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
-    getBosApiRouteById(id) {
+    // @Security(SECURITY_NAME.admin)
+    getBosApiRouteById(req, id) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const node = yield apiService.getApiRouteById(id);
                 if (node) {
                     this.setStatus(constant_1.HTTP_CODES.OK);
@@ -99,7 +106,7 @@ let APIController = class APIController extends tsoa_1.Controller {
                 return { message: `No api route found for ${id}` };
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
@@ -122,23 +129,29 @@ let APIController = class APIController extends tsoa_1.Controller {
         });
     }
     // @Security(SECURITY_NAME.admin)
-    deleteBosApiRoute(id) {
+    deleteBosApiRoute(req, id) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 yield apiService.deleteApiRoute(id);
                 this.setStatus(constant_1.HTTP_CODES.OK);
                 return { message: `${id} api route has been deleted` };
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
     // @Security(SECURITY_NAME.admin)
-    uploadBosSwaggerFile(file) {
+    uploadBosSwaggerFile(req, file) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 if (!file) {
                     this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
                     return { message: "No file uploaded" };
@@ -158,7 +171,7 @@ let APIController = class APIController extends tsoa_1.Controller {
                 return { message: "No file uploaded" };
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
@@ -174,18 +187,19 @@ __decorate([
 ], APIController.prototype, "createBosApiRoute", null);
 __decorate([
     (0, tsoa_1.Put)("/update_bos_api_route/{id}"),
-    __param(0, (0, tsoa_1.Body)()),
-    __param(1, (0, tsoa_1.Path)()),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Body)()),
+    __param(2, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:paramtypes", [Object, Object, String]),
     __metadata("design:returntype", Promise)
 ], APIController.prototype, "updateBosApiRoute", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.profile),
     (0, tsoa_1.Get)("/get_bos_api_route/{id}"),
-    __param(0, (0, tsoa_1.Path)()),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], APIController.prototype, "getBosApiRouteById", null);
 __decorate([
@@ -197,16 +211,18 @@ __decorate([
 ], APIController.prototype, "getAllBosApiRoute", null);
 __decorate([
     (0, tsoa_1.Delete)("/delete_bos_api_route/{id}"),
-    __param(0, (0, tsoa_1.Path)()),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], APIController.prototype, "deleteBosApiRoute", null);
 __decorate([
     (0, tsoa_1.Post)("/upload_bos_apis_routes"),
-    __param(0, (0, tsoa_1.UploadedFile)()),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.UploadedFile)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], APIController.prototype, "uploadBosSwaggerFile", null);
 APIController = __decorate([

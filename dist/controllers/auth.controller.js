@@ -46,8 +46,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthController = void 0;
 const services_1 = require("../services");
+const express = require("express");
 const constant_1 = require("../constant");
 const tsoa_1 = require("tsoa");
+const AuthError_1 = require("../security/AuthError");
+const authentication_1 = require("../security/authentication");
 const serviceInstance = services_1.AuthentificationService.getInstance();
 const tokenService = services_1.TokenService.getInstance();
 let AuthController = class AuthController extends tsoa_1.Controller {
@@ -68,24 +71,30 @@ let AuthController = class AuthController extends tsoa_1.Controller {
         });
     }
     // @Security(SECURITY_NAME.admin)
-    registerToAdmin(data) {
+    registerToAdmin(req, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const registeredData = yield serviceInstance.registerToAdmin(data.pamInfo, data.adminInfo);
                 yield serviceInstance.sendDataToAdmin();
                 this.setStatus(constant_1.HTTP_CODES.OK);
                 return registeredData;
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
     // @Security(SECURITY_NAME.admin)
-    getBosToAdminCredential() {
+    getBosToAdminCredential(req) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const bosCredential = yield serviceInstance.getPamToAdminCredential();
                 if (bosCredential) {
                     this.setStatus(constant_1.HTTP_CODES.OK);
@@ -95,15 +104,18 @@ let AuthController = class AuthController extends tsoa_1.Controller {
                 return { message: "No admin registered" };
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
     // @Security(SECURITY_NAME.admin)
-    deleteAdmin() {
+    deleteAdmin(req) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const deleted = yield serviceInstance.deleteCredentials();
                 const status = deleted ? constant_1.HTTP_CODES.OK : constant_1.HTTP_CODES.BAD_REQUEST;
                 const message = deleted ? "deleted with success" : "something went wrong, please check your input data";
@@ -111,15 +123,18 @@ let AuthController = class AuthController extends tsoa_1.Controller {
                 return { message };
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
     // @Security(SECURITY_NAME.admin)
-    getAdminCredential() {
+    getAdminCredential(req) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const adminCredential = yield serviceInstance.getAdminCredential();
                 if (adminCredential) {
                     this.setStatus(constant_1.HTTP_CODES.OK);
@@ -129,13 +144,13 @@ let AuthController = class AuthController extends tsoa_1.Controller {
                 return { message: "No admin registered" };
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
     // @Security(SECURITY_NAME.admin)
-    syncDataToAdmin() {
+    syncDataToAdmin(req) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const resp = yield serviceInstance.sendDataToAdmin(true);
@@ -143,7 +158,7 @@ let AuthController = class AuthController extends tsoa_1.Controller {
                 return { message: "updated" };
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
@@ -179,33 +194,38 @@ __decorate([
 ], AuthController.prototype, "authenticate", null);
 __decorate([
     (0, tsoa_1.Post)("/register_admin"),
-    __param(0, (0, tsoa_1.Body)()),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "registerToAdmin", null);
 __decorate([
     (0, tsoa_1.Get)("/get_bos_to_auth_credential"),
+    __param(0, (0, tsoa_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "getBosToAdminCredential", null);
 __decorate([
     (0, tsoa_1.Delete)("/delete_admin"),
+    __param(0, (0, tsoa_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "deleteAdmin", null);
 __decorate([
     (0, tsoa_1.Get)("/get_admin_to_bos_credential"),
+    __param(0, (0, tsoa_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "getAdminCredential", null);
 __decorate([
     (0, tsoa_1.Put)("/update_data"),
+    __param(0, (0, tsoa_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "syncDataToAdmin", null);
 __decorate([

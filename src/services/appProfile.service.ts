@@ -176,17 +176,17 @@ export class AppProfileService {
   //             VERIFICATION
   ///////////////////////////////////////////////
 
-  public async profileHasAccessToContext(appProfile: string | SpinalNode, contextId: string, digitalTwinId?: string): Promise<boolean> {
+  public async profileHasAccessToContext(appProfile: string | SpinalNode, contextId: string, digitalTwinId?: string): Promise<SpinalNode> {
     const profile = appProfile instanceof SpinalNode ? appProfile : await this._getAppProfileNode(appProfile);
     return authorizationInstance.profileHasAccessToContext(profile, digitalTwinId, contextId);
   }
 
-  public async profileHasAccessToApp(appProfile: string | SpinalNode, appId: string): Promise<boolean> {
+  public async profileHasAccessToApp(appProfile: string | SpinalNode, appId: string): Promise<SpinalNode> {
     const profile = appProfile instanceof SpinalNode ? appProfile : await this._getAppProfileNode(appProfile);
     return authorizationInstance.profileHasAccessToApp(profile, appId);
   }
 
-  public async profileHasAccessToApi(appProfile: string | SpinalNode, apiId: string): Promise<boolean> {
+  public async profileHasAccessToApi(appProfile: string | SpinalNode, apiId: string): Promise<SpinalNode> {
     const profile = appProfile instanceof SpinalNode ? appProfile : await this._getAppProfileNode(appProfile);
     return authorizationInstance.profileHasAccessToApi(profile, apiId);
   }

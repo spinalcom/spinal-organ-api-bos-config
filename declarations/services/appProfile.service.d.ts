@@ -20,9 +20,9 @@ export declare class AppProfileService {
     unauthorizeProfileToAccessContext(appProfile: string | SpinalNode, contextIds: string | string[], digitalTwinId?: string): Promise<SpinalContext[]>;
     unauthorizeProfileToAccessApps(appProfile: string | SpinalNode, appIds: string | string[]): Promise<SpinalNode[]>;
     unauthorizeProfileToAccessApis(appProfile: string | SpinalNode, apiIds: string | string[]): Promise<SpinalNode[]>;
-    profileHasAccessToContext(appProfile: string | SpinalNode, contextId: string, digitalTwinId?: string): Promise<boolean>;
-    profileHasAccessToApp(appProfile: string | SpinalNode, appId: string): Promise<boolean>;
-    profileHasAccessToApi(appProfile: string | SpinalNode, apiId: string): Promise<boolean>;
+    profileHasAccessToContext(appProfile: string | SpinalNode, contextId: string, digitalTwinId?: string): Promise<SpinalNode>;
+    profileHasAccessToApp(appProfile: string | SpinalNode, appId: string): Promise<SpinalNode>;
+    profileHasAccessToApi(appProfile: string | SpinalNode, apiId: string): Promise<SpinalNode>;
     getAuthorizedContexts(appProfile: string | SpinalNode, digitalTwinId?: string): Promise<SpinalContext[]>;
     getAuthorizedApps(appProfile: string | SpinalNode): Promise<SpinalNode[]>;
     getAuthorizedApis(appProfile: string | SpinalNode): Promise<SpinalNode[]>;

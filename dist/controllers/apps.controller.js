@@ -51,15 +51,19 @@ const constant_1 = require("../constant");
 const express = require("express");
 const utils_1 = require("../security/utils");
 const AuthError_1 = require("../security/AuthError");
+const authentication_1 = require("../security/authentication");
 const appServiceInstance = services_1.AppService.getInstance();
 let AppsController = class AppsController extends tsoa_1.Controller {
     constructor() {
         super();
     }
     // @Security(SECURITY_NAME.admin)
-    createAdminApp(appInfo) {
+    createAdminApp(req, appInfo) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const node = yield appServiceInstance.createAdminApp(appInfo);
                 if (node) {
                     this.setStatus(constant_1.HTTP_CODES.CREATED);
@@ -69,15 +73,18 @@ let AppsController = class AppsController extends tsoa_1.Controller {
                 return { message: "oops, something went wrong, please check your input data" };
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
     // @Security(SECURITY_NAME.admin)
-    createBuildingApp(appInfo) {
+    createBuildingApp(req, appInfo) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const node = yield appServiceInstance.createBuildingApp(appInfo);
                 if (node) {
                     this.setStatus(constant_1.HTTP_CODES.CREATED);
@@ -87,43 +94,52 @@ let AppsController = class AppsController extends tsoa_1.Controller {
                 return { message: "oops, something went wrong, please check your input data" };
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
     // @Security(SECURITY_NAME.admin)
-    getAllAdminApps() {
+    getAllAdminApps(req) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const nodes = yield appServiceInstance.getAllAdminApps();
                 this.setStatus(constant_1.HTTP_CODES.OK);
                 return nodes.map(el => el.info.get());
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
     // @Security(SECURITY_NAME.admin)
-    getAllBuildingApps() {
+    getAllBuildingApps(req) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const nodes = yield appServiceInstance.getAllBuildingApps();
                 this.setStatus(constant_1.HTTP_CODES.OK);
                 return nodes.map(el => el.info.get());
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
     // @Security(SECURITY_NAME.admin)
-    getAdminApp(appId) {
+    getAdminApp(req, appId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const node = yield appServiceInstance.getAdminApp(appId);
                 if (node) {
                     this.setStatus(constant_1.HTTP_CODES.OK);
@@ -133,15 +149,20 @@ let AppsController = class AppsController extends tsoa_1.Controller {
                 return { message: `No application found for this id (${appId})` };
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
-    getBuildingApp(appId) {
+    // @Security(SECURITY_NAME.profile)
+    getBuildingApp(req, appId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const node = yield appServiceInstance.getBuildingApp(appId);
+                const profileId = yield (0, authentication_1.getProfileId)(req);
+                const node = yield services_1.UserProfileService.getInstance().profileHasAccessToApp(profileId, appId);
+                if (!node)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+                // const node = await appServiceInstance.getBuildingApp(appId);
                 if (node) {
                     this.setStatus(constant_1.HTTP_CODES.OK);
                     return node.info.get();
@@ -150,15 +171,18 @@ let AppsController = class AppsController extends tsoa_1.Controller {
                 return { message: `No application found for this id (${appId})` };
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
     // @Security(SECURITY_NAME.admin)
-    updateAdminApp(appId, newInfo) {
+    updateAdminApp(req, appId, newInfo) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const node = yield appServiceInstance.updateAdminApp(appId, newInfo);
                 if (node) {
                     this.setStatus(constant_1.HTTP_CODES.OK);
@@ -168,15 +192,18 @@ let AppsController = class AppsController extends tsoa_1.Controller {
                 return { message: `Something went wrong, please check your input data.` };
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
     // @Security(SECURITY_NAME.admin)
-    updateBuildingApp(appId, newInfo) {
+    updateBuildingApp(req, appId, newInfo) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const node = yield appServiceInstance.updateBuildingApp(appId, newInfo);
                 if (node) {
                     this.setStatus(constant_1.HTTP_CODES.OK);
@@ -186,15 +213,18 @@ let AppsController = class AppsController extends tsoa_1.Controller {
                 return { message: `Something went wrong, please check your input data.` };
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
     // @Security(SECURITY_NAME.admin)
-    deleteAdminApp(appId) {
+    deleteAdminApp(req, appId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const isDeleted = yield appServiceInstance.deleteAdminApp(appId);
                 const status = isDeleted ? constant_1.HTTP_CODES.OK : constant_1.HTTP_CODES.BAD_REQUEST;
                 const message = isDeleted ? `${appId} is deleted with success` : "something went wrong, please check your input data";
@@ -202,15 +232,18 @@ let AppsController = class AppsController extends tsoa_1.Controller {
                 return { message };
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
     // @Security(SECURITY_NAME.admin)
-    deleteBuildingApp(appId) {
+    deleteBuildingApp(req, appId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const isDeleted = yield appServiceInstance.deleteBuildingApp(appId);
                 const status = isDeleted ? constant_1.HTTP_CODES.OK : constant_1.HTTP_CODES.BAD_REQUEST;
                 const message = isDeleted ? `${appId} is deleted with success` : "something went wrong, please check your input data";
@@ -218,15 +251,18 @@ let AppsController = class AppsController extends tsoa_1.Controller {
                 return { message };
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
     // @Security(SECURITY_NAME.admin)
-    uploadAdminApp(file) {
+    uploadAdminApp(req, file) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 if (!file) {
                     this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
                     return { message: "No file uploaded" };
@@ -246,15 +282,18 @@ let AppsController = class AppsController extends tsoa_1.Controller {
                 return { message: "oops, something went wrong, please check your input data" };
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
     // @Security(SECURITY_NAME.admin)
-    uploadBuildingApp(file) {
+    uploadBuildingApp(req, file) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 if (!file) {
                     this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
                     return { message: "No file uploaded" };
@@ -273,11 +312,12 @@ let AppsController = class AppsController extends tsoa_1.Controller {
                 return { message: "oops, something went wrong, please check your input data" };
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
+    // @Security(SECURITY_NAME.profile)
     getFavoriteApps(request) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -298,6 +338,7 @@ let AppsController = class AppsController extends tsoa_1.Controller {
             }
         });
     }
+    // @Security(SECURITY_NAME.profile)
     addAppToFavoris(request, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -319,6 +360,7 @@ let AppsController = class AppsController extends tsoa_1.Controller {
             }
         });
     }
+    // @Security(SECURITY_NAME.profile)
     removeAppFromFavoris(request, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -343,91 +385,101 @@ let AppsController = class AppsController extends tsoa_1.Controller {
 };
 __decorate([
     (0, tsoa_1.Post)("/create_admin_app"),
-    __param(0, (0, tsoa_1.Body)()),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "createAdminApp", null);
 __decorate([
     (0, tsoa_1.Post)("/create_building_app"),
-    __param(0, (0, tsoa_1.Body)()),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "createBuildingApp", null);
 __decorate([
     (0, tsoa_1.Get)("/get_all_admin_apps"),
+    __param(0, (0, tsoa_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "getAllAdminApps", null);
 __decorate([
     (0, tsoa_1.Get)("/get_all_building_apps"),
+    __param(0, (0, tsoa_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "getAllBuildingApps", null);
 __decorate([
     (0, tsoa_1.Get)("/get_admin_app/{appId}"),
-    __param(0, (0, tsoa_1.Path)()),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "getAdminApp", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.profile),
     (0, tsoa_1.Get)("/get_building_app/{appId}"),
-    __param(0, (0, tsoa_1.Path)()),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "getBuildingApp", null);
 __decorate([
     (0, tsoa_1.Put)("/update_admin_app/{appId}"),
-    __param(0, (0, tsoa_1.Path)()),
-    __param(1, (0, tsoa_1.Body)()),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Path)()),
+    __param(2, (0, tsoa_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", [Object, String, Object]),
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "updateAdminApp", null);
 __decorate([
     (0, tsoa_1.Put)("/update_building_app/{appId}"),
-    __param(0, (0, tsoa_1.Path)()),
-    __param(1, (0, tsoa_1.Body)()),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Path)()),
+    __param(2, (0, tsoa_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", [Object, String, Object]),
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "updateBuildingApp", null);
 __decorate([
     (0, tsoa_1.Delete)("/delete_admin_app/{appId}"),
-    __param(0, (0, tsoa_1.Path)()),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "deleteAdminApp", null);
 __decorate([
     (0, tsoa_1.Delete)("/delete_building_app/{appId}"),
-    __param(0, (0, tsoa_1.Path)()),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "deleteBuildingApp", null);
 __decorate([
     (0, tsoa_1.Post)("/upload_admin_apps"),
-    __param(0, (0, tsoa_1.UploadedFile)()),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.UploadedFile)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "uploadAdminApp", null);
 __decorate([
     (0, tsoa_1.Post)("/upload_building_apps"),
-    __param(0, (0, tsoa_1.UploadedFile)()),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.UploadedFile)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "uploadBuildingApp", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.profile),
     (0, tsoa_1.Get)("/get_favorite_apps"),
     __param(0, (0, tsoa_1.Request)()),
     __metadata("design:type", Function),
@@ -435,7 +487,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "getFavoriteApps", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.profile),
     (0, tsoa_1.Post)("/add_app_to_favoris"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Body)()),
@@ -444,7 +495,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "addAppToFavoris", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.profile),
     (0, tsoa_1.Post)("/remove_app_from_favoris"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Body)()),

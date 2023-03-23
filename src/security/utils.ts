@@ -41,9 +41,9 @@ export function getToken(request: express.Request): string {
 }
 
 
-export async function profileHasAccessToApi(profile: SpinalNode, apiUrl: string, method: string): Promise<boolean> {
+export async function profileHasAccessToApi(profile: SpinalNode, apiUrl: string, method: string): Promise<SpinalNode> {
     const api = await APIService.getInstance().getApiRouteByRoute(<any>{ route: apiUrl, method });
-    if (!api) return false;
+    if (!api) return;
 
     return AppProfileService.getInstance().profileHasAccessToApi(profile, api.getId().get());
 }

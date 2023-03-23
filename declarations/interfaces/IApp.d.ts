@@ -6,6 +6,7 @@ export interface IApp {
     categoryName: string;
     groupName: string;
     hasViewer?: boolean;
+    documentationLink?: string;
     packageName?: string;
     isExternalApp?: boolean;
     link?: string;

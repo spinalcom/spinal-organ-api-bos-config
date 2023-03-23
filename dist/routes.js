@@ -55,6 +55,7 @@ const models = {
             "categoryName": { "dataType": "string", "required": true },
             "groupName": { "dataType": "string", "required": true },
             "hasViewer": { "dataType": "boolean" },
+            "documentationLink": { "dataType": "string" },
             "packageName": { "dataType": "string" },
             "isExternalApp": { "dataType": "boolean" },
             "link": { "dataType": "string" },
@@ -233,6 +234,7 @@ function RegisterRoutes(app) {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.put('/api/v1/update_bos_api_route/:id', ...((0, runtime_1.fetchMiddlewares)(apis_controller_1.APIController)), ...((0, runtime_1.fetchMiddlewares)(apis_controller_1.APIController.prototype.updateBosApiRoute)), function APIController_updateBosApiRoute(request, response, next) {
         const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
             data: { "in": "body", "name": "data", "required": true, "ref": "IApiRoute" },
             id: { "in": "path", "name": "id", "required": true, "dataType": "string" },
         };
@@ -249,8 +251,9 @@ function RegisterRoutes(app) {
         }
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    app.get('/api/v1/get_bos_api_route/:id', authenticateMiddleware([{ "profile": [] }]), ...((0, runtime_1.fetchMiddlewares)(apis_controller_1.APIController)), ...((0, runtime_1.fetchMiddlewares)(apis_controller_1.APIController.prototype.getBosApiRouteById)), function APIController_getBosApiRouteById(request, response, next) {
+    app.get('/api/v1/get_bos_api_route/:id', ...((0, runtime_1.fetchMiddlewares)(apis_controller_1.APIController)), ...((0, runtime_1.fetchMiddlewares)(apis_controller_1.APIController.prototype.getBosApiRouteById)), function APIController_getBosApiRouteById(request, response, next) {
         const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
             id: { "in": "path", "name": "id", "required": true, "dataType": "string" },
         };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -285,6 +288,7 @@ function RegisterRoutes(app) {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.delete('/api/v1/delete_bos_api_route/:id', ...((0, runtime_1.fetchMiddlewares)(apis_controller_1.APIController)), ...((0, runtime_1.fetchMiddlewares)(apis_controller_1.APIController.prototype.deleteBosApiRoute)), function APIController_deleteBosApiRoute(request, response, next) {
         const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
             id: { "in": "path", "name": "id", "required": true, "dataType": "any" },
         };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -302,6 +306,7 @@ function RegisterRoutes(app) {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.post('/api/v1/upload_bos_apis_routes', upload.single('file'), ...((0, runtime_1.fetchMiddlewares)(apis_controller_1.APIController)), ...((0, runtime_1.fetchMiddlewares)(apis_controller_1.APIController.prototype.uploadBosSwaggerFile)), function APIController_uploadBosSwaggerFile(request, response, next) {
         const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
             file: { "in": "formData", "name": "file", "required": true, "dataType": "file" },
         };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -319,6 +324,7 @@ function RegisterRoutes(app) {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.post('/api/v1/app_profile/create_profile', ...((0, runtime_1.fetchMiddlewares)(appProfile_controller_1.AppProfileController)), ...((0, runtime_1.fetchMiddlewares)(appProfile_controller_1.AppProfileController.prototype.createAppProfile)), function AppProfileController_createAppProfile(request, response, next) {
         const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
             data: { "in": "body", "name": "data", "required": true, "ref": "IProfile" },
         };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -334,8 +340,9 @@ function RegisterRoutes(app) {
         }
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    app.get('/api/v1/app_profile/get_profile/:id', authenticateMiddleware([{ "profile": [] }]), ...((0, runtime_1.fetchMiddlewares)(appProfile_controller_1.AppProfileController)), ...((0, runtime_1.fetchMiddlewares)(appProfile_controller_1.AppProfileController.prototype.getAppProfile)), function AppProfileController_getAppProfile(request, response, next) {
+    app.get('/api/v1/app_profile/get_profile/:id', ...((0, runtime_1.fetchMiddlewares)(appProfile_controller_1.AppProfileController)), ...((0, runtime_1.fetchMiddlewares)(appProfile_controller_1.AppProfileController.prototype.getAppProfile)), function AppProfileController_getAppProfile(request, response, next) {
         const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
             id: { "in": "path", "name": "id", "required": true, "dataType": "string" },
         };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -352,7 +359,9 @@ function RegisterRoutes(app) {
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.get('/api/v1/app_profile/get_all_profile', ...((0, runtime_1.fetchMiddlewares)(appProfile_controller_1.AppProfileController)), ...((0, runtime_1.fetchMiddlewares)(appProfile_controller_1.AppProfileController.prototype.getAllAppProfile)), function AppProfileController_getAllAppProfile(request, response, next) {
-        const args = {};
+        const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
+        };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         let validatedArgs = [];
         try {
@@ -368,6 +377,7 @@ function RegisterRoutes(app) {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.put('/api/v1/app_profile/edit_profile/:id', ...((0, runtime_1.fetchMiddlewares)(appProfile_controller_1.AppProfileController)), ...((0, runtime_1.fetchMiddlewares)(appProfile_controller_1.AppProfileController.prototype.updateAppProfile)), function AppProfileController_updateAppProfile(request, response, next) {
         const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
             id: { "in": "path", "name": "id", "required": true, "dataType": "string" },
             data: { "in": "body", "name": "data", "required": true, "ref": "IProfileAuthEdit" },
         };
@@ -386,6 +396,7 @@ function RegisterRoutes(app) {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.delete('/api/v1/app_profile/delete_profile/:id', ...((0, runtime_1.fetchMiddlewares)(appProfile_controller_1.AppProfileController)), ...((0, runtime_1.fetchMiddlewares)(appProfile_controller_1.AppProfileController.prototype.deleteAppProfile)), function AppProfileController_deleteAppProfile(request, response, next) {
         const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
             id: { "in": "path", "name": "id", "required": true, "dataType": "string" },
         };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -403,6 +414,7 @@ function RegisterRoutes(app) {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.post('/api/v1/app_profile/authorize_profile_to_access_contexts/:profileId', ...((0, runtime_1.fetchMiddlewares)(appProfile_controller_1.AppProfileController)), ...((0, runtime_1.fetchMiddlewares)(appProfile_controller_1.AppProfileController.prototype.authorizeProfileToAccessContext)), function AppProfileController_authorizeProfileToAccessContext(request, response, next) {
         const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
             profileId: { "in": "path", "name": "profileId", "required": true, "dataType": "string" },
             data: { "in": "body", "name": "data", "required": true, "dataType": "nestedObjectLiteral", "nestedProperties": { "digitalTwinId": { "dataType": "string" }, "contextIds": { "dataType": "union", "subSchemas": [{ "dataType": "string" }, { "dataType": "array", "array": { "dataType": "string" } }], "required": true } } },
         };
@@ -421,6 +433,7 @@ function RegisterRoutes(app) {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.post('/api/v1/app_profile/authorize_profile_to_access_apis/:profileId', ...((0, runtime_1.fetchMiddlewares)(appProfile_controller_1.AppProfileController)), ...((0, runtime_1.fetchMiddlewares)(appProfile_controller_1.AppProfileController.prototype.authorizeProfileToAccessApis)), function AppProfileController_authorizeProfileToAccessApis(request, response, next) {
         const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
             profileId: { "in": "path", "name": "profileId", "required": true, "dataType": "string" },
             data: { "in": "body", "name": "data", "required": true, "dataType": "nestedObjectLiteral", "nestedProperties": { "apiIds": { "dataType": "union", "subSchemas": [{ "dataType": "string" }, { "dataType": "array", "array": { "dataType": "string" } }], "required": true } } },
         };
@@ -439,6 +452,7 @@ function RegisterRoutes(app) {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.post('/api/v1/app_profile/unauthorize_profile_to_access_contexts/:profileId', ...((0, runtime_1.fetchMiddlewares)(appProfile_controller_1.AppProfileController)), ...((0, runtime_1.fetchMiddlewares)(appProfile_controller_1.AppProfileController.prototype.unauthorizeProfileToAccessContext)), function AppProfileController_unauthorizeProfileToAccessContext(request, response, next) {
         const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
             profileId: { "in": "path", "name": "profileId", "required": true, "dataType": "string" },
             data: { "in": "body", "name": "data", "required": true, "dataType": "nestedObjectLiteral", "nestedProperties": { "digitalTwinId": { "dataType": "string" }, "contextIds": { "dataType": "union", "subSchemas": [{ "dataType": "string" }, { "dataType": "array", "array": { "dataType": "string" } }], "required": true } } },
         };
@@ -457,6 +471,7 @@ function RegisterRoutes(app) {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.post('/api/v1/app_profile/unauthorize_profile_to_access_apis/:profileId', ...((0, runtime_1.fetchMiddlewares)(appProfile_controller_1.AppProfileController)), ...((0, runtime_1.fetchMiddlewares)(appProfile_controller_1.AppProfileController.prototype.unauthorizeProfileToAccessApis)), function AppProfileController_unauthorizeProfileToAccessApis(request, response, next) {
         const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
             profileId: { "in": "path", "name": "profileId", "required": true, "dataType": "string" },
             data: { "in": "body", "name": "data", "required": true, "dataType": "nestedObjectLiteral", "nestedProperties": { "apiIds": { "dataType": "union", "subSchemas": [{ "dataType": "string" }, { "dataType": "array", "array": { "dataType": "string" } }], "required": true } } },
         };
@@ -475,6 +490,7 @@ function RegisterRoutes(app) {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.get('/api/v1/app_profile/profile_has_access_to_context/:profileId/:contextId', ...((0, runtime_1.fetchMiddlewares)(appProfile_controller_1.AppProfileController)), ...((0, runtime_1.fetchMiddlewares)(appProfile_controller_1.AppProfileController.prototype.profileHasAccessToContext)), function AppProfileController_profileHasAccessToContext(request, response, next) {
         const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
             profileId: { "in": "path", "name": "profileId", "required": true, "dataType": "string" },
             contextId: { "in": "path", "name": "contextId", "required": true, "dataType": "string" },
             digitalTwinId: { "in": "query", "name": "digitalTwinId", "dataType": "string" },
@@ -494,6 +510,7 @@ function RegisterRoutes(app) {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.get('/api/v1/app_profile/profile_has_access_to_api/:profileId/:apiId', ...((0, runtime_1.fetchMiddlewares)(appProfile_controller_1.AppProfileController)), ...((0, runtime_1.fetchMiddlewares)(appProfile_controller_1.AppProfileController.prototype.profileHasAccessToApi)), function AppProfileController_profileHasAccessToApi(request, response, next) {
         const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
             profileId: { "in": "path", "name": "profileId", "required": true, "dataType": "string" },
             apiId: { "in": "path", "name": "apiId", "required": true, "dataType": "string" },
         };
@@ -512,6 +529,7 @@ function RegisterRoutes(app) {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.get('/api/v1/app_profile/get_authorized_contexts/:profileId', ...((0, runtime_1.fetchMiddlewares)(appProfile_controller_1.AppProfileController)), ...((0, runtime_1.fetchMiddlewares)(appProfile_controller_1.AppProfileController.prototype.getAuthorizedContexts)), function AppProfileController_getAuthorizedContexts(request, response, next) {
         const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
             profileId: { "in": "path", "name": "profileId", "required": true, "dataType": "string" },
             digitalTwinId: { "in": "query", "name": "digitalTwinId", "dataType": "string" },
         };
@@ -530,6 +548,7 @@ function RegisterRoutes(app) {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.get('/api/v1/app_profile/get_authorized_apis/:profileId', ...((0, runtime_1.fetchMiddlewares)(appProfile_controller_1.AppProfileController)), ...((0, runtime_1.fetchMiddlewares)(appProfile_controller_1.AppProfileController.prototype.getAuthorizedApis)), function AppProfileController_getAuthorizedApis(request, response, next) {
         const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
             profileId: { "in": "path", "name": "profileId", "required": true, "dataType": "string" },
         };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -547,6 +566,7 @@ function RegisterRoutes(app) {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.post('/api/v1/create_admin_app', ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController)), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController.prototype.createAdminApp)), function AppsController_createAdminApp(request, response, next) {
         const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
             appInfo: { "in": "body", "name": "appInfo", "required": true, "ref": "IApp" },
         };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -564,6 +584,7 @@ function RegisterRoutes(app) {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.post('/api/v1/create_building_app', ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController)), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController.prototype.createBuildingApp)), function AppsController_createBuildingApp(request, response, next) {
         const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
             appInfo: { "in": "body", "name": "appInfo", "required": true, "ref": "IApp" },
         };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -580,7 +601,9 @@ function RegisterRoutes(app) {
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.get('/api/v1/get_all_admin_apps', ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController)), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController.prototype.getAllAdminApps)), function AppsController_getAllAdminApps(request, response, next) {
-        const args = {};
+        const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
+        };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         let validatedArgs = [];
         try {
@@ -595,7 +618,9 @@ function RegisterRoutes(app) {
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.get('/api/v1/get_all_building_apps', ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController)), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController.prototype.getAllBuildingApps)), function AppsController_getAllBuildingApps(request, response, next) {
-        const args = {};
+        const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
+        };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         let validatedArgs = [];
         try {
@@ -611,6 +636,7 @@ function RegisterRoutes(app) {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.get('/api/v1/get_admin_app/:appId', ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController)), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController.prototype.getAdminApp)), function AppsController_getAdminApp(request, response, next) {
         const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
             appId: { "in": "path", "name": "appId", "required": true, "dataType": "string" },
         };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -626,8 +652,9 @@ function RegisterRoutes(app) {
         }
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    app.get('/api/v1/get_building_app/:appId', authenticateMiddleware([{ "profile": [] }]), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController)), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController.prototype.getBuildingApp)), function AppsController_getBuildingApp(request, response, next) {
+    app.get('/api/v1/get_building_app/:appId', ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController)), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController.prototype.getBuildingApp)), function AppsController_getBuildingApp(request, response, next) {
         const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
             appId: { "in": "path", "name": "appId", "required": true, "dataType": "string" },
         };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -645,6 +672,7 @@ function RegisterRoutes(app) {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.put('/api/v1/update_admin_app/:appId', ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController)), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController.prototype.updateAdminApp)), function AppsController_updateAdminApp(request, response, next) {
         const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
             appId: { "in": "path", "name": "appId", "required": true, "dataType": "string" },
             newInfo: { "in": "body", "name": "newInfo", "required": true, "ref": "IApp" },
         };
@@ -663,6 +691,7 @@ function RegisterRoutes(app) {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.put('/api/v1/update_building_app/:appId', ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController)), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController.prototype.updateBuildingApp)), function AppsController_updateBuildingApp(request, response, next) {
         const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
             appId: { "in": "path", "name": "appId", "required": true, "dataType": "string" },
             newInfo: { "in": "body", "name": "newInfo", "required": true, "ref": "IApp" },
         };
@@ -681,6 +710,7 @@ function RegisterRoutes(app) {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.delete('/api/v1/delete_admin_app/:appId', ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController)), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController.prototype.deleteAdminApp)), function AppsController_deleteAdminApp(request, response, next) {
         const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
             appId: { "in": "path", "name": "appId", "required": true, "dataType": "string" },
         };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -698,6 +728,7 @@ function RegisterRoutes(app) {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.delete('/api/v1/delete_building_app/:appId', ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController)), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController.prototype.deleteBuildingApp)), function AppsController_deleteBuildingApp(request, response, next) {
         const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
             appId: { "in": "path", "name": "appId", "required": true, "dataType": "string" },
         };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -715,6 +746,7 @@ function RegisterRoutes(app) {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.post('/api/v1/upload_admin_apps', upload.single('file'), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController)), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController.prototype.uploadAdminApp)), function AppsController_uploadAdminApp(request, response, next) {
         const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
             file: { "in": "formData", "name": "file", "required": true, "dataType": "file" },
         };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -732,6 +764,7 @@ function RegisterRoutes(app) {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.post('/api/v1/upload_building_apps', upload.single('file'), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController)), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController.prototype.uploadBuildingApp)), function AppsController_uploadBuildingApp(request, response, next) {
         const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
             file: { "in": "formData", "name": "file", "required": true, "dataType": "file" },
         };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -747,7 +780,7 @@ function RegisterRoutes(app) {
         }
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    app.get('/api/v1/get_favorite_apps', authenticateMiddleware([{ "profile": [] }]), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController)), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController.prototype.getFavoriteApps)), function AppsController_getFavoriteApps(request, response, next) {
+    app.get('/api/v1/get_favorite_apps', ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController)), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController.prototype.getFavoriteApps)), function AppsController_getFavoriteApps(request, response, next) {
         const args = {
             request: { "in": "request", "name": "request", "required": true, "dataType": "object" },
         };
@@ -764,7 +797,7 @@ function RegisterRoutes(app) {
         }
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    app.post('/api/v1/add_app_to_favoris', authenticateMiddleware([{ "profile": [] }]), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController)), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController.prototype.addAppToFavoris)), function AppsController_addAppToFavoris(request, response, next) {
+    app.post('/api/v1/add_app_to_favoris', ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController)), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController.prototype.addAppToFavoris)), function AppsController_addAppToFavoris(request, response, next) {
         const args = {
             request: { "in": "request", "name": "request", "required": true, "dataType": "object" },
             data: { "in": "body", "name": "data", "required": true, "dataType": "nestedObjectLiteral", "nestedProperties": { "appIds": { "dataType": "array", "array": { "dataType": "string" }, "required": true } } },
@@ -782,7 +815,7 @@ function RegisterRoutes(app) {
         }
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    app.post('/api/v1/remove_app_from_favoris', authenticateMiddleware([{ "profile": [] }]), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController)), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController.prototype.removeAppFromFavoris)), function AppsController_removeAppFromFavoris(request, response, next) {
+    app.post('/api/v1/remove_app_from_favoris', ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController)), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController.prototype.removeAppFromFavoris)), function AppsController_removeAppFromFavoris(request, response, next) {
         const args = {
             request: { "in": "request", "name": "request", "required": true, "dataType": "object" },
             data: { "in": "body", "name": "data", "required": true, "dataType": "nestedObjectLiteral", "nestedProperties": { "appIds": { "dataType": "array", "array": { "dataType": "string" }, "required": true } } },
@@ -819,6 +852,7 @@ function RegisterRoutes(app) {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.post('/api/v1/register_admin', ...((0, runtime_1.fetchMiddlewares)(auth_controller_1.AuthController)), ...((0, runtime_1.fetchMiddlewares)(auth_controller_1.AuthController.prototype.registerToAdmin)), function AuthController_registerToAdmin(request, response, next) {
         const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
             data: { "in": "body", "name": "data", "required": true, "dataType": "nestedObjectLiteral", "nestedProperties": { "adminInfo": { "ref": "IAdmin", "required": true }, "pamInfo": { "ref": "IPamInfo", "required": true } } },
         };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -835,7 +869,9 @@ function RegisterRoutes(app) {
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.get('/api/v1/get_bos_to_auth_credential', ...((0, runtime_1.fetchMiddlewares)(auth_controller_1.AuthController)), ...((0, runtime_1.fetchMiddlewares)(auth_controller_1.AuthController.prototype.getBosToAdminCredential)), function AuthController_getBosToAdminCredential(request, response, next) {
-        const args = {};
+        const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
+        };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         let validatedArgs = [];
         try {
@@ -850,7 +886,9 @@ function RegisterRoutes(app) {
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.delete('/api/v1/delete_admin', ...((0, runtime_1.fetchMiddlewares)(auth_controller_1.AuthController)), ...((0, runtime_1.fetchMiddlewares)(auth_controller_1.AuthController.prototype.deleteAdmin)), function AuthController_deleteAdmin(request, response, next) {
-        const args = {};
+        const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
+        };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         let validatedArgs = [];
         try {
@@ -865,7 +903,9 @@ function RegisterRoutes(app) {
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.get('/api/v1/get_admin_to_bos_credential', ...((0, runtime_1.fetchMiddlewares)(auth_controller_1.AuthController)), ...((0, runtime_1.fetchMiddlewares)(auth_controller_1.AuthController.prototype.getAdminCredential)), function AuthController_getAdminCredential(request, response, next) {
-        const args = {};
+        const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
+        };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         let validatedArgs = [];
         try {
@@ -880,7 +920,9 @@ function RegisterRoutes(app) {
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.put('/api/v1/update_data', ...((0, runtime_1.fetchMiddlewares)(auth_controller_1.AuthController)), ...((0, runtime_1.fetchMiddlewares)(auth_controller_1.AuthController.prototype.syncDataToAdmin)), function AuthController_syncDataToAdmin(request, response, next) {
-        const args = {};
+        const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
+        };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         let validatedArgs = [];
         try {
@@ -913,6 +955,7 @@ function RegisterRoutes(app) {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.post('/api/v1/add_digitaltwin', ...((0, runtime_1.fetchMiddlewares)(digitalTwin_controller_1.DigitaltwinController)), ...((0, runtime_1.fetchMiddlewares)(digitalTwin_controller_1.DigitaltwinController.prototype.addDigitalTwin)), function DigitaltwinController_addDigitalTwin(request, response, next) {
         const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
             data: { "in": "body", "name": "data", "required": true, "dataType": "nestedObjectLiteral", "nestedProperties": { "url": { "dataType": "string", "required": true }, "name": { "dataType": "string", "required": true } } },
             set_as_actual_digitaltwin: { "in": "query", "name": "set_as_actual_digitaltwin", "dataType": "boolean" },
         };
@@ -930,7 +973,9 @@ function RegisterRoutes(app) {
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.get('/api/v1/get_all_digitaltwins', ...((0, runtime_1.fetchMiddlewares)(digitalTwin_controller_1.DigitaltwinController)), ...((0, runtime_1.fetchMiddlewares)(digitalTwin_controller_1.DigitaltwinController.prototype.getAllDigitalTwins)), function DigitaltwinController_getAllDigitalTwins(request, response, next) {
-        const args = {};
+        const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
+        };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         let validatedArgs = [];
         try {
@@ -946,6 +991,7 @@ function RegisterRoutes(app) {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.get('/api/v1/get_digitaltwin/:digitaltwinId', ...((0, runtime_1.fetchMiddlewares)(digitalTwin_controller_1.DigitaltwinController)), ...((0, runtime_1.fetchMiddlewares)(digitalTwin_controller_1.DigitaltwinController.prototype.getDigitalTwin)), function DigitaltwinController_getDigitalTwin(request, response, next) {
         const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
             digitaltwinId: { "in": "path", "name": "digitaltwinId", "required": true, "dataType": "string" },
         };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -963,6 +1009,7 @@ function RegisterRoutes(app) {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.put('/api/v1/set_as_actual_digitaltwin/:digitaltwinId', ...((0, runtime_1.fetchMiddlewares)(digitalTwin_controller_1.DigitaltwinController)), ...((0, runtime_1.fetchMiddlewares)(digitalTwin_controller_1.DigitaltwinController.prototype.setActualDigitalTwin)), function DigitaltwinController_setActualDigitalTwin(request, response, next) {
         const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
             digitaltwinId: { "in": "path", "name": "digitaltwinId", "required": true, "dataType": "string" },
         };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -979,7 +1026,9 @@ function RegisterRoutes(app) {
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.get('/api/v1/get_actual_digitaltwin', ...((0, runtime_1.fetchMiddlewares)(digitalTwin_controller_1.DigitaltwinController)), ...((0, runtime_1.fetchMiddlewares)(digitalTwin_controller_1.DigitaltwinController.prototype.getActualDigitalTwin)), function DigitaltwinController_getActualDigitalTwin(request, response, next) {
-        const args = {};
+        const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
+        };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         let validatedArgs = [];
         try {
@@ -994,7 +1043,9 @@ function RegisterRoutes(app) {
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.get('/api/v1/get_digitaltwin_contexts', ...((0, runtime_1.fetchMiddlewares)(digitalTwin_controller_1.DigitaltwinController)), ...((0, runtime_1.fetchMiddlewares)(digitalTwin_controller_1.DigitaltwinController.prototype.getDefaultDigitalTwinContexts)), function DigitaltwinController_getDefaultDigitalTwinContexts(request, response, next) {
-        const args = {};
+        const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
+        };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         let validatedArgs = [];
         try {
@@ -1010,6 +1061,7 @@ function RegisterRoutes(app) {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.get('/api/v1/get_digitaltwin_contexts/:digitaltwinId', ...((0, runtime_1.fetchMiddlewares)(digitalTwin_controller_1.DigitaltwinController)), ...((0, runtime_1.fetchMiddlewares)(digitalTwin_controller_1.DigitaltwinController.prototype.getDigitalTwinContexts)), function DigitaltwinController_getDigitalTwinContexts(request, response, next) {
         const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
             digitaltwinId: { "in": "path", "name": "digitaltwinId", "required": true, "dataType": "string" },
         };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -1027,6 +1079,7 @@ function RegisterRoutes(app) {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.put('/api/v1/update_digitaltwin/:digitaltwinId', ...((0, runtime_1.fetchMiddlewares)(digitalTwin_controller_1.DigitaltwinController)), ...((0, runtime_1.fetchMiddlewares)(digitalTwin_controller_1.DigitaltwinController.prototype.editDigitalTwin)), function DigitaltwinController_editDigitalTwin(request, response, next) {
         const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
             digitaltwinId: { "in": "path", "name": "digitaltwinId", "required": true, "dataType": "string" },
             data: { "in": "body", "name": "data", "required": true, "dataType": "nestedObjectLiteral", "nestedProperties": { "url": { "dataType": "string" }, "name": { "dataType": "string" } } },
         };
@@ -1045,6 +1098,7 @@ function RegisterRoutes(app) {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.delete('/api/v1/delete_digitaltwin/:digitaltwinId', ...((0, runtime_1.fetchMiddlewares)(digitalTwin_controller_1.DigitaltwinController)), ...((0, runtime_1.fetchMiddlewares)(digitalTwin_controller_1.DigitaltwinController.prototype.removeDigitalTwin)), function DigitaltwinController_removeDigitalTwin(request, response, next) {
         const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
             digitaltwinId: { "in": "path", "name": "digitaltwinId", "required": true, "dataType": "string" },
         };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -1061,7 +1115,9 @@ function RegisterRoutes(app) {
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.delete('/api/v1/delete_actual_digitaltwin', ...((0, runtime_1.fetchMiddlewares)(digitalTwin_controller_1.DigitaltwinController)), ...((0, runtime_1.fetchMiddlewares)(digitalTwin_controller_1.DigitaltwinController.prototype.removeActualDigitaTwin)), function DigitaltwinController_removeActualDigitaTwin(request, response, next) {
-        const args = {};
+        const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
+        };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         let validatedArgs = [];
         try {
@@ -1077,6 +1133,7 @@ function RegisterRoutes(app) {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.post('/api/v1/user_profile/create_profile', ...((0, runtime_1.fetchMiddlewares)(userProfile_controller_1.UserProfileController)), ...((0, runtime_1.fetchMiddlewares)(userProfile_controller_1.UserProfileController.prototype.createUserProfile)), function UserProfileController_createUserProfile(request, response, next) {
         const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
             data: { "in": "body", "name": "data", "required": true, "ref": "IProfile" },
         };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -1092,8 +1149,9 @@ function RegisterRoutes(app) {
         }
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    app.get('/api/v1/user_profile/get_profile/:id', authenticateMiddleware([{ "profile": [] }]), ...((0, runtime_1.fetchMiddlewares)(userProfile_controller_1.UserProfileController)), ...((0, runtime_1.fetchMiddlewares)(userProfile_controller_1.UserProfileController.prototype.getUserProfile)), function UserProfileController_getUserProfile(request, response, next) {
+    app.get('/api/v1/user_profile/get_profile/:id', ...((0, runtime_1.fetchMiddlewares)(userProfile_controller_1.UserProfileController)), ...((0, runtime_1.fetchMiddlewares)(userProfile_controller_1.UserProfileController.prototype.getUserProfile)), function UserProfileController_getUserProfile(request, response, next) {
         const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
             id: { "in": "path", "name": "id", "required": true, "dataType": "string" },
         };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -1109,8 +1167,27 @@ function RegisterRoutes(app) {
         }
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    app.get('/api/v1/user_profile/get_profile', ...((0, runtime_1.fetchMiddlewares)(userProfile_controller_1.UserProfileController)), ...((0, runtime_1.fetchMiddlewares)(userProfile_controller_1.UserProfileController.prototype.getUserProfileByToken)), function UserProfileController_getUserProfileByToken(request, response, next) {
+        const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
+        };
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        let validatedArgs = [];
+        try {
+            validatedArgs = getValidatedArgs(args, request, response);
+            const controller = new userProfile_controller_1.UserProfileController();
+            const promise = controller.getUserProfileByToken.apply(controller, validatedArgs);
+            promiseHandler(controller, promise, response, undefined, next);
+        }
+        catch (err) {
+            return next(err);
+        }
+    });
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.get('/api/v1/user_profile/get_all_profile', ...((0, runtime_1.fetchMiddlewares)(userProfile_controller_1.UserProfileController)), ...((0, runtime_1.fetchMiddlewares)(userProfile_controller_1.UserProfileController.prototype.getAllUserProfile)), function UserProfileController_getAllUserProfile(request, response, next) {
-        const args = {};
+        const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
+        };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         let validatedArgs = [];
         try {
@@ -1126,6 +1203,7 @@ function RegisterRoutes(app) {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.put('/api/v1/user_profile/edit_profile/:id', ...((0, runtime_1.fetchMiddlewares)(userProfile_controller_1.UserProfileController)), ...((0, runtime_1.fetchMiddlewares)(userProfile_controller_1.UserProfileController.prototype.updateUserProfile)), function UserProfileController_updateUserProfile(request, response, next) {
         const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
             id: { "in": "path", "name": "id", "required": true, "dataType": "string" },
             data: { "in": "body", "name": "data", "required": true, "ref": "IProfileAuthEdit" },
         };
@@ -1144,6 +1222,7 @@ function RegisterRoutes(app) {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.delete('/api/v1/user_profile/delete_profile/:id', ...((0, runtime_1.fetchMiddlewares)(userProfile_controller_1.UserProfileController)), ...((0, runtime_1.fetchMiddlewares)(userProfile_controller_1.UserProfileController.prototype.deleteUserProfile)), function UserProfileController_deleteUserProfile(request, response, next) {
         const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
             id: { "in": "path", "name": "id", "required": true, "dataType": "string" },
         };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -1161,6 +1240,7 @@ function RegisterRoutes(app) {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.get('/api/v1/user_profile/get_authorized_contexts/:profileId', ...((0, runtime_1.fetchMiddlewares)(userProfile_controller_1.UserProfileController)), ...((0, runtime_1.fetchMiddlewares)(userProfile_controller_1.UserProfileController.prototype.getAuthorizedContexts)), function UserProfileController_getAuthorizedContexts(request, response, next) {
         const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
             profileId: { "in": "path", "name": "profileId", "required": true, "dataType": "string" },
             digitalTwinId: { "in": "query", "name": "digitalTwinId", "dataType": "string" },
         };
@@ -1179,6 +1259,7 @@ function RegisterRoutes(app) {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.get('/api/v1/user_profile/get_authorized_apps/:profileId', ...((0, runtime_1.fetchMiddlewares)(userProfile_controller_1.UserProfileController)), ...((0, runtime_1.fetchMiddlewares)(userProfile_controller_1.UserProfileController.prototype.getAuthorizedApps)), function UserProfileController_getAuthorizedApps(request, response, next) {
         const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
             profileId: { "in": "path", "name": "profileId", "required": true, "dataType": "string" },
         };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -1196,6 +1277,7 @@ function RegisterRoutes(app) {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.get('/api/v1/user_profile/get_authorized_admin_apps/:profileId', ...((0, runtime_1.fetchMiddlewares)(userProfile_controller_1.UserProfileController)), ...((0, runtime_1.fetchMiddlewares)(userProfile_controller_1.UserProfileController.prototype.getAuthorizedAdminApps)), function UserProfileController_getAuthorizedAdminApps(request, response, next) {
         const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
             profileId: { "in": "path", "name": "profileId", "required": true, "dataType": "string" },
         };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -1213,6 +1295,7 @@ function RegisterRoutes(app) {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.post('/api/v1/user_profile/authorize_profile_to_access_contexts/:profileId', ...((0, runtime_1.fetchMiddlewares)(userProfile_controller_1.UserProfileController)), ...((0, runtime_1.fetchMiddlewares)(userProfile_controller_1.UserProfileController.prototype.authorizeProfileToAccessContext)), function UserProfileController_authorizeProfileToAccessContext(request, response, next) {
         const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
             profileId: { "in": "path", "name": "profileId", "required": true, "dataType": "string" },
             data: { "in": "body", "name": "data", "required": true, "dataType": "nestedObjectLiteral", "nestedProperties": { "digitalTwinId": { "dataType": "string" }, "contextIds": { "dataType": "union", "subSchemas": [{ "dataType": "string" }, { "dataType": "array", "array": { "dataType": "string" } }], "required": true } } },
         };
@@ -1231,6 +1314,7 @@ function RegisterRoutes(app) {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.post('/api/v1/user_profile/authorize_profile_to_access_apps/:profileId', ...((0, runtime_1.fetchMiddlewares)(userProfile_controller_1.UserProfileController)), ...((0, runtime_1.fetchMiddlewares)(userProfile_controller_1.UserProfileController.prototype.authorizeProfileToAccessApps)), function UserProfileController_authorizeProfileToAccessApps(request, response, next) {
         const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
             profileId: { "in": "path", "name": "profileId", "required": true, "dataType": "string" },
             data: { "in": "body", "name": "data", "required": true, "dataType": "nestedObjectLiteral", "nestedProperties": { "appIds": { "dataType": "union", "subSchemas": [{ "dataType": "string" }, { "dataType": "array", "array": { "dataType": "string" } }], "required": true } } },
         };
@@ -1249,6 +1333,7 @@ function RegisterRoutes(app) {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.post('/api/v1/user_profile/unauthorize_profile_to_access_contexts/:profileId', ...((0, runtime_1.fetchMiddlewares)(userProfile_controller_1.UserProfileController)), ...((0, runtime_1.fetchMiddlewares)(userProfile_controller_1.UserProfileController.prototype.unauthorizeProfileToAccessContext)), function UserProfileController_unauthorizeProfileToAccessContext(request, response, next) {
         const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
             profileId: { "in": "path", "name": "profileId", "required": true, "dataType": "string" },
             data: { "in": "body", "name": "data", "required": true, "dataType": "nestedObjectLiteral", "nestedProperties": { "digitalTwinId": { "dataType": "string" }, "contextIds": { "dataType": "union", "subSchemas": [{ "dataType": "string" }, { "dataType": "array", "array": { "dataType": "string" } }], "required": true } } },
         };
@@ -1267,6 +1352,7 @@ function RegisterRoutes(app) {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.post('/api/v1/user_profile/unauthorize_profile_to_access_apps/:profileId', ...((0, runtime_1.fetchMiddlewares)(userProfile_controller_1.UserProfileController)), ...((0, runtime_1.fetchMiddlewares)(userProfile_controller_1.UserProfileController.prototype.unauthorizeProfileToAccessApps)), function UserProfileController_unauthorizeProfileToAccessApps(request, response, next) {
         const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
             profileId: { "in": "path", "name": "profileId", "required": true, "dataType": "string" },
             data: { "in": "body", "name": "data", "required": true, "dataType": "nestedObjectLiteral", "nestedProperties": { "appIds": { "dataType": "union", "subSchemas": [{ "dataType": "string" }, { "dataType": "array", "array": { "dataType": "string" } }], "required": true } } },
         };
@@ -1285,6 +1371,7 @@ function RegisterRoutes(app) {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.get('/api/v1/user_profile/profile_has_access_to_context/:profileId/:contextId', ...((0, runtime_1.fetchMiddlewares)(userProfile_controller_1.UserProfileController)), ...((0, runtime_1.fetchMiddlewares)(userProfile_controller_1.UserProfileController.prototype.profileHasAccessToContext)), function UserProfileController_profileHasAccessToContext(request, response, next) {
         const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
             profileId: { "in": "path", "name": "profileId", "required": true, "dataType": "string" },
             contextId: { "in": "path", "name": "contextId", "required": true, "dataType": "string" },
             digitalTwinId: { "in": "query", "name": "digitalTwinId", "dataType": "string" },
@@ -1304,6 +1391,7 @@ function RegisterRoutes(app) {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.get('/api/v1/user_profile/profile_has_access_to_app/:profileId/:appId', ...((0, runtime_1.fetchMiddlewares)(userProfile_controller_1.UserProfileController)), ...((0, runtime_1.fetchMiddlewares)(userProfile_controller_1.UserProfileController.prototype.profileHasAccessToApp)), function UserProfileController_profileHasAccessToApp(request, response, next) {
         const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
             profileId: { "in": "path", "name": "profileId", "required": true, "dataType": "string" },
             appId: { "in": "path", "name": "appId", "required": true, "dataType": "string" },
         };

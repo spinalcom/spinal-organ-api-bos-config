@@ -257,19 +257,19 @@ class AuthorizationService {
     profileHasAccessToContext(profile, digitalTwinId, contextId) {
         return __awaiter(this, void 0, void 0, function* () {
             const contexts = yield this.getAuthorizedContexts(profile, digitalTwinId);
-            return contexts.some(el => el.getId().get() === contextId);
+            return contexts.find(el => el.getId().get() === contextId);
         });
     }
     profileHasAccessToApp(profile, appId) {
         return __awaiter(this, void 0, void 0, function* () {
             const contexts = yield Promise.all([this.getAuthorizedApps(profile), this.getAuthorizedAdminApps(profile)]);
-            return contexts.flat().some(el => el.getId().get() === appId);
+            return contexts.flat().find(el => el.getId().get() === appId);
         });
     }
     profileHasAccessToApi(profile, apiId) {
         return __awaiter(this, void 0, void 0, function* () {
             const contexts = yield this.getAuthorizedApis(profile);
-            return contexts.some(el => el.getId().get() === apiId);
+            return contexts.find(el => el.getId().get() === apiId);
         });
     }
     ///////////////////////////////////////////////

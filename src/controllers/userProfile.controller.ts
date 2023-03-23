@@ -314,7 +314,7 @@ export class UserProfileController extends Controller {
 
             const hasAccess = await serviceInstance.profileHasAccessToContext(profileId, contextId, digitalTwinId);
             this.setStatus(HTTP_CODES.OK)
-            return hasAccess;
+            return hasAccess ? true : false;
         } catch (error) {
             this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
@@ -330,7 +330,7 @@ export class UserProfileController extends Controller {
 
             const hasAccess = await serviceInstance.profileHasAccessToApp(profileId, appId);
             this.setStatus(HTTP_CODES.OK)
-            return hasAccess;
+            return hasAccess ? true : false;;
         } catch (error) {
             this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };

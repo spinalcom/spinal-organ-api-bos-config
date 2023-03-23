@@ -6,19 +6,19 @@ export declare class APIController extends Controller {
     createBosApiRoute(req: express.Request, data: IApiRoute): Promise<IApiRoute | {
         message: string;
     }>;
-    updateBosApiRoute(data: IApiRoute, id: string): Promise<IApiRoute | {
+    updateBosApiRoute(req: express.Request, data: IApiRoute, id: string): Promise<IApiRoute | {
         message: string;
     }>;
-    getBosApiRouteById(id: string): Promise<IApiRoute | {
+    getBosApiRouteById(req: express.Request, id: string): Promise<IApiRoute | {
         message: string;
     }>;
     getAllBosApiRoute(req: any): Promise<IApiRoute[] | {
         message: string;
     }>;
-    deleteBosApiRoute(id: any): Promise<{
+    deleteBosApiRoute(req: any, id: any): Promise<{
         message: string;
     }>;
-    uploadBosSwaggerFile(file: any): Promise<IApiRoute[] | {
+    uploadBosSwaggerFile(req: any, file: any): Promise<IApiRoute[] | {
         message: string;
     }>;
 }

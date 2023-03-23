@@ -48,15 +48,21 @@ exports.DigitaltwinController = void 0;
 const services_1 = require("../services");
 const constant_1 = require("../constant");
 const tsoa_1 = require("tsoa");
+const express = require("express");
+const authentication_1 = require("../security/authentication");
+const AuthError_1 = require("../security/AuthError");
 const serviceInstance = services_1.DigitalTwinService.getInstance();
 let DigitaltwinController = class DigitaltwinController extends tsoa_1.Controller {
     constructor() {
         super();
     }
     // @Security(SECURITY_NAME.admin)
-    addDigitalTwin(data, set_as_actual_digitaltwin) {
+    addDigitalTwin(req, data, set_as_actual_digitaltwin) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 if (!data.name || !data.name.trim()) {
                     this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
                     return { message: "The file name is mandatory" };
@@ -72,29 +78,35 @@ let DigitaltwinController = class DigitaltwinController extends tsoa_1.Controlle
                 }
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
     // @Security(SECURITY_NAME.admin)
-    getAllDigitalTwins() {
+    getAllDigitalTwins(req) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const digitalTwins = yield serviceInstance.getAllDigitalTwins();
                 this.setStatus(constant_1.HTTP_CODES.OK);
                 return digitalTwins.map(el => el.info.get());
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
     // @Security(SECURITY_NAME.admin)
-    getDigitalTwin(digitaltwinId) {
+    getDigitalTwin(req, digitaltwinId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const digitaltwin = yield serviceInstance.getDigitalTwin(digitaltwinId);
                 if (digitaltwin) {
                     this.setStatus(constant_1.HTTP_CODES.OK);
@@ -104,15 +116,18 @@ let DigitaltwinController = class DigitaltwinController extends tsoa_1.Controlle
                 return { message: `No digitalTwin found for ${digitaltwinId}` };
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
     // @Security(SECURITY_NAME.admin)
-    setActualDigitalTwin(digitaltwinId) {
+    setActualDigitalTwin(req, digitaltwinId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const node = yield serviceInstance.setActualDigitalTwin(digitaltwinId);
                 if (node) {
                     this.setStatus(constant_1.HTTP_CODES.OK);
@@ -122,15 +137,18 @@ let DigitaltwinController = class DigitaltwinController extends tsoa_1.Controlle
                 return { message: `No digitalTwin found for ${digitaltwinId}` };
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
     // @Security(SECURITY_NAME.admin)
-    getActualDigitalTwin() {
+    getActualDigitalTwin(req) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const node = yield serviceInstance.getActualDigitalTwin();
                 if (node) {
                     this.setStatus(constant_1.HTTP_CODES.OK);
@@ -140,43 +158,52 @@ let DigitaltwinController = class DigitaltwinController extends tsoa_1.Controlle
                 return { message: `No digitaltwin is set up` };
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
     // @Security(SECURITY_NAME.admin)
-    getDefaultDigitalTwinContexts() {
+    getDefaultDigitalTwinContexts(req) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const contexts = yield serviceInstance.getDigitalTwinContexts();
                 this.setStatus(constant_1.HTTP_CODES.OK);
                 return contexts.map(el => el.info.get());
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
     // @Security(SECURITY_NAME.admin)
-    getDigitalTwinContexts(digitaltwinId) {
+    getDigitalTwinContexts(req, digitaltwinId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const contexts = yield serviceInstance.getDigitalTwinContexts(digitaltwinId);
                 this.setStatus(constant_1.HTTP_CODES.OK);
                 return contexts.map(el => el.info.get());
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
     // @Security(SECURITY_NAME.admin)
-    editDigitalTwin(digitaltwinId, data) {
+    editDigitalTwin(req, digitaltwinId, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const node = yield serviceInstance.editDigitalTwin(digitaltwinId, data);
                 if (node) {
                     this.setStatus(constant_1.HTTP_CODES.OK);
@@ -186,15 +213,18 @@ let DigitaltwinController = class DigitaltwinController extends tsoa_1.Controlle
                 return { message: `No digitaltwin found for ${digitaltwinId}` };
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
     // @Security(SECURITY_NAME.admin)
-    removeDigitalTwin(digitaltwinId) {
+    removeDigitalTwin(req, digitaltwinId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const deleted = yield serviceInstance.removeDigitalTwin(digitaltwinId);
                 if (deleted) {
                     this.setStatus(constant_1.HTTP_CODES.OK);
@@ -204,31 +234,28 @@ let DigitaltwinController = class DigitaltwinController extends tsoa_1.Controlle
                 return { message: `sommething went wrong, please check digitaltwin id` };
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
     // @Security(SECURITY_NAME.admin)
-    removeActualDigitaTwin() {
+    removeActualDigitaTwin(req) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                try {
-                    const deleted = yield serviceInstance.removeActualDigitaTwin();
-                    if (deleted) {
-                        this.setStatus(constant_1.HTTP_CODES.OK);
-                        return { message: `actual digitaltwin deleted with success` };
-                    }
-                    this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
-                    return { message: `sommething went wrong, please check if default digitaltwin is set up` };
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+                const deleted = yield serviceInstance.removeActualDigitaTwin();
+                if (deleted) {
+                    this.setStatus(constant_1.HTTP_CODES.OK);
+                    return { message: `actual digitaltwin deleted with success` };
                 }
-                catch (error) {
-                    this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
-                    return { message: error.message };
-                }
+                this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
+                return { message: `sommething went wrong, please check if default digitaltwin is set up` };
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
@@ -236,70 +263,80 @@ let DigitaltwinController = class DigitaltwinController extends tsoa_1.Controlle
 };
 __decorate([
     (0, tsoa_1.Post)("/add_digitaltwin"),
-    __param(0, (0, tsoa_1.Body)()),
-    __param(1, (0, tsoa_1.Query)()),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Body)()),
+    __param(2, (0, tsoa_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Boolean]),
+    __metadata("design:paramtypes", [Object, Object, Boolean]),
     __metadata("design:returntype", Promise)
 ], DigitaltwinController.prototype, "addDigitalTwin", null);
 __decorate([
     (0, tsoa_1.Get)("/get_all_digitaltwins"),
+    __param(0, (0, tsoa_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], DigitaltwinController.prototype, "getAllDigitalTwins", null);
 __decorate([
     (0, tsoa_1.Get)("/get_digitaltwin/{digitaltwinId}"),
-    __param(0, (0, tsoa_1.Path)()),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], DigitaltwinController.prototype, "getDigitalTwin", null);
 __decorate([
     (0, tsoa_1.Put)("/set_as_actual_digitaltwin/{digitaltwinId}"),
-    __param(0, (0, tsoa_1.Path)()),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], DigitaltwinController.prototype, "setActualDigitalTwin", null);
 __decorate([
     (0, tsoa_1.Get)("/get_actual_digitaltwin"),
+    __param(0, (0, tsoa_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], DigitaltwinController.prototype, "getActualDigitalTwin", null);
 __decorate([
     (0, tsoa_1.Get)("/get_digitaltwin_contexts"),
+    __param(0, (0, tsoa_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], DigitaltwinController.prototype, "getDefaultDigitalTwinContexts", null);
 __decorate([
     (0, tsoa_1.Get)("/get_digitaltwin_contexts/{digitaltwinId}"),
-    __param(0, (0, tsoa_1.Path)()),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], DigitaltwinController.prototype, "getDigitalTwinContexts", null);
 __decorate([
     (0, tsoa_1.Put)("/update_digitaltwin/{digitaltwinId}"),
-    __param(0, (0, tsoa_1.Path)()),
-    __param(1, (0, tsoa_1.Body)()),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Path)()),
+    __param(2, (0, tsoa_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", [Object, String, Object]),
     __metadata("design:returntype", Promise)
 ], DigitaltwinController.prototype, "editDigitalTwin", null);
 __decorate([
     (0, tsoa_1.Delete)("/delete_digitaltwin/{digitaltwinId}"),
-    __param(0, (0, tsoa_1.Path)()),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], DigitaltwinController.prototype, "removeDigitalTwin", null);
 __decorate([
     (0, tsoa_1.Delete)("/delete_actual_digitaltwin"),
+    __param(0, (0, tsoa_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], DigitaltwinController.prototype, "removeActualDigitaTwin", null);
 DigitaltwinController = __decorate([

@@ -1,54 +1,55 @@
 import { IProfile, IProfileAuthEdit, IProfileData } from "../interfaces";
 import { Controller } from "tsoa";
+import * as express from "express";
 export declare class AppProfileController extends Controller {
     constructor();
-    createAppProfile(data: IProfile): Promise<IProfileData | {
+    createAppProfile(req: express.Request, data: IProfile): Promise<IProfileData | {
         message: string;
     }>;
-    getAppProfile(id: string): Promise<IProfileData | {
+    getAppProfile(req: express.Request, id: string): Promise<IProfileData | {
         message: string;
     }>;
-    getAllAppProfile(): Promise<IProfileData[] | {
+    getAllAppProfile(req: express.Request): Promise<IProfileData[] | {
         message: string;
     }>;
-    updateAppProfile(id: string, data: IProfileAuthEdit): Promise<IProfileData | {
+    updateAppProfile(req: express.Request, id: string, data: IProfileAuthEdit): Promise<IProfileData | {
         message: string;
     }>;
-    deleteAppProfile(id: string): Promise<{
+    deleteAppProfile(req: express.Request, id: string): Promise<{
         message: string;
     }>;
-    authorizeProfileToAccessContext(profileId: string, data: {
+    authorizeProfileToAccessContext(req: express.Request, profileId: string, data: {
         contextIds: string | string[];
         digitalTwinId?: string;
     }): Promise<any[] | {
         message: any;
     }>;
-    authorizeProfileToAccessApis(profileId: string, data: {
+    authorizeProfileToAccessApis(req: express.Request, profileId: string, data: {
         apiIds: string | string[];
     }): Promise<any[] | {
         message: any;
     }>;
-    unauthorizeProfileToAccessContext(profileId: string, data: {
+    unauthorizeProfileToAccessContext(req: express.Request, profileId: string, data: {
         contextIds: string | string[];
         digitalTwinId?: string;
     }): Promise<any[] | {
         message: any;
     }>;
-    unauthorizeProfileToAccessApis(profileId: string, data: {
+    unauthorizeProfileToAccessApis(req: express.Request, profileId: string, data: {
         apiIds: string | string[];
     }): Promise<any[] | {
         message: any;
     }>;
-    profileHasAccessToContext(profileId: string, contextId: string, digitalTwinId?: string): Promise<boolean | {
+    profileHasAccessToContext(req: express.Request, profileId: string, contextId: string, digitalTwinId?: string): Promise<boolean | {
         message: any;
     }>;
-    profileHasAccessToApi(profileId: string, apiId: string): Promise<boolean | {
+    profileHasAccessToApi(req: express.Request, profileId: string, apiId: string): Promise<boolean | {
         message: any;
     }>;
-    getAuthorizedContexts(profileId: string, digitalTwinId?: string): Promise<any[] | {
+    getAuthorizedContexts(req: express.Request, profileId: string, digitalTwinId?: string): Promise<any[] | {
         message: any;
     }>;
-    getAuthorizedApis(profileId: string): Promise<any[] | {
+    getAuthorizedApis(req: express.Request, profileId: string): Promise<any[] | {
         message: any;
     }>;
 }

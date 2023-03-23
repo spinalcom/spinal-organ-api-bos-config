@@ -49,15 +49,22 @@ const constant_1 = require("../constant");
 const services_1 = require("../services");
 const tsoa_1 = require("tsoa");
 const profileUtils_1 = require("../utils/profileUtils");
+const express = require("express");
+const AuthError_1 = require("../security/AuthError");
+const authentication_1 = require("../security/authentication");
+const adminProfile_service_1 = require("../services/adminProfile.service");
 const serviceInstance = services_1.UserProfileService.getInstance();
 let UserProfileController = class UserProfileController extends tsoa_1.Controller {
     constructor() {
         super();
     }
     // @Security(SECURITY_NAME.admin)
-    createUserProfile(data) {
+    createUserProfile(req, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 if (!data.name) {
                     this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
                     return { message: "The profile name is required" };
@@ -67,14 +74,19 @@ let UserProfileController = class UserProfileController extends tsoa_1.Controlle
                 return (0, profileUtils_1._formatProfile)(profile);
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
-    getUserProfile(id) {
+    // @Security(SECURITY_NAME.profile)
+    getUserProfile(req, id) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const profileId = yield (0, authentication_1.getProfileId)(req);
+                const isAdmin = adminProfile_service_1.AdminProfileService.getInstance().adminNode.getId().get() === profileId;
+                if (!isAdmin && profileId !== id)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const data = yield serviceInstance.getUserProfile(id);
                 if (data) {
                     this.setStatus(constant_1.HTTP_CODES.OK);
@@ -84,29 +96,54 @@ let UserProfileController = class UserProfileController extends tsoa_1.Controlle
                 return { message: `no profile found for ${id}` };
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+                return { message: error.message };
+            }
+        });
+    }
+    // @Security(SECURITY_NAME.profile)
+    getUserProfileByToken(req) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const profileId = yield (0, authentication_1.getProfileId)(req);
+                const data = yield serviceInstance.getUserProfile(profileId);
+                if (data) {
+                    this.setStatus(constant_1.HTTP_CODES.OK);
+                    return (0, profileUtils_1._formatProfile)(data);
+                }
+                // this.setStatus(HTTP_CODES.NOT_FOUND)
+                // return { message: `no profile found for ${id}` };
+            }
+            catch (error) {
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
     // @Security(SECURITY_NAME.admin)
-    getAllUserProfile() {
+    getAllUserProfile(req) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const nodes = (yield serviceInstance.getAllUserProfile()) || [];
                 this.setStatus(constant_1.HTTP_CODES.OK);
                 return nodes.map(el => (0, profileUtils_1._formatProfile)(el));
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
     // @Security(SECURITY_NAME.admin)
-    updateUserProfile(id, data) {
+    updateUserProfile(req, id, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const node = yield serviceInstance.updateUserProfile(id, data);
                 if (node) {
                     this.setStatus(constant_1.HTTP_CODES.OK);
@@ -116,71 +153,88 @@ let UserProfileController = class UserProfileController extends tsoa_1.Controlle
                 return { message: `no profile found for ${id}` };
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
     // @Security(SECURITY_NAME.admin)
-    deleteUserProfile(id) {
+    deleteUserProfile(req, id) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 yield serviceInstance.deleteUserProfile(id);
                 this.setStatus(constant_1.HTTP_CODES.OK);
                 return { message: "user profile deleted" };
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
-    getAuthorizedContexts(profileId, digitalTwinId) {
+    // @Security(SECURITY_NAME.profile)
+    getAuthorizedContexts(req, profileId, digitalTwinId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const id = yield (0, authentication_1.getProfileId)(req);
+                const isAdmin = adminProfile_service_1.AdminProfileService.getInstance().adminNode.getId().get() === id;
+                if (!isAdmin && profileId !== id)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const contexts = yield serviceInstance.getAuthorizedContexts(profileId, digitalTwinId);
                 this.setStatus(constant_1.HTTP_CODES.OK);
                 return (0, profileUtils_1._getNodeListInfo)(contexts);
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
-    getAuthorizedApps(profileId) {
+    // @Security(SECURITY_NAME.profile)
+    getAuthorizedApps(req, profileId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const id = yield (0, authentication_1.getProfileId)(req);
+                const isAdmin = adminProfile_service_1.AdminProfileService.getInstance().adminNode.getId().get() === id;
+                if (!isAdmin && profileId !== id)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const contexts = yield serviceInstance.getAuthorizedApps(profileId);
                 this.setStatus(constant_1.HTTP_CODES.OK);
                 return (0, profileUtils_1._getNodeListInfo)(contexts);
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
     // @Security(SECURITY_NAME.admin)
-    getAuthorizedAdminApps(profileId) {
+    getAuthorizedAdminApps(req, profileId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const contexts = yield serviceInstance.getAuthorizedAdminApps(profileId);
                 this.setStatus(constant_1.HTTP_CODES.OK);
                 return (0, profileUtils_1._getNodeListInfo)(contexts);
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
     // @Security(SECURITY_NAME.admin)
-    authorizeProfileToAccessContext(profileId, data) {
+    authorizeProfileToAccessContext(req, profileId, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const contexts = yield serviceInstance.authorizeProfileToAccessContext(profileId, data.contextIds, data.digitalTwinId);
                 if (contexts) {
                     this.setStatus(constant_1.HTTP_CODES.OK);
@@ -190,15 +244,18 @@ let UserProfileController = class UserProfileController extends tsoa_1.Controlle
                 return { message: "something went wrong please check your input" };
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
     // @Security(SECURITY_NAME.admin)
-    authorizeProfileToAccessApps(profileId, data) {
+    authorizeProfileToAccessApps(req, profileId, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const apps = yield serviceInstance.authorizeProfileToAccessApps(profileId, data.appIds);
                 if (apps) {
                     this.setStatus(constant_1.HTTP_CODES.OK);
@@ -208,15 +265,18 @@ let UserProfileController = class UserProfileController extends tsoa_1.Controlle
                 return { message: "something went wrong please check your input" };
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
     // @Security(SECURITY_NAME.admin)
-    unauthorizeProfileToAccessContext(profileId, data) {
+    unauthorizeProfileToAccessContext(req, profileId, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const contexts = yield serviceInstance.unauthorizeProfileToAccessContext(profileId, data.contextIds, data.digitalTwinId);
                 if (contexts) {
                     this.setStatus(constant_1.HTTP_CODES.OK);
@@ -226,15 +286,18 @@ let UserProfileController = class UserProfileController extends tsoa_1.Controlle
                 return { message: "something went wrong please check your input" };
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
     // @Security(SECURITY_NAME.admin)
-    unauthorizeProfileToAccessApps(profileId, data) {
+    unauthorizeProfileToAccessApps(req, profileId, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const apps = yield serviceInstance.unauthorizeProfileToAccessApps(profileId, data.appIds);
                 if (apps) {
                     this.setStatus(constant_1.HTTP_CODES.OK);
@@ -244,35 +307,42 @@ let UserProfileController = class UserProfileController extends tsoa_1.Controlle
                 return { message: "something went wrong please check your input" };
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
     // @Security(SECURITY_NAME.admin)
-    profileHasAccessToContext(profileId, contextId, digitalTwinId) {
+    profileHasAccessToContext(req, profileId, contextId, digitalTwinId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const hasAccess = yield serviceInstance.profileHasAccessToContext(profileId, contextId, digitalTwinId);
                 this.setStatus(constant_1.HTTP_CODES.OK);
-                return hasAccess;
+                return hasAccess ? true : false;
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
     }
     // @Security(SECURITY_NAME.admin)
-    profileHasAccessToApp(profileId, appId) {
+    profileHasAccessToApp(req, profileId, appId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
+                if (!isAdmin)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
                 const hasAccess = yield serviceInstance.profileHasAccessToApp(profileId, appId);
                 this.setStatus(constant_1.HTTP_CODES.OK);
-                return hasAccess;
+                return hasAccess ? true : false;
+                ;
             }
             catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
                 return { message: error.message };
             }
         });
@@ -280,109 +350,129 @@ let UserProfileController = class UserProfileController extends tsoa_1.Controlle
 };
 __decorate([
     (0, tsoa_1.Post)("/create_profile"),
-    __param(0, (0, tsoa_1.Body)()),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], UserProfileController.prototype, "createUserProfile", null);
 __decorate([
-    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.profile),
     (0, tsoa_1.Get)("/get_profile/{id}"),
-    __param(0, (0, tsoa_1.Path)()),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], UserProfileController.prototype, "getUserProfile", null);
 __decorate([
-    (0, tsoa_1.Get)("/get_all_profile"),
+    (0, tsoa_1.Get)("/get_profile"),
+    __param(0, (0, tsoa_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UserProfileController.prototype, "getUserProfileByToken", null);
+__decorate([
+    (0, tsoa_1.Get)("/get_all_profile"),
+    __param(0, (0, tsoa_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], UserProfileController.prototype, "getAllUserProfile", null);
 __decorate([
     (0, tsoa_1.Put)("/edit_profile/{id}"),
-    __param(0, (0, tsoa_1.Path)()),
-    __param(1, (0, tsoa_1.Body)()),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Path)()),
+    __param(2, (0, tsoa_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", [Object, String, Object]),
     __metadata("design:returntype", Promise)
 ], UserProfileController.prototype, "updateUserProfile", null);
 __decorate([
     (0, tsoa_1.Delete)("/delete_profile/{id}"),
-    __param(0, (0, tsoa_1.Path)()),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], UserProfileController.prototype, "deleteUserProfile", null);
 __decorate([
     (0, tsoa_1.Get)("/get_authorized_contexts/{profileId}"),
-    __param(0, (0, tsoa_1.Path)()),
-    __param(1, (0, tsoa_1.Query)()),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Path)()),
+    __param(2, (0, tsoa_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:paramtypes", [Object, String, String]),
     __metadata("design:returntype", Promise)
 ], UserProfileController.prototype, "getAuthorizedContexts", null);
 __decorate([
     (0, tsoa_1.Get)("/get_authorized_apps/{profileId}"),
-    __param(0, (0, tsoa_1.Path)()),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], UserProfileController.prototype, "getAuthorizedApps", null);
 __decorate([
     (0, tsoa_1.Get)("/get_authorized_admin_apps/{profileId}"),
-    __param(0, (0, tsoa_1.Path)()),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], UserProfileController.prototype, "getAuthorizedAdminApps", null);
 __decorate([
     (0, tsoa_1.Post)("/authorize_profile_to_access_contexts/{profileId}"),
-    __param(0, (0, tsoa_1.Path)()),
-    __param(1, (0, tsoa_1.Body)()),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Path)()),
+    __param(2, (0, tsoa_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", [Object, String, Object]),
     __metadata("design:returntype", Promise)
 ], UserProfileController.prototype, "authorizeProfileToAccessContext", null);
 __decorate([
     (0, tsoa_1.Post)("/authorize_profile_to_access_apps/{profileId}"),
-    __param(0, (0, tsoa_1.Path)()),
-    __param(1, (0, tsoa_1.Body)()),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Path)()),
+    __param(2, (0, tsoa_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", [Object, String, Object]),
     __metadata("design:returntype", Promise)
 ], UserProfileController.prototype, "authorizeProfileToAccessApps", null);
 __decorate([
     (0, tsoa_1.Post)("/unauthorize_profile_to_access_contexts/{profileId}"),
-    __param(0, (0, tsoa_1.Path)()),
-    __param(1, (0, tsoa_1.Body)()),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Path)()),
+    __param(2, (0, tsoa_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", [Object, String, Object]),
     __metadata("design:returntype", Promise)
 ], UserProfileController.prototype, "unauthorizeProfileToAccessContext", null);
 __decorate([
     (0, tsoa_1.Post)("/unauthorize_profile_to_access_apps/{profileId}"),
-    __param(0, (0, tsoa_1.Path)()),
-    __param(1, (0, tsoa_1.Body)()),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Path)()),
+    __param(2, (0, tsoa_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", [Object, String, Object]),
     __metadata("design:returntype", Promise)
 ], UserProfileController.prototype, "unauthorizeProfileToAccessApps", null);
 __decorate([
     (0, tsoa_1.Get)("/profile_has_access_to_context/{profileId}/{contextId}"),
-    __param(0, (0, tsoa_1.Path)()),
+    __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
-    __param(2, (0, tsoa_1.Query)()),
+    __param(2, (0, tsoa_1.Path)()),
+    __param(3, (0, tsoa_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String]),
+    __metadata("design:paramtypes", [Object, String, String, String]),
     __metadata("design:returntype", Promise)
 ], UserProfileController.prototype, "profileHasAccessToContext", null);
 __decorate([
     (0, tsoa_1.Get)("/profile_has_access_to_app/{profileId}/{appId}"),
-    __param(0, (0, tsoa_1.Path)()),
+    __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
+    __param(2, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:paramtypes", [Object, String, String]),
     __metadata("design:returntype", Promise)
 ], UserProfileController.prototype, "profileHasAccessToApp", null);
 UserProfileController = __decorate([
