@@ -40,12 +40,15 @@ const server_1 = require("./server");
 const services_1 = require("./services");
 const SpinalAPIMiddleware_1 = require("./middlewares/SpinalAPIMiddleware");
 const spinal_organ_api_server_1 = require("spinal-organ-api-server");
+const SpinalIOMiddleware_1 = require("./middlewares/SpinalIOMiddleware");
 const conn = spinal_core_connectorjs_type_1.spinalCore.connect(`${process.env.SPINALHUB_PROTOCOL}://${process.env.USER_ID}:${process.env.USER_MDP}@${process.env.HUB_HOST}:${process.env.HUB_PORT}/`);
 configFile_service_1.configServiceInstance.init(conn).then(() => __awaiter(void 0, void 0, void 0, function* () {
     const { app, server } = yield (0, server_1.default)(conn);
     yield services_1.DigitalTwinService.getInstance().getActualDigitalTwin(true);
     const spinalAPIMiddleware = SpinalAPIMiddleware_1.default.getInstance(conn);
-    (0, spinal_organ_api_server_1.runServerRest)(server, app, spinalAPIMiddleware);
+    const spinalIOMiddleware = SpinalIOMiddleware_1.default.getInstance(conn);
+    const log_body = Number(process.env.LOG_BODY) == 1 ? true : false;
+    (0, spinal_organ_api_server_1.runServerRest)(server, app, spinalAPIMiddleware, spinalIOMiddleware, log_body);
 })).catch((err) => {
     console.error(err);
 });

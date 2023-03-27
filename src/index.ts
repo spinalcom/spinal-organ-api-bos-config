@@ -31,6 +31,7 @@ import expressServer from './server';
 import { DigitalTwinService } from './services';
 import SpinalAPIMiddleware from './middlewares/SpinalAPIMiddleware';
 import { runServerRest } from 'spinal-organ-api-server';
+import SpinalIOMiddleware from './middlewares/SpinalIOMiddleware';
 
 
 const conn = spinalCore.connect(`${process.env.SPINALHUB_PROTOCOL}://${process.env.USER_ID}:${process.env.USER_MDP}@${process.env.HUB_HOST}:${process.env.HUB_PORT}/`);
@@ -39,8 +40,12 @@ configServiceInstance.init(conn).then(async () => {
 
   const { app, server } = await expressServer(conn);
   await DigitalTwinService.getInstance().getActualDigitalTwin(true);
+
   const spinalAPIMiddleware = SpinalAPIMiddleware.getInstance(conn);
-  runServerRest(server,app,spinalAPIMiddleware);
+  const spinalIOMiddleware = SpinalIOMiddleware.getInstance(conn);
+  const log_body = Number(process.env.LOG_BODY) == 1 ? true : false;
+
+  runServerRest(server, app, spinalAPIMiddleware, spinalIOMiddleware, log_body);
 
 }).catch((err: Error) => {
   console.error(err);
