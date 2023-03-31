@@ -29,7 +29,7 @@ import { IApp } from "../interfaces";
 import * as express from "express";
 import { getToken } from "../security/utils";
 import { AuthError } from "../security/AuthError";
-import { checkIfItIsAdmin, getProfileId } from "../security/authentication";
+import { checkAndGetTokenInfo, checkIfItIsAdmin, getProfileId } from "../security/authentication";
 
 const appServiceInstance = AppService.getInstance();
 
@@ -326,10 +326,7 @@ export class AppsController extends Controller {
     @Get("/get_favorite_apps")
     public async getFavoriteApps(@Request() request: express.Request) {
         try {
-            const token = getToken(request);
-            if (!token) throw { code: HTTP_CODES.UNAUTHORIZED, message: SECURITY_MESSAGES.INVALID_TOKEN };
-            const tokenInfo: any = await TokenService.getInstance().tokenIsValid(token);
-            if (!tokenInfo) throw new AuthError(SECURITY_MESSAGES.INVALID_TOKEN);
+            const tokenInfo: any = await checkAndGetTokenInfo(request);
 
             let userName = tokenInfo.userInfo.userName;
 
@@ -347,10 +344,7 @@ export class AppsController extends Controller {
     @Post("/add_app_to_favoris")
     public async addAppToFavoris(@Request() request: express.Request, @Body() data: { appIds: string[] }) {
         try {
-            const token = getToken(request);
-            if (!token) throw { code: HTTP_CODES.UNAUTHORIZED, message: SECURITY_MESSAGES.INVALID_TOKEN };
-            const tokenInfo: any = await TokenService.getInstance().tokenIsValid(token);
-            if (!tokenInfo) throw new AuthError(SECURITY_MESSAGES.INVALID_TOKEN);
+            const tokenInfo: any = await checkAndGetTokenInfo(request);
 
             let profileId = tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId;
             let userName = tokenInfo.userInfo.userName;
@@ -369,10 +363,7 @@ export class AppsController extends Controller {
     @Post("/remove_app_from_favoris")
     public async removeAppFromFavoris(@Request() request: express.Request, @Body() data: { appIds: string[] }) {
         try {
-            const token = getToken(request);
-            if (!token) throw { code: HTTP_CODES.UNAUTHORIZED, message: SECURITY_MESSAGES.INVALID_TOKEN };
-            const tokenInfo: any = await TokenService.getInstance().tokenIsValid(token);
-            if (!tokenInfo) throw new AuthError(SECURITY_MESSAGES.INVALID_TOKEN);
+            const tokenInfo: any = await checkAndGetTokenInfo(request);
 
             let profileId = tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId;
             let userName = tokenInfo.userInfo.userName;

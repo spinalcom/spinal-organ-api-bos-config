@@ -34,15 +34,7 @@ export async function expressAuthentication(request: express.Request, securityNa
 
     if (securityName === SECURITY_NAME.all) return;
 
-    // check token validity
-    const token = getToken(request);
-    if (!token) throw new AuthError(SECURITY_MESSAGES.INVALID_TOKEN);
-
-    const tokenInstance = TokenService.getInstance();
-
-    const tokenInfo: any = await tokenInstance.tokenIsValid(token);
-    if (!tokenInfo) throw new AuthError(SECURITY_MESSAGES.INVALID_TOKEN);
-    //end of token validity checking
+    const tokenInfo: any = await checkAndGetTokenInfo(request);
 
     // get profile Node
     let profileId = tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId || tokenInfo.profile.appProfileBosConfigId;
@@ -60,7 +52,6 @@ export async function expressAuthentication(request: express.Request, securityNa
         if (!isAuthorized) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
     }
 
-
     (<any>request).profileId = profileId;
 
     return tokenInfo;
@@ -68,6 +59,25 @@ export async function expressAuthentication(request: express.Request, securityNa
 
 
 export async function checkIfItIsAdmin(request: express.Request): Promise<boolean> {
+
+    let profileId = await getProfileId(request);
+
+    return AdminProfileService.getInstance().adminNode.getId().get() === profileId;
+}
+
+
+export async function getProfileId(request: express.Request): Promise<string> {
+    const tokenInfo: any = await checkAndGetTokenInfo(request);
+
+    let profileId = tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId || tokenInfo.profile.appProfileBosConfigId;
+    if (!profileId) throw new AuthError(SECURITY_MESSAGES.NO_PROFILE_FOUND);
+
+    return profileId;
+}
+
+
+export async function checkAndGetTokenInfo(request: express.Request) {
+    // check token validity
     const token = getToken(request);
     if (!token) throw new AuthError(SECURITY_MESSAGES.INVALID_TOKEN);
 
@@ -76,20 +86,5 @@ export async function checkIfItIsAdmin(request: express.Request): Promise<boolea
     const tokenInfo: any = await tokenInstance.tokenIsValid(token);
     if (!tokenInfo) throw new AuthError(SECURITY_MESSAGES.INVALID_TOKEN);
 
-    // get profile Node
-    let profileId = tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId || tokenInfo.profile.appProfileBosConfigId;
-    if (!profileId) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
-
-    return AdminProfileService.getInstance().adminNode.getId().get() === profileId;
-}
-
-
-export async function getProfileId(request: express.Request): Promise<string> {
-    const token = getToken(request);
-    if (!token) throw new AuthError(SECURITY_MESSAGES.INVALID_TOKEN);
-
-    const profileId = await TokenService.getInstance().getProfileIdByToken(token);
-    if (!profileId) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
-
-    return profileId;
+    return tokenInfo;
 }
