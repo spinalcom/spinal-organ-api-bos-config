@@ -28,8 +28,9 @@ import { AppProfileService } from "../services";
 import { Route, Tags, Controller, Post, Get, Put, Delete, Body, Path, Security, Query, Request } from "tsoa";
 import { _formatProfile, _getNodeListInfo } from '../utils/profileUtils'
 import * as express from "express";
-import { checkIfItIsAdmin } from "../security/authentication";
+import { checkIfItIsAdmin, getProfileId } from "../security/authentication";
 import { AuthError } from "../security/AuthError";
+import { AdminProfileService } from "../services/adminProfile.service";
 
 const serviceInstance = AppProfileService.getInstance();
 
@@ -268,13 +269,15 @@ export class AppProfileController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.admin)
+    // @Security(SECURITY_NAME.profile)
     @Get("/get_authorized_contexts/{profileId}")
     public async getAuthorizedContexts(@Request() req: express.Request, @Path() profileId: string, @Query() digitalTwinId?: string) {
         try {
 
-            const isAdmin = await checkIfItIsAdmin(req);
-            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+            const id = await getProfileId(req);
+            const isAdmin = AdminProfileService.getInstance().adminNode.getId().get() === id;
+
+            if (!isAdmin && profileId !== id) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
             const contexts = await serviceInstance.getAuthorizedContexts(profileId, digitalTwinId);
             this.setStatus(HTTP_CODES.OK);
