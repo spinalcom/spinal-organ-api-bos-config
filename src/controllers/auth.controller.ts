@@ -55,7 +55,7 @@ export class AuthController extends Controller {
     }
 
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Post("/register_admin")
     public async registerToAdmin(@Request() req: express.Request, @Body() data: { pamInfo: IPamInfo, adminInfo: IAdmin }): Promise<IPamCredential | { message: string }> {
         try {
@@ -72,7 +72,7 @@ export class AuthController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Get("/get_bos_to_auth_credential")
     public async getBosToAdminCredential(@Request() req: express.Request,): Promise<IPamCredential | { message: string }> {
         try {
@@ -93,7 +93,7 @@ export class AuthController extends Controller {
     }
 
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Delete("/delete_admin")
     public async deleteAdmin(@Request() req: express.Request,): Promise<{ message: string }> {
         try {
@@ -111,7 +111,7 @@ export class AuthController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Get("/get_admin_to_bos_credential")
     public async getAdminCredential(@Request() req: express.Request,): Promise<IAdminCredential | { message: string }> {
         try {
@@ -133,7 +133,7 @@ export class AuthController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Put("/update_data")
     public async syncDataToAdmin(@Request() req: express.Request,): Promise<{ message: string }> {
         try {

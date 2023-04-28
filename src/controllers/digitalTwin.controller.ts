@@ -39,7 +39,7 @@ export class DigitaltwinController extends Controller {
         super();
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Post("/add_digitaltwin")
     public async addDigitalTwin(@Request() req: express.Request, @Body() data: { name: string; url: string }, @Query() set_as_actual_digitaltwin?: boolean) {
         try {
@@ -68,7 +68,7 @@ export class DigitaltwinController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Get("/get_all_digitaltwins")
     public async getAllDigitalTwins(@Request() req: express.Request,) {
         try {
@@ -84,7 +84,7 @@ export class DigitaltwinController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Get("/get_digitaltwin/{digitaltwinId}")
     public async getDigitalTwin(@Request() req: express.Request, @Path() digitaltwinId: string) {
         try {
@@ -105,7 +105,7 @@ export class DigitaltwinController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Put("/set_as_actual_digitaltwin/{digitaltwinId}")
     public async setActualDigitalTwin(@Request() req: express.Request, @Path() digitaltwinId: string) {
         try {
@@ -126,7 +126,7 @@ export class DigitaltwinController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Get("/get_actual_digitaltwin")
     public async getActualDigitalTwin(@Request() req: express.Request,) {
         try {
@@ -148,7 +148,7 @@ export class DigitaltwinController extends Controller {
     }
 
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Get("/get_digitaltwin_contexts")
     public async getDefaultDigitalTwinContexts(@Request() req: express.Request,) {
         try {
@@ -164,7 +164,7 @@ export class DigitaltwinController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Get("/get_digitaltwin_contexts/{digitaltwinId}")
     public async getDigitalTwinContexts(@Request() req: express.Request, @Path() digitaltwinId: string) {
         try {
@@ -180,7 +180,7 @@ export class DigitaltwinController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Put("/update_digitaltwin/{digitaltwinId}")
     public async editDigitalTwin(@Request() req: express.Request, @Path() digitaltwinId: string, @Body() data: { name?: string; url?: string }) {
         try {
@@ -202,7 +202,7 @@ export class DigitaltwinController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Delete("/delete_digitaltwin/{digitaltwinId}")
     public async removeDigitalTwin(@Request() req: express.Request, @Path() digitaltwinId: string) {
         try {
@@ -223,7 +223,7 @@ export class DigitaltwinController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Delete("/delete_actual_digitaltwin")
     public async removeActualDigitaTwin(@Request() req: express.Request,) {
         try {

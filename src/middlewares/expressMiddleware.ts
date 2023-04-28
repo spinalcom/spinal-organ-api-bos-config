@@ -31,7 +31,7 @@ var proxy = require('express-http-proxy');
 import * as swaggerUi from "swagger-ui-express";
 import { ValidateError } from 'tsoa';
 import { AuthError } from '../security/AuthError';
-import { expressAuthentication } from '../security/authentication';
+import { checkBeforeRedirectToApi } from '../security/authentication';
 import * as swaggerJSON from "../swagger/swagger.json";
 import * as bodyParser from "body-parser";
 
@@ -55,7 +55,7 @@ const swaggerOption = {
 }
 
 export function useHubProxy(app: express.Express) {
-    const HUB_HOST = `http://${process.env.HUB_HOST}:${process.env.HUB_PORT}`;
+    const HUB_HOST = `${process.env.SPINALHUB_PROTOCOL}://${process.env.HUB_HOST}:${process.env.HUB_PORT}`;
     const proxyHub = proxy(HUB_HOST, {
         limit: '1tb',
         proxyReqPathResolver: function (req: any) { return req.originalUrl; }
@@ -142,7 +142,7 @@ export function authenticateRequest(app: express.Application) {
             const isAdmin = isAdminRoute(req.url);
             if (isAdmin) return next();
 
-            await expressAuthentication(req, SECURITY_NAME.profile);
+            await checkBeforeRedirectToApi(req, SECURITY_NAME.profile);
         } catch (error) {
             err = error
         }

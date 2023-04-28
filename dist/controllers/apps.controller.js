@@ -49,7 +49,6 @@ const services_1 = require("../services");
 const tsoa_1 = require("tsoa");
 const constant_1 = require("../constant");
 const express = require("express");
-const utils_1 = require("../security/utils");
 const AuthError_1 = require("../security/AuthError");
 const authentication_1 = require("../security/authentication");
 const appServiceInstance = services_1.AppService.getInstance();
@@ -57,7 +56,6 @@ let AppsController = class AppsController extends tsoa_1.Controller {
     constructor() {
         super();
     }
-    // @Security(SECURITY_NAME.admin)
     createAdminApp(req, appInfo) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -78,7 +76,6 @@ let AppsController = class AppsController extends tsoa_1.Controller {
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     createBuildingApp(req, appInfo) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -99,7 +96,6 @@ let AppsController = class AppsController extends tsoa_1.Controller {
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     getAllAdminApps(req) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -116,7 +112,6 @@ let AppsController = class AppsController extends tsoa_1.Controller {
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     getAllBuildingApps(req) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -133,7 +128,6 @@ let AppsController = class AppsController extends tsoa_1.Controller {
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     getAdminApp(req, appId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -154,7 +148,6 @@ let AppsController = class AppsController extends tsoa_1.Controller {
             }
         });
     }
-    // @Security(SECURITY_NAME.profile)
     getBuildingApp(req, appId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -176,7 +169,6 @@ let AppsController = class AppsController extends tsoa_1.Controller {
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     updateAdminApp(req, appId, newInfo) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -197,7 +189,6 @@ let AppsController = class AppsController extends tsoa_1.Controller {
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     updateBuildingApp(req, appId, newInfo) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -218,7 +209,6 @@ let AppsController = class AppsController extends tsoa_1.Controller {
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     deleteAdminApp(req, appId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -237,7 +227,6 @@ let AppsController = class AppsController extends tsoa_1.Controller {
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     deleteBuildingApp(req, appId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -256,7 +245,6 @@ let AppsController = class AppsController extends tsoa_1.Controller {
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     uploadAdminApp(req, file) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -287,7 +275,6 @@ let AppsController = class AppsController extends tsoa_1.Controller {
             }
         });
     }
-    // @Security(SECURITY_NAME.admin)
     uploadBuildingApp(req, file) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -317,16 +304,10 @@ let AppsController = class AppsController extends tsoa_1.Controller {
             }
         });
     }
-    // @Security(SECURITY_NAME.profile)
     getFavoriteApps(request) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const token = (0, utils_1.getToken)(request);
-                if (!token)
-                    throw { code: constant_1.HTTP_CODES.UNAUTHORIZED, message: constant_1.SECURITY_MESSAGES.INVALID_TOKEN };
-                const tokenInfo = yield services_1.TokenService.getInstance().tokenIsValid(token);
-                if (!tokenInfo)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.INVALID_TOKEN);
+                const tokenInfo = yield (0, authentication_1.checkAndGetTokenInfo)(request);
                 let userName = tokenInfo.userInfo.userName;
                 const nodes = yield services_1.UserListService.getInstance().getFavoriteApps(userName);
                 this.setStatus(constant_1.HTTP_CODES.OK);
@@ -338,16 +319,10 @@ let AppsController = class AppsController extends tsoa_1.Controller {
             }
         });
     }
-    // @Security(SECURITY_NAME.profile)
     addAppToFavoris(request, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const token = (0, utils_1.getToken)(request);
-                if (!token)
-                    throw { code: constant_1.HTTP_CODES.UNAUTHORIZED, message: constant_1.SECURITY_MESSAGES.INVALID_TOKEN };
-                const tokenInfo = yield services_1.TokenService.getInstance().tokenIsValid(token);
-                if (!tokenInfo)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.INVALID_TOKEN);
+                const tokenInfo = yield (0, authentication_1.checkAndGetTokenInfo)(request);
                 let profileId = tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId;
                 let userName = tokenInfo.userInfo.userName;
                 const nodes = yield services_1.UserListService.getInstance().addFavoriteApp(userName, profileId, data.appIds);
@@ -360,16 +335,10 @@ let AppsController = class AppsController extends tsoa_1.Controller {
             }
         });
     }
-    // @Security(SECURITY_NAME.profile)
     removeAppFromFavoris(request, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const token = (0, utils_1.getToken)(request);
-                if (!token)
-                    throw { code: constant_1.HTTP_CODES.UNAUTHORIZED, message: constant_1.SECURITY_MESSAGES.INVALID_TOKEN };
-                const tokenInfo = yield services_1.TokenService.getInstance().tokenIsValid(token);
-                if (!tokenInfo)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.INVALID_TOKEN);
+                const tokenInfo = yield (0, authentication_1.checkAndGetTokenInfo)(request);
                 let profileId = tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId;
                 let userName = tokenInfo.userInfo.userName;
                 const nodes = yield services_1.UserListService.getInstance().removeFavoriteApp(userName, profileId, data.appIds);
@@ -384,6 +353,7 @@ let AppsController = class AppsController extends tsoa_1.Controller {
     }
 };
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Post)("/create_admin_app"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Body)()),
@@ -392,6 +362,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "createAdminApp", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Post)("/create_building_app"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Body)()),
@@ -400,6 +371,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "createBuildingApp", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Get)("/get_all_admin_apps"),
     __param(0, (0, tsoa_1.Request)()),
     __metadata("design:type", Function),
@@ -407,6 +379,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "getAllAdminApps", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Get)("/get_all_building_apps"),
     __param(0, (0, tsoa_1.Request)()),
     __metadata("design:type", Function),
@@ -414,6 +387,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "getAllBuildingApps", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Get)("/get_admin_app/{appId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -422,6 +396,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "getAdminApp", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Get)("/get_building_app/{appId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -430,6 +405,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "getBuildingApp", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Put)("/update_admin_app/{appId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -439,6 +415,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "updateAdminApp", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Put)("/update_building_app/{appId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -448,6 +425,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "updateBuildingApp", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Delete)("/delete_admin_app/{appId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -456,6 +434,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "deleteAdminApp", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Delete)("/delete_building_app/{appId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
@@ -464,6 +443,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "deleteBuildingApp", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Post)("/upload_admin_apps"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.UploadedFile)()),
@@ -472,6 +452,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "uploadAdminApp", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Post)("/upload_building_apps"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.UploadedFile)()),
@@ -480,6 +461,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "uploadBuildingApp", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Get)("/get_favorite_apps"),
     __param(0, (0, tsoa_1.Request)()),
     __metadata("design:type", Function),
@@ -487,6 +469,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "getFavoriteApps", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Post)("/add_app_to_favoris"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Body)()),
@@ -495,6 +478,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "addAppToFavoris", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Post)("/remove_app_from_favoris"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Body)()),

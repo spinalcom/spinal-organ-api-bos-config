@@ -194,6 +194,7 @@ var SECURITY_NAME;
 (function (SECURITY_NAME) {
     SECURITY_NAME["admin"] = "admin";
     SECURITY_NAME["profile"] = "profile";
+    SECURITY_NAME["bearerAuth"] = "bearerAuth";
     SECURITY_NAME["all"] = "all";
 })(SECURITY_NAME = exports.SECURITY_NAME || (exports.SECURITY_NAME = {}));
 exports.EXCLUDES_TYPES = [constants_1.URL_TYPE, constants_1.NOTE_TYPE, constants_1.CATEGORY_TYPE, constants_1.ATTRIBUTE_TYPE, spinal_model_timeseries_1.SpinalTimeSeries.nodeTypeName];

@@ -29,10 +29,50 @@ import { profileHasAccessToApi, getToken } from "./utils";
 import { AuthError } from "./AuthError";
 import { AdminProfileService } from "../services/adminProfile.service";
 
-
-export async function expressAuthentication(request: express.Request, securityName: string, scopes?: string[]): Promise<any> {
-
+export async function expressAuthentication(request: express.Request, securityName?: string, scopes?: string[]) {
     if (securityName === SECURITY_NAME.all) return;
+
+    const token = getToken(request);
+    if (!token) throw new AuthError(SECURITY_MESSAGES.INVALID_TOKEN);
+
+    return token;
+}
+
+
+
+export async function checkIfItIsAdmin(request: express.Request): Promise<boolean> {
+
+    let profileId = await getProfileId(request);
+
+    return AdminProfileService.getInstance().adminNode.getId().get() === profileId;
+}
+
+
+export async function getProfileId(request: express.Request): Promise<string> {
+    const tokenInfo: any = await checkAndGetTokenInfo(request);
+
+    let profileId = tokenInfo.profile?.profileId || tokenInfo.profile?.userProfileBosConfigId || tokenInfo.profile?.appProfileBosConfigId;
+    if (!profileId) throw new AuthError(SECURITY_MESSAGES.NO_PROFILE_FOUND);
+
+    return profileId;
+}
+
+
+export async function checkAndGetTokenInfo(request: express.Request) {
+    // check token validity
+    const token = await expressAuthentication(request);
+
+    const tokenInstance = TokenService.getInstance();
+
+    const tokenInfo: any = await tokenInstance.tokenIsValid(token);
+    if (!tokenInfo) throw new AuthError(SECURITY_MESSAGES.INVALID_TOKEN);
+
+    return tokenInfo;
+}
+
+
+export async function checkBeforeRedirectToApi(request: express.Request, securityName: string, scopes?: string[]): Promise<any> {
+
 
     const tokenInfo: any = await checkAndGetTokenInfo(request);
 
@@ -53,38 +93,6 @@ export async function expressAuthentication(request: express.Request, securityNa
     }
 
     (<any>request).profileId = profileId;
-
-    return tokenInfo;
-}
-
-
-export async function checkIfItIsAdmin(request: express.Request): Promise<boolean> {
-
-    let profileId = await getProfileId(request);
-
-    return AdminProfileService.getInstance().adminNode.getId().get() === profileId;
-}
-
-
-export async function getProfileId(request: express.Request): Promise<string> {
-    const tokenInfo: any = await checkAndGetTokenInfo(request);
-
-    let profileId = tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId || tokenInfo.profile.appProfileBosConfigId;
-    if (!profileId) throw new AuthError(SECURITY_MESSAGES.NO_PROFILE_FOUND);
-
-    return profileId;
-}
-
-
-export async function checkAndGetTokenInfo(request: express.Request) {
-    // check token validity
-    const token = getToken(request);
-    if (!token) throw new AuthError(SECURITY_MESSAGES.INVALID_TOKEN);
-
-    const tokenInstance = TokenService.getInstance();
-
-    const tokenInfo: any = await tokenInstance.tokenIsValid(token);
-    if (!tokenInfo) throw new AuthError(SECURITY_MESSAGES.INVALID_TOKEN);
 
     return tokenInfo;
 }

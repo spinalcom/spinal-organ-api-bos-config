@@ -42,8 +42,7 @@ export class APIController extends Controller {
         super();
     }
 
-
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Post("/create_bos_api_route")
     public async createBosApiRoute(@Request() req: express.Request, @Body() data: IApiRoute): Promise<IApiRoute | { message: string }> {
         try {
@@ -59,7 +58,7 @@ export class APIController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Put("/update_bos_api_route/{id}")
     public async updateBosApiRoute(@Request() req: express.Request, @Body() data: IApiRoute, @Path() id: string): Promise<IApiRoute | { message: string }> {
         try {
@@ -75,7 +74,7 @@ export class APIController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Get("/get_bos_api_route/{id}")
     public async getBosApiRouteById(@Request() req: express.Request, @Path() id: string): Promise<IApiRoute | { message: string }> {
         try {
@@ -96,7 +95,7 @@ export class APIController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Get("/get_all_bos_api_route")
     public async getAllBosApiRoute(@Request() req: any): Promise<IApiRoute[] | { message: string }> {
         try {
@@ -112,7 +111,7 @@ export class APIController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Delete("/delete_bos_api_route/{id}")
     public async deleteBosApiRoute(@Request() req: any, @Path() id): Promise<{ message: string }> {
         try {
@@ -128,7 +127,7 @@ export class APIController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Post("/upload_bos_apis_routes")
     public async uploadBosSwaggerFile(@Request() req: any, @UploadedFile() file): Promise<IApiRoute[] | { message: string }> {
         try {

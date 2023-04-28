@@ -125,6 +125,7 @@ export declare enum SECURITY_MESSAGES {
 export declare enum SECURITY_NAME {
     admin = "admin",
     profile = "profile",
+    bearerAuth = "bearerAuth",
     all = "all"
 }
 export declare const EXCLUDES_TYPES: any[];

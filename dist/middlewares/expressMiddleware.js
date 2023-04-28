@@ -61,7 +61,7 @@ const swaggerOption = {
     customCss: '.topbar-wrapper img {content: url(/admin/logo);} .swagger-ui .topbar {background: #dbdbdb;}',
 };
 function useHubProxy(app) {
-    const HUB_HOST = `http://${process.env.HUB_HOST}:${process.env.HUB_PORT}`;
+    const HUB_HOST = `${process.env.SPINALHUB_PROTOCOL}://${process.env.HUB_HOST}:${process.env.HUB_PORT}`;
     const proxyHub = proxy(HUB_HOST, {
         limit: '1tb',
         proxyReqPathResolver: function (req) { return req.originalUrl; }
@@ -136,7 +136,7 @@ function authenticateRequest(app) {
             const isAdmin = isAdminRoute(req.url);
             if (isAdmin)
                 return next();
-            yield (0, authentication_1.expressAuthentication)(req, constant_1.SECURITY_NAME.profile);
+            yield (0, authentication_1.checkBeforeRedirectToApi)(req, constant_1.SECURITY_NAME.profile);
         }
         catch (error) {
             err = error;

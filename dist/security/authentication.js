@@ -32,7 +32,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getProfileId = exports.checkIfItIsAdmin = exports.expressAuthentication = void 0;
+exports.checkBeforeRedirectToApi = exports.checkAndGetTokenInfo = exports.getProfileId = exports.checkIfItIsAdmin = exports.expressAuthentication = void 0;
 const constant_1 = require("../constant");
 const services_1 = require("../services");
 const utils_1 = require("./utils");
@@ -42,15 +42,46 @@ function expressAuthentication(request, securityName, scopes) {
     return __awaiter(this, void 0, void 0, function* () {
         if (securityName === constant_1.SECURITY_NAME.all)
             return;
-        // check token validity
         const token = (0, utils_1.getToken)(request);
         if (!token)
             throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.INVALID_TOKEN);
+        return token;
+    });
+}
+exports.expressAuthentication = expressAuthentication;
+function checkIfItIsAdmin(request) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let profileId = yield getProfileId(request);
+        return adminProfile_service_1.AdminProfileService.getInstance().adminNode.getId().get() === profileId;
+    });
+}
+exports.checkIfItIsAdmin = checkIfItIsAdmin;
+function getProfileId(request) {
+    var _a, _b, _c;
+    return __awaiter(this, void 0, void 0, function* () {
+        const tokenInfo = yield checkAndGetTokenInfo(request);
+        let profileId = ((_a = tokenInfo.profile) === null || _a === void 0 ? void 0 : _a.profileId) || ((_b = tokenInfo.profile) === null || _b === void 0 ? void 0 : _b.userProfileBosConfigId) || ((_c = tokenInfo.profile) === null || _c === void 0 ? void 0 : _c.appProfileBosConfigId);
+        if (!profileId)
+            throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.NO_PROFILE_FOUND);
+        return profileId;
+    });
+}
+exports.getProfileId = getProfileId;
+function checkAndGetTokenInfo(request) {
+    return __awaiter(this, void 0, void 0, function* () {
+        // check token validity
+        const token = yield expressAuthentication(request);
         const tokenInstance = services_1.TokenService.getInstance();
         const tokenInfo = yield tokenInstance.tokenIsValid(token);
         if (!tokenInfo)
             throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.INVALID_TOKEN);
-        //end of token validity checking
+        return tokenInfo;
+    });
+}
+exports.checkAndGetTokenInfo = checkAndGetTokenInfo;
+function checkBeforeRedirectToApi(request, securityName, scopes) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const tokenInfo = yield checkAndGetTokenInfo(request);
         // get profile Node
         let profileId = tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId || tokenInfo.profile.appProfileBosConfigId;
         if (!profileId)
@@ -70,34 +101,5 @@ function expressAuthentication(request, securityName, scopes) {
         return tokenInfo;
     });
 }
-exports.expressAuthentication = expressAuthentication;
-function checkIfItIsAdmin(request) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const token = (0, utils_1.getToken)(request);
-        if (!token)
-            throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.INVALID_TOKEN);
-        const tokenInstance = services_1.TokenService.getInstance();
-        const tokenInfo = yield tokenInstance.tokenIsValid(token);
-        if (!tokenInfo)
-            throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.INVALID_TOKEN);
-        // get profile Node
-        let profileId = tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId || tokenInfo.profile.appProfileBosConfigId;
-        if (!profileId)
-            throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-        return adminProfile_service_1.AdminProfileService.getInstance().adminNode.getId().get() === profileId;
-    });
-}
-exports.checkIfItIsAdmin = checkIfItIsAdmin;
-function getProfileId(request) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const token = (0, utils_1.getToken)(request);
-        if (!token)
-            throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.INVALID_TOKEN);
-        const profileId = yield services_1.TokenService.getInstance().getProfileIdByToken(token);
-        if (!profileId)
-            throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-        return profileId;
-    });
-}
-exports.getProfileId = getProfileId;
+exports.checkBeforeRedirectToApi = checkBeforeRedirectToApi;
 //# sourceMappingURL=authentication.js.map

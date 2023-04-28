@@ -42,7 +42,7 @@ export class UserProfileController extends Controller {
         super();
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Post("/create_profile")
     public async createUserProfile(@Request() req: express.Request, @Body() data: IProfile): Promise<IProfileData | { message: string }> {
         try {
@@ -66,7 +66,7 @@ export class UserProfileController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.profile)
+    @Security(SECURITY_NAME.bearerAuth)
     @Get("/get_profile/{id}")
     public async getUserProfile(@Request() req: express.Request, @Path() id: string): Promise<IProfileData | { message: string }> {
         try {
@@ -89,7 +89,7 @@ export class UserProfileController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.profile)
+    @Security(SECURITY_NAME.bearerAuth)
     @Get("/get_profile")
     public async getUserProfileByToken(@Request() req: express.Request): Promise<IProfileData | { message: string }> {
         try {
@@ -108,7 +108,7 @@ export class UserProfileController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Get("/get_all_profile")
     public async getAllUserProfile(@Request() req: express.Request): Promise<IProfileData[] | { message: string }> {
         try {
@@ -125,7 +125,7 @@ export class UserProfileController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Put("/edit_profile/{id}")
     public async updateUserProfile(@Request() req: express.Request, @Path() id: string, @Body() data: IProfileAuthEdit): Promise<IProfileData | { message: string }> {
         try {
@@ -148,7 +148,7 @@ export class UserProfileController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Delete("/delete_profile/{id}")
     public async deleteUserProfile(@Request() req: express.Request, @Path() id: string): Promise<{ message: string }> {
         try {
@@ -167,7 +167,7 @@ export class UserProfileController extends Controller {
     }
 
 
-    // @Security(SECURITY_NAME.profile)
+    @Security(SECURITY_NAME.bearerAuth)
     @Get("/get_authorized_contexts/{profileId}")
     public async getAuthorizedContexts(@Request() req: express.Request, @Path() profileId: string, @Query() digitalTwinId?: string) {
         try {
@@ -185,7 +185,7 @@ export class UserProfileController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.profile)
+    @Security(SECURITY_NAME.bearerAuth)
     @Get("/get_authorized_apps/{profileId}")
     public async getAuthorizedApps(@Request() req: express.Request, @Path() profileId: string) {
         try {
@@ -203,7 +203,7 @@ export class UserProfileController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Get("/get_authorized_admin_apps/{profileId}")
     public async getAuthorizedAdminApps(@Request() req: express.Request, @Path() profileId: string) {
         try {
@@ -221,7 +221,7 @@ export class UserProfileController extends Controller {
 
 
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Post("/authorize_profile_to_access_contexts/{profileId}")
     public async authorizeProfileToAccessContext(@Request() req: express.Request, @Path() profileId: string, @Body() data: { contextIds: string | string[], digitalTwinId?: string }) {
         try {
@@ -242,7 +242,7 @@ export class UserProfileController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Post("/authorize_profile_to_access_apps/{profileId}")
     public async authorizeProfileToAccessApps(@Request() req: express.Request, @Path() profileId: string, @Body() data: { appIds: string | string[] }) {
         try {
@@ -263,7 +263,7 @@ export class UserProfileController extends Controller {
     }
 
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Post("/unauthorize_profile_to_access_contexts/{profileId}")
     public async unauthorizeProfileToAccessContext(@Request() req: express.Request, @Path() profileId: string, @Body() data: { contextIds: string | string[], digitalTwinId?: string }) {
         try {
@@ -284,7 +284,7 @@ export class UserProfileController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Post("/unauthorize_profile_to_access_apps/{profileId}")
     public async unauthorizeProfileToAccessApps(@Request() req: express.Request, @Path() profileId: string, @Body() data: { appIds: string | string[] }) {
         try {
@@ -305,7 +305,7 @@ export class UserProfileController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Get("/profile_has_access_to_context/{profileId}/{contextId}")
     public async profileHasAccessToContext(@Request() req: express.Request, @Path() profileId: string, @Path() contextId: string, @Query() digitalTwinId?: string) {
         try {
@@ -321,7 +321,7 @@ export class UserProfileController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Get("/profile_has_access_to_app/{profileId}/{appId}")
     public async profileHasAccessToApp(@Request() req: express.Request, @Path() profileId: string, @Path() appId: string) {
         try {

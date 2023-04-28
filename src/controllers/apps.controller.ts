@@ -41,7 +41,7 @@ export class AppsController extends Controller {
         super();
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Post("/create_admin_app")
     public async createAdminApp(@Request() req: express.Request, @Body() appInfo: IApp): Promise<IApp | { message: string }> {
         try {
@@ -61,7 +61,7 @@ export class AppsController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Post("/create_building_app")
     public async createBuildingApp(@Request() req: express.Request, @Body() appInfo: IApp): Promise<IApp | { message: string }> {
         try {
@@ -82,7 +82,7 @@ export class AppsController extends Controller {
     }
 
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Get("/get_all_admin_apps")
     public async getAllAdminApps(@Request() req: express.Request,): Promise<IApp[] | { message: string }> {
         try {
@@ -99,7 +99,7 @@ export class AppsController extends Controller {
     }
 
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Get("/get_all_building_apps")
     public async getAllBuildingApps(@Request() req: express.Request,): Promise<IApp[] | { message: string }> {
         try {
@@ -116,7 +116,7 @@ export class AppsController extends Controller {
     }
 
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Get("/get_admin_app/{appId}")
     public async getAdminApp(@Request() req: express.Request, @Path() appId: string): Promise<IApp | { message: string }> {
         try {
@@ -140,7 +140,7 @@ export class AppsController extends Controller {
     }
 
 
-    // @Security(SECURITY_NAME.profile)
+    @Security(SECURITY_NAME.bearerAuth)
     @Get("/get_building_app/{appId}")
     public async getBuildingApp(@Request() req: express.Request, @Path() appId: string): Promise<IApp | { message: string }> {
         try {
@@ -166,7 +166,7 @@ export class AppsController extends Controller {
     }
 
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Put("/update_admin_app/{appId}")
     public async updateAdminApp(@Request() req: express.Request, @Path() appId: string, @Body() newInfo: IApp): Promise<IApp | { message: string }> {
         try {
@@ -188,7 +188,7 @@ export class AppsController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Put("/update_building_app/{appId}")
     public async updateBuildingApp(@Request() req: express.Request, @Path() appId: string, @Body() newInfo: IApp): Promise<IApp | { message: string }> {
         try {
@@ -212,7 +212,7 @@ export class AppsController extends Controller {
     }
 
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Delete("/delete_admin_app/{appId}")
     public async deleteAdminApp(@Request() req: express.Request, @Path() appId: string): Promise<{ message: string }> {
         try {
@@ -232,7 +232,7 @@ export class AppsController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Delete("/delete_building_app/{appId}")
     public async deleteBuildingApp(@Request() req: express.Request, @Path() appId: string): Promise<{ message: string }> {
         try {
@@ -252,7 +252,7 @@ export class AppsController extends Controller {
     }
 
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Post("/upload_admin_apps")
     public async uploadAdminApp(@Request() req: express.Request, @UploadedFile() file): Promise<IApp[] | { message: string }> {
         try {
@@ -287,7 +287,7 @@ export class AppsController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.admin)
+    @Security(SECURITY_NAME.bearerAuth)
     @Post("/upload_building_apps")
     public async uploadBuildingApp(@Request() req: express.Request, @UploadedFile() file): Promise<IApp[] | { message: string }> {
         try {
@@ -322,7 +322,7 @@ export class AppsController extends Controller {
 
 
 
-    // @Security(SECURITY_NAME.profile)
+    @Security(SECURITY_NAME.bearerAuth)
     @Get("/get_favorite_apps")
     public async getFavoriteApps(@Request() request: express.Request) {
         try {
@@ -340,7 +340,7 @@ export class AppsController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.profile)
+    @Security(SECURITY_NAME.bearerAuth)
     @Post("/add_app_to_favoris")
     public async addAppToFavoris(@Request() request: express.Request, @Body() data: { appIds: string[] }) {
         try {
@@ -359,7 +359,7 @@ export class AppsController extends Controller {
         }
     }
 
-    // @Security(SECURITY_NAME.profile)
+    @Security(SECURITY_NAME.bearerAuth)
     @Post("/remove_app_from_favoris")
     public async removeAppFromFavoris(@Request() request: express.Request, @Body() data: { appIds: string[] }) {
         try {
