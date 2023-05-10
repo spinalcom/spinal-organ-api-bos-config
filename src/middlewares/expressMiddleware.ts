@@ -54,7 +54,7 @@ const swaggerOption = {
 };
 
 export function useHubProxy(app: express.Express) {
-  const HUB_HOST = `${process.env.SPINALHUB_PROTOCOL}://${process.env.HUB_HOST}:${process.env.HUB_PORT}`;
+  const HUB_HOST = `${process.env.HUB_PROTOCOL}://${process.env.HUB_HOST}:${process.env.HUB_PORT}`;
   const proxyHub = proxy(HUB_HOST, {
     limit: '1tb',
     proxyReqPathResolver: function (req: any) {

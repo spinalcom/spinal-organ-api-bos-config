@@ -61,7 +61,7 @@ const swaggerOption = {
     customCss: '.topbar-wrapper img {content: url(/admin/logo);} .swagger-ui .topbar {background: #dbdbdb;}',
 };
 function useHubProxy(app) {
-    const HUB_HOST = `${process.env.SPINALHUB_PROTOCOL}://${process.env.HUB_HOST}:${process.env.HUB_PORT}`;
+    const HUB_HOST = `${process.env.HUB_PROTOCOL}://${process.env.HUB_HOST}:${process.env.HUB_PORT}`;
     const proxyHub = proxy(HUB_HOST, {
         limit: '1tb',
         proxyReqPathResolver: function (req) {

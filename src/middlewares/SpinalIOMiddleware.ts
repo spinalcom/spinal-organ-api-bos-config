@@ -37,7 +37,7 @@ const spinalAPIMiddleware = SpinalAPIMiddleware.getInstance();
 export default class SpinalIOMiddleware implements ISpinalIOMiddleware {
     config: IConfig = {
         spinalConnector: {
-            protocol: process.env.SPINALHUB_PROTOCOL || 'http',
+            protocol: process.env.HUB_PROTOCOL || 'http',
             user: process.env.USER_ID,
             password: process.env.USER_MDP,
             host: process.env.HUB_HOST,

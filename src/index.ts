@@ -34,7 +34,7 @@ import { runServerRest } from 'spinal-organ-api-server';
 import SpinalIOMiddleware from './middlewares/SpinalIOMiddleware';
 
 
-const conn = spinalCore.connect(`${process.env.SPINALHUB_PROTOCOL}://${process.env.USER_ID}:${process.env.USER_MDP}@${process.env.HUB_HOST}:${process.env.HUB_PORT}/`);
+const conn = spinalCore.connect(`${process.env.HUB_PROTOCOL}://${process.env.USER_ID}:${process.env.USER_MDP}@${process.env.HUB_HOST}:${process.env.HUB_PORT}/`);
 
 configServiceInstance.init(conn).then(async () => {
 

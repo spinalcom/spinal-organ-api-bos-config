@@ -41,7 +41,7 @@ const services_1 = require("./services");
 const SpinalAPIMiddleware_1 = require("./middlewares/SpinalAPIMiddleware");
 const spinal_organ_api_server_1 = require("spinal-organ-api-server");
 const SpinalIOMiddleware_1 = require("./middlewares/SpinalIOMiddleware");
-const conn = spinal_core_connectorjs_type_1.spinalCore.connect(`${process.env.SPINALHUB_PROTOCOL}://${process.env.USER_ID}:${process.env.USER_MDP}@${process.env.HUB_HOST}:${process.env.HUB_PORT}/`);
+const conn = spinal_core_connectorjs_type_1.spinalCore.connect(`${process.env.HUB_PROTOCOL}://${process.env.USER_ID}:${process.env.USER_MDP}@${process.env.HUB_HOST}:${process.env.HUB_PORT}/`);
 configFile_service_1.configServiceInstance.init(conn).then(() => __awaiter(void 0, void 0, void 0, function* () {
     const { app, server } = yield (0, server_1.default)(conn);
     yield services_1.DigitalTwinService.getInstance().getActualDigitalTwin(true);
