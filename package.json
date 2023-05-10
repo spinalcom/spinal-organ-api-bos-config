@@ -1,6 +1,6 @@
 {
   "name": "spinal-organ-api-bos-config",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "description": "",
   "main": "index.js",
   "keywords": [],
@@ -45,6 +45,7 @@
     "spinal-env-viewer-plugin-excel-manager-service": "git+https://github.com/spinalcom/spinal-env-viewer-plugin-excel-manager-service.git",
     "spinal-model-timeseries": "git+https://github.com/spinalcom/spinal-model-timeseries.git",
     "spinal-organ-api-server": "git+https://github.com/spinalcom/spinal-organ-api-server.git#bos_config",
+    "spinal-organ-api-pubsub": "git+https://github.com/spinalcom/spinal-organ-api-pubsub.git#bos_config",
     "swagger-ui-express": "^4.5.0",
     "uuid": "^8.3.2"
   },

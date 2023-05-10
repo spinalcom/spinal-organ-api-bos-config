@@ -49,14 +49,14 @@ const swaggerOption = {
     swaggerOptions: {
         swaggerDefinition: {
             info: {
-                "x-logo": {
-                    "url": "/admin/logo"
+                'x-logo': {
+                    url: '/admin/logo',
                 },
-                "x-favicon": {
-                    "url": "/admin/favicon"
-                }
-            }
-        }
+                'x-favicon': {
+                    url: '/admin/favicon',
+                },
+            },
+        },
     },
     customCss: '.topbar-wrapper img {content: url(/admin/logo);} .swagger-ui .topbar {background: #dbdbdb;}',
 };
@@ -64,7 +64,9 @@ function useHubProxy(app) {
     const HUB_HOST = `${process.env.SPINALHUB_PROTOCOL}://${process.env.HUB_HOST}:${process.env.HUB_PORT}`;
     const proxyHub = proxy(HUB_HOST, {
         limit: '1tb',
-        proxyReqPathResolver: function (req) { return req.originalUrl; }
+        proxyReqPathResolver: function (req) {
+            return req.originalUrl;
+        },
     });
     for (const routeToProxy of constant_1.routesToProxy) {
         app.use(routeToProxy, proxyHub);
@@ -72,25 +74,27 @@ function useHubProxy(app) {
 }
 exports.useHubProxy = useHubProxy;
 function useClientMiddleWare(app) {
-    const root = path.resolve(__dirname, '..');
+    const root = process.env.PATH_DIR_STATIC_HTML || path.resolve(__dirname, '..');
     app.use(express.static(root));
-    app.get("/", (req, res) => {
-        res.redirect("/spinalcom-api-docs");
+    app.get('/', (req, res) => {
+        res.redirect('/spinalcom-api-docs');
     });
 }
 exports.useClientMiddleWare = useClientMiddleWare;
 function initSwagger(app) {
-    app.use("/admin/swagger.json", (req, res) => {
-        res.sendFile(path.resolve(__dirname, "../swagger/swagger.json"));
+    app.use('/admin/swagger.json', (req, res) => {
+        res.sendFile(path.resolve(__dirname, '../swagger/swagger.json'));
     });
     app.get('/admin/logo', (req, res) => {
-        res.sendFile('spinalcore.png', { root: path.resolve(__dirname, "../../assets") });
+        res.sendFile('spinalcore.png', {
+            root: path.resolve(__dirname, '../../assets'),
+        });
     });
     // app.use("/admin_docs", swaggerUi.serve, async (req, res) => {
     // return res.send(swaggerUi.generateHTML(await import("../swagger/swagger.json"), swaggerOption))
     // });
-    app.use("/admin_docs", swaggerUi.serve, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
-        return swaggerUi.setup(yield Promise.resolve().then(() => require("../swagger/swagger.json")), swaggerOption)(req, res, next);
+    app.use('/admin_docs', swaggerUi.serve, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+        return swaggerUi.setup(yield Promise.resolve().then(() => require('../swagger/swagger.json')), swaggerOption)(req, res, next);
     }));
 }
 exports.initSwagger = initSwagger;
@@ -98,7 +102,8 @@ function useApiMiddleWare(app) {
     app.use(cors({ origin: '*' }));
     const bodyParserTicket = bodyParser.json({ limit: '500mb' });
     app.use((req, res, next) => {
-        if (req.originalUrl === '/api/v1/node/convert_base_64' || req.originalUrl === '/api/v1/ticket/create_ticket')
+        if (req.originalUrl === '/api/v1/node/convert_base_64' ||
+            req.originalUrl === '/api/v1/ticket/create_ticket')
             return bodyParserTicket(req, res, next);
         return bodyParser.json()(req, res, next);
     });
@@ -115,7 +120,7 @@ function errorHandler(err, req, res, next) {
     }
     if (err instanceof Error) {
         return res.status(constant_1.HTTP_CODES.INTERNAL_ERROR).json({
-            message: "Internal Server Error",
+            message: 'Internal Server Error',
         });
     }
     next();
@@ -124,7 +129,7 @@ exports.errorHandler = errorHandler;
 function _formatValidationError(err) {
     err;
     return {
-        message: "Validation Failed",
+        message: 'Validation Failed',
         details: err === null || err === void 0 ? void 0 : err.fields,
     };
 }
@@ -146,8 +151,10 @@ function authenticateRequest(app) {
 }
 exports.authenticateRequest = authenticateRequest;
 function isAdminRoute(apiRoute) {
-    const route = apiRoute.includes("?") ? apiRoute.substring(0, apiRoute.indexOf('?')) : apiRoute;
-    return adminRoutes.some(api => {
+    const route = apiRoute.includes('?')
+        ? apiRoute.substring(0, apiRoute.indexOf('?'))
+        : apiRoute;
+    return adminRoutes.some((api) => {
         const routeFormatted = api.replace(/\{(.*?)\}/g, (el) => '(.*?)');
         const regex = new RegExp(`^${routeFormatted}$`);
         return route.match(regex);
