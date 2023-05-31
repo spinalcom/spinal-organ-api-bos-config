@@ -32,8 +32,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const path = require("path");
-require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 const spinal_core_connectorjs_type_1 = require("spinal-core-connectorjs_type");
 const configFile_service_1 = require("./services/configFile.service");
 const server_1 = require("./server");
@@ -42,14 +42,18 @@ const SpinalAPIMiddleware_1 = require("./middlewares/SpinalAPIMiddleware");
 const spinal_organ_api_server_1 = require("spinal-organ-api-server");
 const SpinalIOMiddleware_1 = require("./middlewares/SpinalIOMiddleware");
 const conn = spinal_core_connectorjs_type_1.spinalCore.connect(`${process.env.HUB_PROTOCOL}://${process.env.USER_ID}:${process.env.USER_MDP}@${process.env.HUB_HOST}:${process.env.HUB_PORT}/`);
-configFile_service_1.configServiceInstance.init(conn).then(() => __awaiter(void 0, void 0, void 0, function* () {
+configFile_service_1.configServiceInstance
+    .init(conn)
+    .then(() => __awaiter(void 0, void 0, void 0, function* () {
     const { app, server } = yield (0, server_1.default)(conn);
     yield services_1.DigitalTwinService.getInstance().getActualDigitalTwin(true);
     const spinalAPIMiddleware = SpinalAPIMiddleware_1.default.getInstance(conn);
     const spinalIOMiddleware = SpinalIOMiddleware_1.default.getInstance(conn);
     const log_body = Number(process.env.LOG_BODY) == 1 ? true : false;
-    (0, spinal_organ_api_server_1.runServerRest)(server, app, spinalAPIMiddleware, spinalIOMiddleware, log_body);
-})).catch((err) => {
+    const { io } = yield (0, spinal_organ_api_server_1.runServerRest)(server, app, spinalAPIMiddleware, spinalIOMiddleware, log_body);
+    services_1.WebsocketLogsService.getInstance().setIo(io);
+}))
+    .catch((err) => {
     console.error(err);
 });
 //# sourceMappingURL=index.js.map

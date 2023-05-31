@@ -65,5 +65,17 @@
         "categoryName": "Administation",
         "groupName": "Administration",
         "packageName": "spinal-env-bos-config-digitaltwin-manager"
+    },
+    {
+        "name": "Surveiller l'état du websocket",
+        "icon": "mdi-monitor-eye",
+        "description": "Surveiller l'etat et les logs du websocket",
+        "tags": [
+            "WEB_SOCKET",
+            "LOGS"
+        ],
+        "categoryName": "Administation",
+        "groupName": "Administration",
+        "packageName": "spinal-env-bos-websocket-state"
     }
 ]

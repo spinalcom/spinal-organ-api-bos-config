@@ -1,19 +1,19 @@
 /*
  * Copyright 2022 SpinalCom - www.spinalcom.com
- * 
+ *
  * This file is part of SpinalCore.
- * 
+ *
  * Please read all of the following terms and conditions
  * of the Free Software license Agreement ("Agreement")
  * carefully.
- * 
+ *
  * This Agreement is a legally binding contract between
  * the Licensee (as defined below) and SpinalCom that
  * sets forth the terms and conditions that govern your
  * use of the Program. By installing and/or using the
  * Program, you agree to abide by all the terms and
  * conditions stated or referenced herein.
- * 
+ *
  * If you do not agree to abide by these terms and
  * conditions, do not demonstrate your acceptance and do
  * not install or use the Program.
@@ -22,31 +22,41 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
-const path = require("path");
+const path = require('path');
 
-require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
-import { spinalCore } from 'spinal-core-connectorjs_type';
-import { configServiceInstance } from './services/configFile.service';
+require('dotenv').config({path: path.resolve(__dirname, '../.env')});
+import {spinalCore} from 'spinal-core-connectorjs_type';
+import {configServiceInstance} from './services/configFile.service';
 import expressServer from './server';
-import { DigitalTwinService } from './services';
+import {DigitalTwinService, WebsocketLogsService} from './services';
 import SpinalAPIMiddleware from './middlewares/SpinalAPIMiddleware';
-import { runServerRest } from 'spinal-organ-api-server';
+import {runServerRest} from 'spinal-organ-api-server';
 import SpinalIOMiddleware from './middlewares/SpinalIOMiddleware';
 
+const conn = spinalCore.connect(
+  `${process.env.HUB_PROTOCOL}://${process.env.USER_ID}:${process.env.USER_MDP}@${process.env.HUB_HOST}:${process.env.HUB_PORT}/`
+);
 
-const conn = spinalCore.connect(`${process.env.HUB_PROTOCOL}://${process.env.USER_ID}:${process.env.USER_MDP}@${process.env.HUB_HOST}:${process.env.HUB_PORT}/`);
+configServiceInstance
+  .init(conn)
+  .then(async () => {
+    const {app, server} = await expressServer(conn);
+    await DigitalTwinService.getInstance().getActualDigitalTwin(true);
 
-configServiceInstance.init(conn).then(async () => {
+    const spinalAPIMiddleware = SpinalAPIMiddleware.getInstance(conn);
+    const spinalIOMiddleware = SpinalIOMiddleware.getInstance(conn);
+    const log_body = Number(process.env.LOG_BODY) == 1 ? true : false;
 
-  const { app, server } = await expressServer(conn);
-  await DigitalTwinService.getInstance().getActualDigitalTwin(true);
+    const {io} = await runServerRest(
+      server,
+      app,
+      spinalAPIMiddleware,
+      spinalIOMiddleware,
+      log_body
+    );
 
-  const spinalAPIMiddleware = SpinalAPIMiddleware.getInstance(conn);
-  const spinalIOMiddleware = SpinalIOMiddleware.getInstance(conn);
-  const log_body = Number(process.env.LOG_BODY) == 1 ? true : false;
-
-  runServerRest(server, app, spinalAPIMiddleware, spinalIOMiddleware, log_body);
-
-}).catch((err: Error) => {
-  console.error(err);
-});
+    WebsocketLogsService.getInstance().setIo(io);
+  })
+  .catch((err: Error) => {
+    console.error(err);
+  });

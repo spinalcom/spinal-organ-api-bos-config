@@ -77,7 +77,9 @@ class ConfigFileService {
     }
     _createFile(directory, fileName = constant_1.CONFIG_DEFAULT_NAME) {
         const graph = new spinal_model_graph_1.SpinalGraph(constant_1.CONFIG_DEFAULT_NAME);
-        directory.force_add_file(fileName, graph, { model_type: constant_1.CONFIG_FILE_MODEl_TYPE });
+        directory.force_add_file(fileName, graph, {
+            model_type: constant_1.CONFIG_FILE_MODEl_TYPE,
+        });
         return graph;
     }
     _initServices() {
@@ -91,12 +93,13 @@ class ConfigFileService {
             _1.AppListService,
             _1.DigitalTwinService,
             _1.TokenService,
-            _1.LogService
+            _1.LogService,
+            _1.WebsocketLogsService,
         ];
-        const promises = services.map(service => {
+        const promises = services.map((service) => {
             try {
                 const instance = service.getInstance();
-                if (typeof instance.init === "function")
+                if (typeof instance.init === 'function')
                     return instance.init();
             }
             catch (error) {

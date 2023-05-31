@@ -1,11 +1,13 @@
 import { FileSystem } from 'spinal-core-connectorjs';
-import { ISpinalIOMiddleware } from "spinal-organ-api-pubsub";
-import { Socket, Server } from "socket.io";
-import { SpinalGraph, SpinalNode } from "spinal-env-viewer-graph-service";
-import { IConfig } from "spinal-organ-api-server";
+import { ISpinalIOMiddleware } from 'spinal-organ-api-pubsub';
+import { Socket, Server } from 'socket.io';
+import { SpinalGraph, SpinalNode } from 'spinal-env-viewer-graph-service';
+import { WebsocketLogsService } from '../services';
+import { IConfig } from 'spinal-organ-api-server';
 export default class SpinalIOMiddleware implements ISpinalIOMiddleware {
     config: IConfig;
     conn: FileSystem;
+    logService: WebsocketLogsService;
     private static instance;
     private constructor();
     static getInstance(conn?: spinal.FileSystem): ISpinalIOMiddleware;

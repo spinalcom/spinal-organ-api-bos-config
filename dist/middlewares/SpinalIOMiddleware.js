@@ -45,15 +45,16 @@ class SpinalIOMiddleware {
                 user: process.env.USER_ID,
                 password: process.env.USER_MDP,
                 host: process.env.HUB_HOST,
-                port: process.env.HUB_PORT
+                port: process.env.HUB_PORT,
             },
             api: {
-                port: process.env.SERVER_PORT
+                port: process.env.SERVER_PORT,
             },
             file: {
-                path: process.env.CONFIG_DIRECTORY_PATH
-            }
+                path: process.env.CONFIG_DIRECTORY_PATH,
+            },
         };
+        this.logService = services_1.WebsocketLogsService.getInstance();
         this.getGraph = spinalAPIMiddleware.getGraph.bind(spinalAPIMiddleware);
         this.conn = conn;
     }
@@ -83,7 +84,7 @@ class SpinalIOMiddleware {
     getContext(contextId, socket) {
         return __awaiter(this, void 0, void 0, function* () {
             const profileId = yield this._getProfileId(socket);
-            if (typeof contextId === "undefined")
+            if (typeof contextId === 'undefined')
                 return;
             if (!isNaN(contextId))
                 return spinalAPIMiddleware.load(contextId, profileId);
@@ -91,7 +92,7 @@ class SpinalIOMiddleware {
             if (!graph)
                 return;
             const contexts = yield graph.getChildren();
-            return contexts.find(el => {
+            return contexts.find((el) => {
                 if (el.getId().get() === contextId || el._server_id == contextId) {
                     return true;
                 }
@@ -137,6 +138,7 @@ class SpinalIOMiddleware {
         });
     }
     _getTokenInfo(socket) {
+        var _a, _b, _c;
         return __awaiter(this, void 0, void 0, function* () {
             const { header, auth, query } = socket.handshake;
             const token = (auth === null || auth === void 0 ? void 0 : auth.token) || (header === null || header === void 0 ? void 0 : header.token) || (query === null || query === void 0 ? void 0 : query.token);
@@ -145,13 +147,21 @@ class SpinalIOMiddleware {
             const tokenInfo = yield services_1.TokenService.getInstance().tokenIsValid(token);
             if (!tokenInfo)
                 throw new Error(constant_1.SECURITY_MESSAGES.INVALID_TOKEN);
+            const sessionId = (_a = tokenInfo.userInfo) === null || _a === void 0 ? void 0 : _a.id;
+            socket.sessionId = sessionId;
+            socket.userInfo = {
+                id: (_b = tokenInfo.userInfo) === null || _b === void 0 ? void 0 : _b.id,
+                name: (_c = tokenInfo.userInfo) === null || _c === void 0 ? void 0 : _c.userName,
+            };
             return tokenInfo;
         });
     }
     _getProfileId(socket) {
         return __awaiter(this, void 0, void 0, function* () {
             const tokenInfo = yield this._getTokenInfo(socket);
-            return tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId || tokenInfo.profile.appProfileBosConfigId;
+            return (tokenInfo.profile.profileId ||
+                tokenInfo.profile.userProfileBosConfigId ||
+                tokenInfo.profile.appProfileBosConfigId);
         });
     }
 }

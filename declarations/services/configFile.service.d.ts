@@ -1,4 +1,4 @@
-import { SpinalGraph, SpinalContext } from "spinal-model-graph";
+import { SpinalGraph, SpinalContext } from 'spinal-model-graph';
 export default class ConfigFileService {
     private static instance;
     graph: SpinalGraph;

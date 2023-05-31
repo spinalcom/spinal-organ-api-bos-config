@@ -45,5 +45,6 @@ __exportStar(require("./userList.services"), exports);
 __exportStar(require("./appList.services"), exports);
 __exportStar(require("./token.service"), exports);
 __exportStar(require("./log.service"), exports);
+__exportStar(require("./webSocketLogs.service"), exports);
 // export * from "./graph.service";
 //# sourceMappingURL=index.js.map

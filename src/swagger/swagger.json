@@ -423,6 +423,80 @@
 					500
 				],
 				"type": "number"
+			},
+			"WEBSOCKET_STATE": {
+				"enum": [
+					"running",
+					"alert",
+					"unknow"
+				],
+				"type": "string"
+			},
+			"ILog": {
+				"properties": {
+					"type": {
+						"type": "string"
+					},
+					"targetInfo": {
+						"properties": {
+							"name": {
+								"type": "string"
+							},
+							"id": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"name",
+							"id"
+						],
+						"type": "object"
+					},
+					"nodeInfo": {
+						"properties": {
+							"name": {
+								"type": "string"
+							},
+							"id": {
+								"type": "string"
+							}
+						},
+						"additionalProperties": {
+							"type": "string"
+						},
+						"required": [
+							"name",
+							"id"
+						],
+						"type": "object"
+					},
+					"action": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"type",
+					"action"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ISpinalDateValue": {
+				"properties": {
+					"date": {
+						"type": "number",
+						"format": "double"
+					},
+					"value": {
+						"$ref": "#/components/schemas/ILog"
+					}
+				},
+				"required": [
+					"date",
+					"value"
+				],
+				"type": "object",
+				"additionalProperties": false
 			}
 		},
 		"securitySchemes": {
@@ -4022,6 +4096,284 @@
 						}
 					}
 				]
+			}
+		},
+		"/api/v1/pam/websocket/get_websocket_state": {
+			"get": {
+				"operationId": "GetWebsocketState",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"properties": {
+												"since": {
+													"type": "number",
+													"format": "double"
+												},
+												"state": {
+													"$ref": "#/components/schemas/WEBSOCKET_STATE"
+												}
+											},
+											"required": [
+												"since",
+												"state"
+											],
+											"type": "object"
+										},
+										{
+											"properties": {
+												"message": {}
+											},
+											"required": [
+												"message"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Websocket Logs"
+				],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/api/v1/pam/websocket/get_client_connected_count": {
+			"get": {
+				"operationId": "GetNbClientConnected",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"properties": {
+												"numberOfClientConnected": {}
+											},
+											"required": [
+												"numberOfClientConnected"
+											],
+											"type": "object"
+										},
+										{
+											"properties": {
+												"message": {}
+											},
+											"required": [
+												"message"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Websocket Logs"
+				],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/api/v1/pam/websocket_log/read/{begin}/{end}": {
+			"get": {
+				"operationId": "ReadWebsocketLogs",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"items": {
+												"$ref": "#/components/schemas/ISpinalDateValue"
+											},
+											"type": "array"
+										},
+										{
+											"properties": {
+												"message": {}
+											},
+											"required": [
+												"message"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Websocket Logs"
+				],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "begin",
+						"required": true,
+						"schema": {}
+					},
+					{
+						"in": "path",
+						"name": "end",
+						"required": true,
+						"schema": {}
+					}
+				]
+			}
+		},
+		"/api/v1/pam/websocket_log/read_current_week": {
+			"get": {
+				"operationId": "ReadCurrentWeekLogs",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"items": {
+												"$ref": "#/components/schemas/ISpinalDateValue"
+											},
+											"type": "array"
+										},
+										{
+											"properties": {
+												"message": {}
+											},
+											"required": [
+												"message"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Websocket Logs"
+				],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/api/v1/pam/websocket_log/read_current_year": {
+			"get": {
+				"operationId": "ReadCurrentYearLogs",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"items": {
+												"$ref": "#/components/schemas/ISpinalDateValue"
+											},
+											"type": "array"
+										},
+										{
+											"properties": {
+												"message": {}
+											},
+											"required": [
+												"message"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Websocket Logs"
+				],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/api/v1/pam/websocket_log/read_from_last_24h": {
+			"get": {
+				"operationId": "ReadLast24hLogs",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"items": {
+												"$ref": "#/components/schemas/ISpinalDateValue"
+											},
+											"type": "array"
+										},
+										{
+											"properties": {
+												"message": {}
+											},
+											"required": [
+												"message"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Websocket Logs"
+				],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
+				"parameters": []
 			}
 		}
 	},
