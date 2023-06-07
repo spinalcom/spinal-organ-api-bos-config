@@ -56,8 +56,10 @@ class APIService {
     createApiRoute(routeInfo) {
         return __awaiter(this, void 0, void 0, function* () {
             const apiExist = yield this.getApiRouteByRoute(routeInfo);
-            if (apiExist)
+            if (apiExist) {
+                console.log('log exists');
                 return apiExist;
+            }
             delete routeInfo.id;
             routeInfo.type = constant_1.API_ROUTE_TYPE;
             routeInfo.name = routeInfo.route;
@@ -75,7 +77,8 @@ class APIService {
             if (!route)
                 throw new Error(`no api route Found for ${routeId}`);
             for (const key in newValue) {
-                if (Object.prototype.hasOwnProperty.call(newValue, key) && route.info[key]) {
+                if (Object.prototype.hasOwnProperty.call(newValue, key) &&
+                    route.info[key]) {
                     const element = newValue[key];
                     route.info[key].set(element);
                 }
@@ -86,17 +89,19 @@ class APIService {
     getApiRouteById(routeId) {
         return __awaiter(this, void 0, void 0, function* () {
             const children = yield this.context.getChildrenInContext(this.context);
-            return children.find(el => el.getId().get() === routeId);
+            return children.find((el) => el.getId().get() === routeId);
         });
     }
     getApiRouteByRoute(apiRoute) {
         return __awaiter(this, void 0, void 0, function* () {
             const children = yield this.context.getChildrenInContext(this.context);
-            if (apiRoute.route.includes("?"))
+            if (apiRoute.route.includes('?'))
                 apiRoute.route = apiRoute.route.substring(0, apiRoute.route.indexOf('?'));
-            return children.find(el => {
+            return children.find((el) => {
                 const { route, method } = el.info.get();
-                if (route && method && method.toLowerCase() === apiRoute.method.toLowerCase()) {
+                if (route &&
+                    method &&
+                    method.toLowerCase() === apiRoute.method.toLowerCase()) {
                     const routeFormatted = this._formatRoute(route);
                     // return routeFormatted.toLowerCase() === apiRoute.route.toLowerCase() || apiRoute.route.match(routeFormatted);
                     return apiRoute.route.match(routeFormatted);
@@ -152,42 +157,46 @@ class APIService {
             const data = [];
             for (const key in paths) {
                 if (Object.prototype.hasOwnProperty.call(paths, key)) {
-                    const method = this._getMethod(paths[key]);
-                    let item = {
-                        route: key,
-                        method: method && method.toUpperCase(),
-                        tag: this._getTags(paths[key][method]),
-                        scope: this._getScope(paths[key][method])
-                    };
-                    data.push(item);
+                    const methods = this._getMethod(paths[key]);
+                    let items = methods.map((method) => {
+                        return {
+                            route: key,
+                            method: method && method.toUpperCase(),
+                            tag: this._getTags(paths[key][method]),
+                            scope: this._getScope(paths[key][method]),
+                        };
+                    });
+                    data.push(...items);
                 }
             }
             return data;
         }
         catch (error) {
-            throw new Error("Invalid swagger file");
+            throw new Error('Invalid swagger file');
         }
     }
     _getMethod(path) {
         const keys = Object.keys(path);
-        return keys.length > 0 && keys[0];
+        return keys;
     }
     _getTags(item) {
-        return (item.tags && item.tags[0]) || "";
+        return (item.tags && item.tags[0]) || '';
     }
     _getScope(item) {
         return ((item.security &&
             item.security[0] &&
             item.security[0].OauthSecurity &&
-            item.security[0].OauthSecurity[0]) || "");
+            item.security[0].OauthSecurity[0]) ||
+            '');
     }
     _readBuffer(buffer) {
         return JSON.parse(buffer.toString());
     }
     _formatRoute(route) {
-        if (route.includes("?"))
+        if (route.includes('?'))
             route = route.substring(0, route.indexOf('?'));
-        const routeFormatted = route.replace(/\{(.*?)\}/g, (el) => '(.*?)');
+        // const routeFormatted = route.replace(/\{(.*?)\}/g, (el) => '(.*?)');
+        const routeFormatted = route.replace(/\{(.*?)\}/g, (el) => '([^,/]+)');
         return new RegExp(`^${routeFormatted}$`);
     }
 }
