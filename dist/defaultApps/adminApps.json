@@ -48,7 +48,7 @@
         "icon": "mdi-api",
         "description": "Gestion de routes d'API",
         "tags": [
-            "APIS"
+            "API"
         ],
         "categoryName": "Administation",
         "groupName": "Administration",
@@ -57,10 +57,10 @@
     {
         "name": "Gestion du jumeau numérique",
         "icon": "mdi-office-building-cog",
-        "description": "Gestion du jumeau numérique",
+        "description": "Selection du jumeau numérique",
         "tags": [
             "Digitaltwin",
-            "Jumeau numerique"
+            "Jumeau numérique"
         ],
         "categoryName": "Administation",
         "groupName": "Administration",

@@ -1,5 +1,5 @@
-import { SpinalContext } from "spinal-env-viewer-graph-service";
-import { IAppCredential, IApplicationToken, IOAuth2Credential } from "../interfaces";
+import { SpinalContext } from 'spinal-env-viewer-graph-service';
+import { IAppCredential, IApplicationToken, IOAuth2Credential, IPamCredential } from '../interfaces';
 export declare class AppListService {
     private static instance;
     context: SpinalContext;
@@ -11,7 +11,7 @@ export declare class AppListService {
         data: string | IApplicationToken;
     }>;
     private _addUserToContext;
-    private _getProfileInfo;
+    _getProfileInfo(userToken: string, adminCredential: IPamCredential): Promise<any>;
     private _getApplicationInfo;
     private _getAuthPlateformInfo;
 }

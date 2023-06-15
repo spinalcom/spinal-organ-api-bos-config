@@ -41,6 +41,10 @@ const adminProfile_service_1 = require("./adminProfile.service");
 const jwt = require("jsonwebtoken");
 const globalCache = require("global-cache");
 const cron = require("node-cron");
+const authentification_service_1 = require("./authentification.service");
+const axios_1 = require("axios");
+const userList_services_1 = require("./userList.services");
+const appList_services_1 = require("./appList.services");
 class TokenService {
     constructor() { }
     static getInstance() {
@@ -61,7 +65,7 @@ class TokenService {
     purgeToken() {
         return __awaiter(this, void 0, void 0, function* () {
             const tokens = yield this._getAllTokens();
-            const promises = tokens.map(token => this.tokenIsValid(token, true));
+            const promises = tokens.map((token) => this.tokenIsValid(token, true));
             return Promise.all(promises);
         });
     }
@@ -75,7 +79,7 @@ class TokenService {
     getAdminPlayLoad(userNode, secret, durationInMin) {
         return __awaiter(this, void 0, void 0, function* () {
             const playload = {
-                userInfo: userNode.info.get()
+                userInfo: userNode.info.get(),
             };
             durationInMin = durationInMin || 7 * 24 * 60 * 60; // par default 7jrs
             const key = secret || this._generateString(15);
@@ -83,11 +87,11 @@ class TokenService {
             const adminProfile = yield adminProfile_service_1.AdminProfileService.getInstance().getAdminProfile();
             const now = Date.now();
             playload.createdToken = now;
-            playload.expieredToken = now + (durationInMin * 60 * 1000);
+            playload.expieredToken = now + durationInMin * 60 * 1000;
             playload.userId = userNode.getId().get();
             playload.token = token;
             playload.profile = {
-                profileId: adminProfile.getId().get()
+                profileId: adminProfile.getId().get(),
             };
             return playload;
         });
@@ -105,9 +109,10 @@ class TokenService {
             const data = globalCache.get(token);
             if (data)
                 return data;
-            const found = yield this.context.getChild((node) => node.getName().get() === token, constant_1.TOKEN_RELATION_NAME, constant_1.PTR_LST_TYPE);
+            const children = yield this.context.getChildren([constant_1.TOKEN_RELATION_NAME]);
+            const found = children.find((node) => node.getName().get() === token);
             if (!found)
-                return;
+                return this._checkTokenNearAuthPlateform(token);
             const element = yield found.getElement(true);
             if (element) {
                 globalCache.set(token, element.get());
@@ -117,7 +122,9 @@ class TokenService {
     }
     deleteToken(token) {
         return __awaiter(this, void 0, void 0, function* () {
-            const found = token instanceof spinal_env_viewer_graph_service_1.SpinalNode ? token : yield this.context.getChild((node) => node.getName().get() === token, constant_1.TOKEN_RELATION_NAME, constant_1.PTR_LST_TYPE);
+            const found = token instanceof spinal_env_viewer_graph_service_1.SpinalNode
+                ? token
+                : yield this.context.getChild((node) => node.getName().get() === token, constant_1.TOKEN_RELATION_NAME, constant_1.PTR_LST_TYPE);
             if (!found)
                 return true;
             try {
@@ -138,7 +145,9 @@ class TokenService {
             if (!data)
                 return;
             const expirationTime = data.expieredToken;
-            const tokenExpired = expirationTime ? Date.now() >= expirationTime * 1000 : true;
+            const tokenExpired = expirationTime
+                ? Date.now() >= expirationTime * 1000
+                : true;
             if (tokenExpired) {
                 if (deleteIfExpired)
                     yield this.deleteToken(token);
@@ -150,9 +159,40 @@ class TokenService {
     //////////////////////////////////////////////////
     //                        PRIVATE               //
     //////////////////////////////////////////////////
+    _checkTokenNearAuthPlateform(token) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const authPlateform = yield this._getAuthPlateformInfo();
+                let info;
+                try {
+                    info = yield this._checkRequest(authPlateform, token, 'user');
+                }
+                catch (error) {
+                    info = yield this._checkRequest(authPlateform, token, 'application');
+                }
+                return info;
+            }
+            catch (error) {
+                return;
+            }
+        });
+    }
+    _checkRequest(authPlateform, token, actor) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const url = `${authPlateform.urlAdmin}/tokens/verifyToken`;
+            const result = yield axios_1.default.post(url, { tokenParam: token, actor });
+            const info = result.data;
+            const instance = actor === 'user'
+                ? userList_services_1.UserListService.getInstance()
+                : appList_services_1.AppListService.getInstance();
+            info.profile = yield instance._getProfileInfo(token, authPlateform);
+            return info;
+            // info.userInfo = await instance.
+        });
+    }
     _generateString(length = 10) {
-        const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789*/-_@#&";
-        let text = "";
+        const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789*/-_@#&';
+        let text = '';
         for (var i = 0, n = charset.length; i < length; ++i) {
             text += charset.charAt(Math.floor(Math.random() * n));
         }
@@ -161,15 +201,23 @@ class TokenService {
     _getAllTokens() {
         return __awaiter(this, void 0, void 0, function* () {
             const tokens = yield this.context.getChildren(constant_1.TOKEN_RELATION_NAME);
-            return tokens.map(el => el.getName().get());
+            return tokens.map((el) => el.getName().get());
         });
     }
     _scheduleTokenPurge() {
         // cron.schedule('0 0 23 * * *', async () => {
         cron.schedule('30 */1 * * *', () => __awaiter(this, void 0, void 0, function* () {
-            console.log(new Date().toUTCString(), "purge invalid tokens");
+            console.log(new Date().toUTCString(), 'purge invalid tokens');
             yield this.purgeToken();
         }));
+    }
+    _getAuthPlateformInfo() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const adminCredential = yield authentification_service_1.AuthentificationService.getInstance().getPamToAdminCredential();
+            if (!adminCredential)
+                throw new Error('No authentication platform is registered');
+            return adminCredential;
+        });
     }
 }
 exports.TokenService = TokenService;

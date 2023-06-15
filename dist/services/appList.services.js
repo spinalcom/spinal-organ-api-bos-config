@@ -59,7 +59,9 @@ class AppListService {
         return __awaiter(this, void 0, void 0, function* () {
             const adminCredential = yield this._getAuthPlateformInfo();
             const url = `${adminCredential.urlAdmin}/applications/login`;
-            return axios_1.default.post(url, application).then((result) => __awaiter(this, void 0, void 0, function* () {
+            return axios_1.default
+                .post(url, application)
+                .then((result) => __awaiter(this, void 0, void 0, function* () {
                 const data = result.data;
                 data.profile = yield this._getProfileInfo(data.token, adminCredential);
                 data.userInfo = yield this._getApplicationInfo(data.applicationId, adminCredential, data.token);
@@ -69,13 +71,13 @@ class AppListService {
                 yield token_service_1.TokenService.getInstance().addUserToken(node, data.token, data);
                 return {
                     code: constant_1.HTTP_CODES.OK,
-                    data
+                    data,
                 };
-            })).catch(err => {
-                console.error(err);
+            }))
+                .catch((err) => {
                 return {
                     code: constant_1.HTTP_CODES.UNAUTHORIZED,
-                    data: "bad credential"
+                    data: 'bad credential',
                 };
             });
         });
@@ -86,7 +88,7 @@ class AppListService {
     _addUserToContext(info, element) {
         return __awaiter(this, void 0, void 0, function* () {
             const users = yield this.context.getChildrenInContext();
-            const found = users.find(el => { var _a; return ((_a = el.info.clientId) === null || _a === void 0 ? void 0 : _a.get()) === info.clientId; });
+            const found = users.find((el) => { var _a; return ((_a = el.info.clientId) === null || _a === void 0 ? void 0 : _a.get()) === info.clientId; });
             if (found)
                 return found;
             const nodeId = spinal_env_viewer_graph_service_1.SpinalGraphService.createNode(info, element);
@@ -96,17 +98,20 @@ class AppListService {
     }
     _getProfileInfo(userToken, adminCredential) {
         let urlAdmin = adminCredential.urlAdmin;
-        let endpoint = "/tokens/getAppProfileByToken";
-        return axios_1.default.post(urlAdmin + endpoint, {
+        let endpoint = '/tokens/getAppProfileByToken';
+        return axios_1.default
+            .post(urlAdmin + endpoint, {
             platformId: adminCredential.idPlateform,
-            token: userToken
-        }).then((result) => {
+            token: userToken,
+        })
+            .then((result) => {
             if (!result.data)
                 return;
             const data = result.data;
             delete data.password;
             return data;
-        }).catch(err => {
+        })
+            .catch((err) => {
             return {};
         });
     }
@@ -115,12 +120,15 @@ class AppListService {
             headers: {
                 'Content-Type': 'application/json',
                 // "x-access-token": adminCredential.tokenBosAdmin
-                "x-access-token": userToken
+                'x-access-token': userToken,
             },
         };
-        return axios_1.default.get(`${adminCredential.urlAdmin}/applications/${applicationId}`, config).then((result) => {
+        return axios_1.default
+            .get(`${adminCredential.urlAdmin}/applications/${applicationId}`, config)
+            .then((result) => {
             return result.data;
-        }).catch((err) => {
+        })
+            .catch((err) => {
             console.error(err);
         });
     }
@@ -128,7 +136,7 @@ class AppListService {
         return __awaiter(this, void 0, void 0, function* () {
             const adminCredential = yield authentification_service_1.AuthentificationService.getInstance().getPamToAdminCredential();
             if (!adminCredential)
-                throw new Error("No authentication platform is registered");
+                throw new Error('No authentication platform is registered');
             return adminCredential;
         });
     }

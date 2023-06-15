@@ -1,5 +1,5 @@
-import { SpinalContext, SpinalNode } from "spinal-env-viewer-graph-service";
-import { IApplicationToken, IUserToken } from "../interfaces";
+import { SpinalContext, SpinalNode } from 'spinal-env-viewer-graph-service';
+import { IApplicationToken, IUserToken } from '../interfaces';
 export declare class TokenService {
     private static instance;
     context: SpinalContext;
@@ -13,7 +13,10 @@ export declare class TokenService {
     getTokenData(token: string): Promise<any>;
     deleteToken(token: SpinalNode | string): Promise<boolean>;
     tokenIsValid(token: string, deleteIfExpired?: boolean): Promise<IUserToken | IApplicationToken>;
+    private _checkTokenNearAuthPlateform;
+    private _checkRequest;
     private _generateString;
     private _getAllTokens;
     private _scheduleTokenPurge;
+    private _getAuthPlateformInfo;
 }
