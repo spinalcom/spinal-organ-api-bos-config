@@ -12,7 +12,7 @@ export default class SpinalIOMiddleware implements ISpinalIOMiddleware {
     private constructor();
     static getInstance(conn?: spinal.FileSystem): ISpinalIOMiddleware;
     tokenCheckMiddleware(io: Server): void;
-    getGraph: any;
+    getGraph(): Promise<SpinalGraph>;
     getProfileGraph(socket?: Socket): Promise<SpinalGraph>;
     getContext(contextId: number | string, socket?: Socket): Promise<SpinalNode>;
     getNodeWithServerId(server_id: number, socket?: Socket): Promise<SpinalNode>;

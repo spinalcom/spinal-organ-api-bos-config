@@ -36,7 +36,6 @@ const SpinalAPIMiddleware_1 = require("./SpinalAPIMiddleware");
 const spinal_env_viewer_graph_service_1 = require("spinal-env-viewer-graph-service");
 const constant_1 = require("../constant");
 const services_1 = require("../services");
-const spinalAPIMiddleware = SpinalAPIMiddleware_1.default.getInstance();
 class SpinalIOMiddleware {
     constructor(conn) {
         this.config = {
@@ -55,7 +54,6 @@ class SpinalIOMiddleware {
             },
         };
         this.logService = services_1.WebsocketLogsService.getInstance();
-        this.getGraph = spinalAPIMiddleware.getGraph.bind(spinalAPIMiddleware);
         this.conn = conn;
     }
     static getInstance(conn) {
@@ -75,10 +73,13 @@ class SpinalIOMiddleware {
             next(err);
         }));
     }
+    getGraph() {
+        return SpinalAPIMiddleware_1.default.getInstance().getGraph();
+    }
     getProfileGraph(socket) {
         return __awaiter(this, void 0, void 0, function* () {
             let profileId = yield this._getProfileId(socket);
-            return spinalAPIMiddleware.getProfileGraph(profileId);
+            return SpinalAPIMiddleware_1.default.getInstance().getProfileGraph(profileId);
         });
     }
     getContext(contextId, socket) {
@@ -87,8 +88,8 @@ class SpinalIOMiddleware {
             if (typeof contextId === 'undefined')
                 return;
             if (!isNaN(contextId))
-                return spinalAPIMiddleware.load(contextId, profileId);
-            const graph = yield spinalAPIMiddleware.getProfileGraph(profileId);
+                return SpinalAPIMiddleware_1.default.getInstance().load(contextId, profileId);
+            const graph = yield SpinalAPIMiddleware_1.default.getInstance().getProfileGraph(profileId);
             if (!graph)
                 return;
             const contexts = yield graph.getChildren();
@@ -103,7 +104,7 @@ class SpinalIOMiddleware {
     getNodeWithServerId(server_id, socket) {
         return __awaiter(this, void 0, void 0, function* () {
             const profileId = yield this._getProfileId(socket);
-            return spinalAPIMiddleware.load(server_id, profileId);
+            return SpinalAPIMiddleware_1.default.getInstance().load(server_id, profileId);
         });
     }
     getNodeWithStaticId(nodeId, contextId, socket) {

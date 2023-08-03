@@ -36,8 +36,6 @@ import {TokenService, WebsocketLogsService} from '../services';
 import {NextFunction} from 'express';
 import {IConfig} from 'spinal-organ-api-server';
 
-const spinalAPIMiddleware = SpinalAPIMiddleware.getInstance();
-
 export default class SpinalIOMiddleware implements ISpinalIOMiddleware {
   config: IConfig = {
     spinalConnector: {
@@ -83,12 +81,14 @@ export default class SpinalIOMiddleware implements ISpinalIOMiddleware {
     });
   }
 
-  getGraph = spinalAPIMiddleware.getGraph.bind(spinalAPIMiddleware);
+  public getGraph(): Promise<SpinalGraph> {
+    return SpinalAPIMiddleware.getInstance().getGraph();
+  }  
 
   public async getProfileGraph(socket?: Socket): Promise<SpinalGraph> {
     let profileId = await this._getProfileId(socket);
 
-    return spinalAPIMiddleware.getProfileGraph(profileId);
+    return SpinalAPIMiddleware.getInstance().getProfileGraph(profileId);
   }
 
   public async getContext(
@@ -98,9 +98,9 @@ export default class SpinalIOMiddleware implements ISpinalIOMiddleware {
     const profileId = await this._getProfileId(socket);
     if (typeof contextId === 'undefined') return;
     if (!isNaN(contextId as any))
-      return spinalAPIMiddleware.load(<number>contextId, profileId);
+      return SpinalAPIMiddleware.getInstance().load(<number>contextId, profileId);
 
-    const graph = await spinalAPIMiddleware.getProfileGraph(profileId);
+    const graph = await SpinalAPIMiddleware.getInstance().getProfileGraph(profileId);
     if (!graph) return;
 
     const contexts = await graph.getChildren();
@@ -117,7 +117,7 @@ export default class SpinalIOMiddleware implements ISpinalIOMiddleware {
     socket?: Socket
   ): Promise<SpinalNode> {
     const profileId = await this._getProfileId(socket);
-    return spinalAPIMiddleware.load(server_id, profileId);
+    return SpinalAPIMiddleware.getInstance().load(server_id, profileId);
   }
 
   public async getNodeWithStaticId(
