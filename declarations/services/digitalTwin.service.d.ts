@@ -1,4 +1,4 @@
-import { SpinalContext, SpinalNode } from "spinal-env-viewer-graph-service";
+import { SpinalContext, SpinalGraph, SpinalNode } from "spinal-env-viewer-graph-service";
 export declare class DigitalTwinService {
     private static instance;
     private _actualDigitalTwin;
@@ -7,6 +7,7 @@ export declare class DigitalTwinService {
     private constructor();
     static getInstance(): DigitalTwinService;
     init(): Promise<SpinalContext>;
+    getDigitalTwinGraph(digitalTwin: SpinalNode): Promise<SpinalGraph>;
     getDigitalTwinContexts(digitalTwinId?: string): Promise<SpinalContext[]>;
     findContextInDigitalTwin(digitalTwinId: string, contextId: string): Promise<SpinalContext>;
     createDigitalTwin(name: string, directoryPath: string, setAsDefault?: boolean): Promise<SpinalNode>;

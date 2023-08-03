@@ -52,7 +52,7 @@ const express = require("express");
 const AuthError_1 = require("../security/AuthError");
 const authentication_1 = require("../security/authentication");
 const appServiceInstance = services_1.AppService.getInstance();
-let AppsController = class AppsController extends tsoa_1.Controller {
+let AppsController = exports.AppsController = class AppsController extends tsoa_1.Controller {
     constructor() {
         super();
     }
@@ -486,11 +486,10 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], AppsController.prototype, "removeAppFromFavoris", null);
-AppsController = __decorate([
+exports.AppsController = AppsController = __decorate([
     (0, tsoa_1.Route)("/api/v1"),
     (0, tsoa_1.Tags)("Applications"),
     __metadata("design:paramtypes", [])
 ], AppsController);
-exports.AppsController = AppsController;
 exports.default = new AppsController();
 //# sourceMappingURL=apps.controller.js.map

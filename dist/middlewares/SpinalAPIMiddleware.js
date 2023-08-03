@@ -150,13 +150,15 @@ class SpinalAPIMiddleware {
     _geneGraph() {
         return __asyncGenerator(this, arguments, function* _geneGraph_1() {
             let graph;
+            const actualDigitalTwin = yield __await(digitalTwinService.getActualDigitalTwin());
+            graph = yield __await(digitalTwinService.getDigitalTwinGraph(actualDigitalTwin));
             while (true) {
-                const actualDigitalTwin = yield __await(digitalTwinService.getActualDigitalTwin());
                 const url = actualDigitalTwin.info.url.get();
-                if (!graph || url !== this.config.file.path) {
+                if (!graph) {
                     graph = yield __await(this._loadNewGraph(url));
-                    yield __await(spinal_env_viewer_graph_service_1.SpinalGraphService.setGraph(graph));
                 }
+                if (graph)
+                    yield __await(spinal_env_viewer_graph_service_1.SpinalGraphService.setGraph(graph));
                 yield yield __await(graph);
             }
         });

@@ -56,12 +56,20 @@ class DigitalTwinService {
             return this.context;
         });
     }
+    getDigitalTwinGraph(digitalTwin) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                return digitalTwin.getElement(true);
+            }
+            catch (error) { }
+        });
+    }
     getDigitalTwinContexts(digitalTwinId) {
         return __awaiter(this, void 0, void 0, function* () {
             const digitalTwin = yield (digitalTwinId ? this.getDigitalTwin(digitalTwinId) : this.getActualDigitalTwin());
             if (!digitalTwin)
                 return [];
-            const graph = yield digitalTwin.getElement(true);
+            const graph = yield this.getDigitalTwinGraph(digitalTwin);
             if (!graph)
                 return [];
             return graph.getChildren("hasContext");
@@ -133,6 +141,8 @@ class DigitalTwinService {
     }
     getActualDigitalTwin(createIfNotExist = false) {
         return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
+            if (this._actualDigitalTwin instanceof spinal_env_viewer_graph_service_1.SpinalNode)
+                return resolve(this._actualDigitalTwin);
             if (!this.context.info[this.attrName]) {
                 if (!createIfNotExist)
                     return resolve(undefined);

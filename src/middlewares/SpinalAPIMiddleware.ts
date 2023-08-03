@@ -137,15 +137,16 @@ export default class SpinalAPIMiddleware implements ISpinalAPIMiddleware {
 
     private async *_geneGraph(): AsyncGenerator<SpinalGraph<any>, never> {
         let graph;
+        const actualDigitalTwin = await digitalTwinService.getActualDigitalTwin();
+        graph = await digitalTwinService.getDigitalTwinGraph(actualDigitalTwin);
 
         while (true) {
-            const actualDigitalTwin = await digitalTwinService.getActualDigitalTwin();
             const url = actualDigitalTwin.info.url.get();
-            if (!graph || url !== this.config.file.path) {
+            if (!graph) {
                 graph = await this._loadNewGraph(url);
-                await SpinalGraphService.setGraph(graph)
             }
-
+            
+            if (graph) await SpinalGraphService.setGraph(graph);
             yield graph;
         }
     }

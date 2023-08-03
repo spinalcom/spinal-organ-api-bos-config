@@ -2,8 +2,8 @@
 import { SpinalContext, SpinalNode } from "spinal-env-viewer-graph-service";
 import { IApp } from "../interfaces";
 export declare const AppsType: Readonly<{
-    admin: string;
-    building: string;
+    admin: "admin";
+    building: "building";
 }>;
 export declare class AppService {
     private static instance;

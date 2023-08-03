@@ -6,9 +6,9 @@ export declare const ADMIN_USERNAME = "admin";
 export declare const ADMIN_USER_TYPE = "admin";
 export declare const CONTEXT_TO_ADMIN_USER_RELATION = "hasAdminUser";
 export declare const USER_TYPES: Readonly<{
-    ADMIN: string;
-    USER: string;
-    APP: string;
+    ADMIN: "ADMIN";
+    USER: "USER";
+    APP: "APP";
 }>;
 export declare const AVAILABLE_APPLICATIONS_CONTEXT_NAME = "Available Applications";
 export declare const USER_PROFILE_CONTEXT_NAME = "UserProfileList";

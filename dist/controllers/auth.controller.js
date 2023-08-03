@@ -53,7 +53,7 @@ const AuthError_1 = require("../security/AuthError");
 const authentication_1 = require("../security/authentication");
 const serviceInstance = services_1.AuthentificationService.getInstance();
 const tokenService = services_1.TokenService.getInstance();
-let AuthController = class AuthController extends tsoa_1.Controller {
+let AuthController = exports.AuthController = class AuthController extends tsoa_1.Controller {
     constructor() {
         super();
     }
@@ -236,11 +236,10 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "tokenIsValid", null);
-AuthController = __decorate([
+exports.AuthController = AuthController = __decorate([
     (0, tsoa_1.Route)("/api/v1"),
     (0, tsoa_1.Tags)("Auth"),
     __metadata("design:paramtypes", [])
 ], AuthController);
-exports.AuthController = AuthController;
 exports.default = new AuthController();
 //# sourceMappingURL=auth.controller.js.map

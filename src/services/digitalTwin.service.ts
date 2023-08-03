@@ -51,12 +51,18 @@ export class DigitalTwinService {
         return this.context;
     }
 
+    public async getDigitalTwinGraph(digitalTwin: SpinalNode): Promise<SpinalGraph> {
+        try {
+            return digitalTwin.getElement(true);
+        } catch (error) {}
+    }
+
 
     public async getDigitalTwinContexts(digitalTwinId?: string): Promise<SpinalContext[]> {
         const digitalTwin = await (digitalTwinId ? this.getDigitalTwin(digitalTwinId) : this.getActualDigitalTwin());
         if (!digitalTwin) return [];
 
-        const graph: SpinalContext = await digitalTwin.getElement(true);
+        const graph: SpinalGraph = await this.getDigitalTwinGraph(digitalTwin);
         if (!graph) return [];
 
         return graph.getChildren("hasContext");
@@ -128,7 +134,7 @@ export class DigitalTwinService {
 
     public getActualDigitalTwin(createIfNotExist: boolean = false): Promise<SpinalNode> {
         return new Promise(async (resolve, reject) => {
-
+            if(this._actualDigitalTwin instanceof SpinalNode) return resolve(this._actualDigitalTwin)
             if (!this.context.info[this.attrName]) {
                 if (!createIfNotExist) return resolve(undefined);
                 const defaultName = "Digital twin";
