@@ -32,6 +32,8 @@ import {DigitalTwinService, WebsocketLogsService} from './services';
 import SpinalAPIMiddleware from './middlewares/SpinalAPIMiddleware';
 import {runServerRest} from 'spinal-organ-api-server';
 import SpinalIOMiddleware from './middlewares/SpinalIOMiddleware';
+import ConfigFile from "spinal-lib-organ-monitoring";
+
 
 const conn = spinalCore.connect(
   `${process.env.HUB_PROTOCOL}://${process.env.USER_ID}:${process.env.USER_MDP}@${process.env.HUB_HOST}:${process.env.HUB_PORT}/`
@@ -56,6 +58,7 @@ configServiceInstance
     );
 
     WebsocketLogsService.getInstance().setIo(io);
+    await ConfigFile.init(conn, process.env.ORGAN_NAME, "BONS_CONFIG_API", process.env.HUB_HOST, parseInt(process.env.HUB_PORT));
   })
   .catch((err: Error) => {
     console.error(err);

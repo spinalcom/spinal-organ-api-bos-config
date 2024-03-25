@@ -54,7 +54,7 @@ const AuthError_1 = require("../security/AuthError");
 const authentication_1 = require("../security/authentication");
 const adminProfile_service_1 = require("../services/adminProfile.service");
 const serviceInstance = services_1.UserProfileService.getInstance();
-let UserProfileController = exports.UserProfileController = class UserProfileController extends tsoa_1.Controller {
+let UserProfileController = class UserProfileController extends tsoa_1.Controller {
     constructor() {
         super();
     }
@@ -475,10 +475,11 @@ __decorate([
     __metadata("design:paramtypes", [Object, String, String]),
     __metadata("design:returntype", Promise)
 ], UserProfileController.prototype, "profileHasAccessToApp", null);
-exports.UserProfileController = UserProfileController = __decorate([
+UserProfileController = __decorate([
     (0, tsoa_1.Route)("/api/v1/user_profile"),
     (0, tsoa_1.Tags)("user Profiles"),
     __metadata("design:paramtypes", [])
 ], UserProfileController);
+exports.UserProfileController = UserProfileController;
 exports.default = new UserProfileController();
 //# sourceMappingURL=userProfile.controller.js.map

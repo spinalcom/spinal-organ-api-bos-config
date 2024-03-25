@@ -67,6 +67,7 @@ class SpinalAPIMiddleware {
                 path: process.env.CONFIG_DIRECTORY_PATH
             }
         };
+        this.loadedPtr = new Map();
         this.iteratorGraph = this._geneGraph();
         this.profilesToGraph = new Map();
         this.conn = conn;

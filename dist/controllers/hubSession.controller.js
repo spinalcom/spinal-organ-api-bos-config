@@ -52,7 +52,7 @@ const authentication_1 = require("../security/authentication");
 const SpinalAPIMiddleware_1 = require("../middlewares/SpinalAPIMiddleware");
 const hubSession_service_1 = require("../services/hubSession.service");
 const AuthError_1 = require("../security/AuthError");
-let HubSessionController = exports.HubSessionController = class HubSessionController extends tsoa_1.Controller {
+let HubSessionController = class HubSessionController extends tsoa_1.Controller {
     constructor() {
         super();
     }
@@ -88,9 +88,10 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], HubSessionController.prototype, "createSession", null);
-exports.HubSessionController = HubSessionController = __decorate([
+HubSessionController = __decorate([
     (0, tsoa_1.Route)("/api/v1"),
     (0, tsoa_1.Tags)("Hub session"),
     __metadata("design:paramtypes", [])
 ], HubSessionController);
+exports.HubSessionController = HubSessionController;
 //# sourceMappingURL=hubSession.controller.js.map

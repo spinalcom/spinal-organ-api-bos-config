@@ -1593,7 +1593,7 @@ function RegisterRoutes(app) {
                 }
                 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
                 try {
-                    request['user'] = yield promiseAny.call(Promise, secMethodOrPromises);
+                    request['user'] = yield promiseAny(secMethodOrPromises);
                     next();
                 }
                 catch (err) {
@@ -1633,7 +1633,6 @@ function RegisterRoutes(app) {
             response.set(name, headers[name]);
         });
         if (data && typeof data.pipe === 'function' && data.readable && typeof data._read === 'function') {
-            response.status(statusCode || 200);
             data.pipe(response);
         }
         else if (data !== null && data !== undefined) {
@@ -1660,8 +1659,6 @@ function RegisterRoutes(app) {
                     return request;
                 case 'query':
                     return validationService.ValidateParam(args[key], request.query[name], name, fieldErrors, undefined, { "noImplicitAdditionalProperties": "throw-on-extras" });
-                case 'queries':
-                    return validationService.ValidateParam(args[key], request.query, name, fieldErrors, undefined, { "noImplicitAdditionalProperties": "throw-on-extras" });
                 case 'path':
                     return validationService.ValidateParam(args[key], request.params[name], name, fieldErrors, undefined, { "noImplicitAdditionalProperties": "throw-on-extras" });
                 case 'header':

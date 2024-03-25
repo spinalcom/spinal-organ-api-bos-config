@@ -52,7 +52,7 @@ const express = require("express");
 const authentication_1 = require("../security/authentication");
 const AuthError_1 = require("../security/AuthError");
 const serviceInstance = services_1.DigitalTwinService.getInstance();
-let DigitaltwinController = exports.DigitaltwinController = class DigitaltwinController extends tsoa_1.Controller {
+let DigitaltwinController = class DigitaltwinController extends tsoa_1.Controller {
     constructor() {
         super();
     }
@@ -339,10 +339,11 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], DigitaltwinController.prototype, "removeActualDigitaTwin", null);
-exports.DigitaltwinController = DigitaltwinController = __decorate([
+DigitaltwinController = __decorate([
     (0, tsoa_1.Route)("/api/v1"),
     (0, tsoa_1.Tags)("DigitalTwin"),
     __metadata("design:paramtypes", [])
 ], DigitaltwinController);
+exports.DigitaltwinController = DigitaltwinController;
 exports.default = new DigitaltwinController();
 //# sourceMappingURL=digitalTwin.controller.js.map

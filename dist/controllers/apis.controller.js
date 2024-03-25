@@ -52,7 +52,7 @@ const authentication_1 = require("../security/authentication");
 const AuthError_1 = require("../security/AuthError");
 const express = require("express");
 const apiService = services_1.APIService.getInstance();
-let APIController = exports.APIController = class APIController extends tsoa_1.Controller {
+let APIController = class APIController extends tsoa_1.Controller {
     constructor() {
         super();
     }
@@ -225,10 +225,11 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], APIController.prototype, "uploadBosSwaggerFile", null);
-exports.APIController = APIController = __decorate([
+APIController = __decorate([
     (0, tsoa_1.Route)("/api/v1"),
     (0, tsoa_1.Tags)("Apis"),
     __metadata("design:paramtypes", [])
 ], APIController);
+exports.APIController = APIController;
 exports.default = new APIController();
 //# sourceMappingURL=apis.controller.js.map

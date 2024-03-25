@@ -50,7 +50,7 @@ export default class SpinalAPIMiddleware implements ISpinalAPIMiddleware {
         }
     };
     conn: FileSystem;
-    loadedPtr: Map<number, any>;
+    loadedPtr: Map<number, any> = new Map();
     iteratorGraph: AsyncGenerator<SpinalGraph<any>, never> = this._geneGraph();
     profilesToGraph: Map<string, SpinalGraph> = new Map();
     private static instance: SpinalAPIMiddleware;
