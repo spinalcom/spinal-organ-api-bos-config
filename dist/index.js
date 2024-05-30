@@ -53,7 +53,7 @@ configFile_service_1.configServiceInstance
     const log_body = Number(process.env.LOG_BODY) == 1 ? true : false;
     const { io } = yield (0, spinal_organ_api_server_1.runServerRest)(server, app, spinalAPIMiddleware, spinalIOMiddleware, log_body);
     services_1.WebsocketLogsService.getInstance().setIo(io);
-    yield spinal_lib_organ_monitoring_1.default.init(conn, process.env.ORGAN_NAME, "BONS_CONFIG_API", process.env.HUB_HOST, parseInt(process.env.HUB_PORT));
+    yield spinal_lib_organ_monitoring_1.default.init(conn, process.env.ORGAN_NAME, "BOS_CONFIG_API", process.env.HUB_HOST, parseInt(process.env.HUB_PORT));
 }))
     .catch((err) => {
     console.error(err);

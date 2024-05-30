@@ -47,6 +47,7 @@ configServiceInstance
 
     const spinalAPIMiddleware = SpinalAPIMiddleware.getInstance(conn);
     const spinalIOMiddleware = SpinalIOMiddleware.getInstance(conn);
+
     const log_body = Number(process.env.LOG_BODY) == 1 ? true : false;
 
     const {io} = await runServerRest(
@@ -58,7 +59,7 @@ configServiceInstance
     );
 
     WebsocketLogsService.getInstance().setIo(io);
-    await ConfigFile.init(conn, process.env.ORGAN_NAME, "BONS_CONFIG_API", process.env.HUB_HOST, parseInt(process.env.HUB_PORT));
+    await ConfigFile.init(conn, process.env.ORGAN_NAME, "BOS_CONFIG_API", process.env.HUB_HOST, parseInt(process.env.HUB_PORT));
   })
   .catch((err: Error) => {
     console.error(err);
