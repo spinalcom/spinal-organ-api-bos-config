@@ -23,11 +23,7 @@
  */
 
 import axios from 'axios';
-import {
-  SpinalContext,
-  SpinalGraphService,
-  SpinalNode,
-} from 'spinal-env-viewer-graph-service';
+import { SpinalContext, SpinalGraphService, SpinalNode } from 'spinal-env-viewer-graph-service';
 import {
   USER_LIST_CONTEXT_TYPE,
   USER_LIST_CONTEXT_NAME,
@@ -48,21 +44,21 @@ import {
   IUserInfo,
   IUserToken,
 } from '../interfaces';
-import {configServiceInstance} from './configFile.service';
-import {Model} from 'spinal-core-connectorjs_type';
+import { configServiceInstance } from './configFile.service';
+import { Model } from 'spinal-core-connectorjs_type';
 import * as bcrypt from 'bcrypt';
 import * as fileLog from 'log-to-file';
 import * as path from 'path';
-import {TokenService} from './token.service';
-import {AuthentificationService} from './authentification.service';
-import {UserProfileService} from './userProfile.service';
-import {AppService} from './apps.service';
+import { TokenService } from './token.service';
+import { AuthentificationService } from './authentification.service';
+import { UserProfileService } from './userProfile.service';
+import { AppService } from './apps.service';
 
 export class UserListService {
   private static instance: UserListService;
   public context: SpinalContext;
 
-  private constructor() {}
+  private constructor() { }
 
   public static getInstance(): UserListService {
     if (!this.instance) this.instance = new UserListService();
@@ -93,13 +89,13 @@ export class UserListService {
 
   public async authenticateUser(
     user: IUserCredential
-  ): Promise<{code: number; data: string | IUserToken}> {
+  ): Promise<{ code: number; data: string | IUserToken }> {
     let data: any = await this.authAdmin(user);
     let isAdmin = true;
-    if (data.code === HTTP_CODES.INTERNAL_ERROR) {
-      data = await this.authUserViaAuthPlateform(user);
-      isAdmin = false;
-    }
+    // if (data.code === HTTP_CODES.INTERNAL_ERROR) {
+    //   data = await this.authUserViaAuthPlateform(user);
+    //   isAdmin = false;
+    // }
 
     if (data.code === HTTP_CODES.OK) {
       const type = isAdmin ? USER_TYPES.ADMIN : USER_TYPES.USER;
@@ -155,7 +151,7 @@ export class UserListService {
             appId
           );
         if (!hasAccess)
-          throw {code: HTTP_CODES.UNAUTHORIZED, message: 'unauthorized'};
+          throw { code: HTTP_CODES.UNAUTHORIZED, message: 'unauthorized' };
 
         const [user, app] = await Promise.all([
           this.getUser(userId),
@@ -174,7 +170,7 @@ export class UserListService {
 
         await user.addChild(app, USER_TO_FAVORITE_APP_RELATION, PTR_LST_TYPE);
         list.push(app);
-      } catch (error) {}
+      } catch (error) { }
 
       return list;
     }, Promise.resolve([]));
@@ -197,7 +193,7 @@ export class UserListService {
             appId
           );
         if (!hasAccess)
-          throw {code: HTTP_CODES.UNAUTHORIZED, message: 'unauthorized'};
+          throw { code: HTTP_CODES.UNAUTHORIZED, message: 'unauthorized' };
 
         const [user, app] = await Promise.all([
           this.getUser(userId),
@@ -220,7 +216,7 @@ export class UserListService {
           PTR_LST_TYPE
         );
         list.push(app);
-      } catch (error) {}
+      } catch (error) { }
 
       return list;
     }, Promise.resolve([]));
@@ -239,7 +235,7 @@ export class UserListService {
     const password =
       (userInfo && userInfo.password) || this._generateString(16);
     fileLog(
-      JSON.stringify({userName, password}),
+      JSON.stringify({ userName, password }),
       path.resolve(__dirname, '../../.admin.log')
     );
 
@@ -250,21 +246,17 @@ export class UserListService {
         type: USER_TYPES.ADMIN,
         userType: USER_TYPES.ADMIN,
       },
-      new Model({userName, password: await this._hashPassword(password)}),
+      new Model({ userName, password: await this._hashPassword(password) }),
       true
     );
   }
 
   public async getAdminUser(userName: string): Promise<SpinalNode> {
-    const children = await this.context.getChildren(
-      CONTEXT_TO_ADMIN_USER_RELATION
-    );
+    const children = await this.context.getChildren(CONTEXT_TO_ADMIN_USER_RELATION);
     return children.find((el) => el.info.userName.get() === userName);
   }
 
-  public async authAdmin(
-    user: IUserCredential
-  ): Promise<{code: number; data: any | string}> {
+  public async authAdmin(user: IUserCredential): Promise<{ code: number; data: any | string }> {
     const node = await this.getAdminUser(user.userName);
     if (!node)
       return {
@@ -286,25 +278,17 @@ export class UserListService {
     // await this._deleteUserToken(node);
     const res = await TokenService.getInstance().getAdminPlayLoad(node);
 
-    return {code: HTTP_CODES.OK, data: res};
+    return { code: HTTP_CODES.OK, data: res };
   }
 
-  public async authUserViaAuthPlateform(
-    user: IUserCredential
-  ): Promise<{code: HTTP_CODES; data: any}> {
+  public async authUserViaAuthPlateform(user: IUserCredential): Promise<{ code: HTTP_CODES; data: any }> {
     const adminCredential = await this._getAuthPlateformInfo();
 
     const url = `${adminCredential.urlAdmin}/users/login`;
     return axios
       .post(url, user)
       .then(async (result) => {
-        const data = result.data;
-        data.profile = await this._getProfileInfo(data.token, adminCredential);
-        data.userInfo = await this._getUserInfo(
-          data.userId,
-          adminCredential,
-          data.token
-        );
+        const data = this.getUserDataFormatted(result.data, adminCredential);
 
         return {
           code: HTTP_CODES.OK,
@@ -320,12 +304,19 @@ export class UserListService {
       });
   }
 
+  public async getUserDataFormatted(data: any, adminCredential?: any) {
+    adminCredential = adminCredential || await this._getAuthPlateformInfo();
+    data.profile = await this._getProfileInfo(data.token, adminCredential);
+    data.userInfo = await this._getUserInfo(data.userId, adminCredential, data.token);
+    return data;
+  }
+
   //////////////////////////////////////////////////
   //                    PRIVATE                   //
   //////////////////////////////////////////////////
 
   private async _addUserToContext(
-    info: {[key: string]: any},
+    info: { [key: string]: any },
     element?: spinal.Model,
     isAdmin: boolean = false
   ): Promise<SpinalNode> {
@@ -376,11 +367,7 @@ export class UserListService {
     return Promise.all(promises);
   }
 
-  public _getProfileInfo(
-    userToken: string,
-    adminCredential: IPamCredential,
-    isUser: boolean = true
-  ) {
+  public _getProfileInfo(userToken: string, adminCredential: IPamCredential, isUser: boolean = true) {
     let urlAdmin = adminCredential.urlAdmin;
     let endpoint = '/tokens/getUserProfileByToken';
     return axios
@@ -399,11 +386,7 @@ export class UserListService {
       });
   }
 
-  public _getUserInfo(
-    userId: string,
-    adminCredential: IPamCredential,
-    userToken: string
-  ) {
+  public _getUserInfo(userId: string, adminCredential: IPamCredential, userToken: string) {
     const config = {
       headers: {
         'Content-Type': 'application/json',
@@ -411,14 +394,11 @@ export class UserListService {
         'x-access-token': userToken,
       },
     };
-    return axios
-      .get(`${adminCredential.urlAdmin}/users/${userId}`, config)
-      .then((result) => {
-        return result.data;
-      })
-      .catch((err) => {
-        console.error(err);
-      });
+    return axios.get(`${adminCredential.urlAdmin}/users/${userId}`, config).then((result) => {
+      return result.data;
+    }).catch((err) => {
+      console.error(err);
+    });
   }
 
   private async _getAuthPlateformInfo() {

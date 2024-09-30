@@ -95,6 +95,7 @@ class ConfigFileService {
             _1.TokenService,
             _1.LogService,
             _1.WebsocketLogsService,
+            _1.AuthentificationService
         ];
         const promises = services.map((service) => {
             try {

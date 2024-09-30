@@ -71,10 +71,10 @@ class UserListService {
         return __awaiter(this, void 0, void 0, function* () {
             let data = yield this.authAdmin(user);
             let isAdmin = true;
-            if (data.code === constant_1.HTTP_CODES.INTERNAL_ERROR) {
-                data = yield this.authUserViaAuthPlateform(user);
-                isAdmin = false;
-            }
+            // if (data.code === HTTP_CODES.INTERNAL_ERROR) {
+            //   data = await this.authUserViaAuthPlateform(user);
+            //   isAdmin = false;
+            // }
             if (data.code === constant_1.HTTP_CODES.OK) {
                 const type = isAdmin ? constant_1.USER_TYPES.ADMIN : constant_1.USER_TYPES.USER;
                 const info = {
@@ -230,9 +230,7 @@ class UserListService {
             return axios_1.default
                 .post(url, user)
                 .then((result) => __awaiter(this, void 0, void 0, function* () {
-                const data = result.data;
-                data.profile = yield this._getProfileInfo(data.token, adminCredential);
-                data.userInfo = yield this._getUserInfo(data.userId, adminCredential, data.token);
+                const data = this.getUserDataFormatted(result.data, adminCredential);
                 return {
                     code: constant_1.HTTP_CODES.OK,
                     data,
@@ -245,6 +243,14 @@ class UserListService {
                     data: 'bad credential',
                 };
             });
+        });
+    }
+    getUserDataFormatted(data, adminCredential) {
+        return __awaiter(this, void 0, void 0, function* () {
+            adminCredential = adminCredential || (yield this._getAuthPlateformInfo());
+            data.profile = yield this._getProfileInfo(data.token, adminCredential);
+            data.userInfo = yield this._getUserInfo(data.userId, adminCredential, data.token);
+            return data;
         });
     }
     //////////////////////////////////////////////////
@@ -312,12 +318,9 @@ class UserListService {
                 'x-access-token': userToken,
             },
         };
-        return axios_1.default
-            .get(`${adminCredential.urlAdmin}/users/${userId}`, config)
-            .then((result) => {
+        return axios_1.default.get(`${adminCredential.urlAdmin}/users/${userId}`, config).then((result) => {
             return result.data;
-        })
-            .catch((err) => {
+        }).catch((err) => {
             console.error(err);
         });
     }

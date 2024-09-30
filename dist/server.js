@@ -36,6 +36,7 @@ const express = require("express");
 const morgan = require("morgan");
 const routes_1 = require("./routes");
 const expressMiddleware_1 = require("./middlewares/expressMiddleware");
+const login_1 = require("./proxy/login");
 function initExpress(conn) {
     return __awaiter(this, void 0, void 0, function* () {
         var app = express();
@@ -44,6 +45,7 @@ function initExpress(conn) {
         (0, expressMiddleware_1.useClientMiddleWare)(app);
         (0, expressMiddleware_1.initSwagger)(app);
         (0, expressMiddleware_1.useApiMiddleWare)(app);
+        (0, login_1.useLoginProxy)(app);
         (0, expressMiddleware_1.authenticateRequest)(app);
         (0, routes_1.RegisterRoutes)(app);
         app.use(expressMiddleware_1.errorHandler);

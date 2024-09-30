@@ -23,8 +23,8 @@
  */
 
 import * as path from 'path';
-import {spinalCore} from 'spinal-core-connectorjs_type';
-import {SpinalGraph, SpinalContext} from 'spinal-model-graph';
+import { spinalCore } from 'spinal-core-connectorjs_type';
+import { SpinalGraph, SpinalContext } from 'spinal-model-graph';
 import {
   CONFIG_DEFAULT_NAME,
   CONFIG_FILE_MODEl_TYPE,
@@ -43,9 +43,10 @@ import {
   AppListService,
   LogService,
   WebsocketLogsService,
+  AuthentificationService,
 } from '.';
 
-import {createDefaultAdminApps} from '../defaultApps/adminApps';
+import { createDefaultAdminApps } from '../defaultApps/adminApps';
 
 // const { config: { directory_path, fileName } } = require("../../config");
 
@@ -58,7 +59,7 @@ export default class ConfigFileService {
   public graph: SpinalGraph;
   public hubConnect: spinal.FileSystem;
 
-  private constructor() {}
+  private constructor() { }
 
   public static getInstance(): ConfigFileService {
     if (!ConfigFileService.instance) {
@@ -67,7 +68,7 @@ export default class ConfigFileService {
     return ConfigFileService.instance;
   }
 
-  public init(connect: spinal.FileSystem): Promise<SpinalContext[]> {
+  public init(connect: spinal.FileSystem): Promise<(SpinalContext | void)[]> {
     return this.loadOrMakeConfigFile(connect).then((graph: SpinalGraph) => {
       this.hubConnect = connect;
       this.graph = graph;
@@ -131,6 +132,7 @@ export default class ConfigFileService {
       TokenService,
       LogService,
       WebsocketLogsService,
+      AuthentificationService
     ];
 
     const promises = services.map((service) => {

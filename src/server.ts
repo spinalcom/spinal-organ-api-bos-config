@@ -38,6 +38,8 @@ import {
 } from './middlewares/expressMiddleware';
 
 
+import { useLoginProxy } from './proxy/login';
+
 export default async function initExpress(conn: spinal.FileSystem) {
 
   var app = express();
@@ -50,6 +52,7 @@ export default async function initExpress(conn: spinal.FileSystem) {
   useClientMiddleWare(app);
   initSwagger(app);
   useApiMiddleWare(app);
+  useLoginProxy(app);
   authenticateRequest(app);
   RegisterRoutes(app);
 

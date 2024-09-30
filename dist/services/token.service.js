@@ -141,19 +141,27 @@ class TokenService {
     }
     tokenIsValid(token, deleteIfExpired = false) {
         return __awaiter(this, void 0, void 0, function* () {
-            const data = yield this.getTokenData(token);
-            if (!data)
-                return;
+            let data = yield this.getTokenData(token);
+            if (!data) {
+                data = yield this.verifyToken(token);
+            }
+            ;
             const expirationTime = data.expieredToken;
-            const tokenExpired = expirationTime
-                ? Date.now() >= expirationTime * 1000
-                : true;
+            const tokenExpired = expirationTime ? Date.now() >= expirationTime * 1000 : true;
             if (tokenExpired) {
                 if (deleteIfExpired)
                     yield this.deleteToken(token);
                 return;
             }
             return data;
+        });
+    }
+    verifyToken(token, actor = "user") {
+        return __awaiter(this, void 0, void 0, function* () {
+            const authAdmin = yield authentification_service_1.AuthentificationService.getInstance().getPamToAdminCredential();
+            return axios_1.default.post(`${authAdmin.urlAdmin}/tokens/verifyToken`, { tokenParam: token, actor }).then((result) => {
+                return result.data;
+            });
         });
     }
     //////////////////////////////////////////////////

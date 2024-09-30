@@ -13,6 +13,7 @@ export declare class TokenService {
     getTokenData(token: string): Promise<any>;
     deleteToken(token: SpinalNode | string): Promise<boolean>;
     tokenIsValid(token: string, deleteIfExpired?: boolean): Promise<IUserToken | IApplicationToken>;
+    verifyToken(token: string, actor?: "user" | "app"): Promise<any>;
     private _checkTokenNearAuthPlateform;
     private _checkRequest;
     private _generateString;

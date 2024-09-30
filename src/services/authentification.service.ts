@@ -41,6 +41,8 @@ const tokenKey = '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d';
 
 export class AuthentificationService {
     private static instance: AuthentificationService;
+    public authPlatformIsConnected: boolean = false;
+
     private constructor() { }
 
     public static getInstance(): AuthentificationService {
@@ -48,34 +50,73 @@ export class AuthentificationService {
         return this.instance;
     }
 
+    async init() {
+        let urlAdmin = process.env.AUTH_SERVER_URL;
+        const clientId = process.env.AUTH_CLIENT_ID;
+        const clientSecret = process.env.AUTH_CLIENT_SECRET;
+        if (!urlAdmin || !clientId || !clientSecret) {
+            console.info("There is not all the information needed to connect an auth platform in the .env file, so you can only login as admin");
+            this.authPlatformIsConnected = false;
+            return;
+        }
+        return this.registerToAdmin(urlAdmin, clientId, clientSecret)
+            .then(async () => {
+                console.info("Connected to the auth platform");
+                await this.sendDataToAdmin();
+                this.authPlatformIsConnected = true;
+            }).catch((e) => {
+                console.error("Impossible to connect to the auth platform, please check the information in the .env file");
+                console.error("error message", e.message);
+                this.authPlatformIsConnected = false;
+            })
+    }
+
     public async authenticate(info: IUserCredential | IAppCredential | IOAuth2Credential): Promise<{ code: number; data: string | IApplicationToken | IUserToken }> {
         const isUser = "userName" in info && "password" in info ? true : false;
 
-        if (isUser) {
-            return UserListService.getInstance().authenticateUser(<IUserCredential>info);
-        }
+        if (!isUser) return { code: HTTP_CODES.BAD_REQUEST, data: "Invalid userName and/or password" };
+        return UserListService.getInstance().authenticateUser(<IUserCredential>info);
 
-        const appInfo: any = this._formatInfo(<any>info);
-
-        return AppListService.getInstance().authenticateApplication(appInfo)
+        // const appInfo: any = this._formatInfo(<any>info);
+        // return AppListService.getInstance().authenticateApplication(appInfo);
     }
 
 
-    // PAM Credential
-    public registerToAdmin(pamInfo: IPamInfo, adminInfo: IAdmin): Promise<IPamCredential> {
-        if (adminInfo.urlAdmin[adminInfo.urlAdmin.length - 1] === "/") {
-            adminInfo.urlAdmin = adminInfo.urlAdmin.substring(0, adminInfo.urlAdmin.lastIndexOf('/'))
+    public registerToAdmin(urlAdmin: string, clientId: string, clientSecret: string): Promise<IPamCredential> {
+
+        if (!urlAdmin || !(/^https?:\/\//.test(urlAdmin))) throw new Error("AUTH_SERVER_URL is not valid in .env file");
+        if (!clientId) throw new Error("AUTH_CLIENT_ID is not valid in .env file");
+        if (!clientSecret) throw new Error("AUTH_CLIENT_SECRET is not valid in .env file");
+
+        if (urlAdmin[urlAdmin.length - 1] === "/") {
+            urlAdmin = urlAdmin.substring(0, urlAdmin.lastIndexOf('/'))
         }
 
-        return axios.post(`${adminInfo.urlAdmin}/register`, {
-            platformCreationParms: pamInfo,
-            registerKey: adminInfo.registerKey
+        return axios.post(`${urlAdmin}/register`, {
+            // platformCreationParms: pamInfo,
+            clientId,
+            clientSecret
         }).then((result) => {
-            result.data.url = adminInfo.urlAdmin;
-            result.data.registerKey = adminInfo.registerKey;
+            result.data.url = urlAdmin;
+            result.data.clientId = clientId;
             return this._editPamCredential(result.data)
         })
     }
+
+    // // PAM Credential
+    // public registerToAdmin(pamInfo: IPamInfo, adminInfo: IAdmin): Promise<IPamCredential> {
+    //     if (adminInfo.urlAdmin[adminInfo.urlAdmin.length - 1] === "/") {
+    //         adminInfo.urlAdmin = adminInfo.urlAdmin.substring(0, adminInfo.urlAdmin.lastIndexOf('/'))
+    //     }
+    //     return axios.post(`${adminInfo.urlAdmin}/register`, {
+    //         platformCreationParms: pamInfo,
+    //         registerKey: adminInfo.registerKey
+    //     }).then((result) => {
+    //         result.data.url = adminInfo.urlAdmin;
+    //         result.data.registerKey = adminInfo.registerKey;
+    //         return this._editPamCredential(result.data)
+    //     })
+    // }
 
     public async getPamToAdminCredential(): Promise<IPamCredential> {
         let context = await configServiceInstance.getContext(BOS_CREDENTIAL_CONTEXT_NAME);
@@ -192,7 +233,8 @@ export class AuthentificationService {
         if (bosCredential.name) contextInfo.mod_attr("pamName", bosCredential.name);
         if (bosCredential.id) contextInfo.mod_attr("idPlateform", bosCredential.id);
         if (bosCredential.url) contextInfo.mod_attr("urlAdmin", bosCredential.url);
-        if (bosCredential.registerKey) contextInfo.mod_attr("registerKey", bosCredential.registerKey);
+        // if (bosCredential.registerKey) contextInfo.mod_attr("registerKey", bosCredential.registerKey);
+        if (bosCredential.clientId) contextInfo.mod_attr("clientId", bosCredential.clientId);
 
         return contextInfo.get();
     }
@@ -222,16 +264,20 @@ export class AuthentificationService {
     }
 
     private _formatInfo(info: IAppCredential | IOAuth2Credential): IAppCredential {
+        const obj: any = { clientId: undefined, clientSecret: undefined };
+
         if ("client_id" in info) {
-            info["clientId"] = info["client_id"]
-            delete info.client_id;
+            // info["clientId"] = info["client_id"]
+            // delete info.client_id;
+            obj.clientId = info["client_id"];
         }
 
         if ("client_secret" in info) {
-            info["clientSecret"] = info["client_secret"]
-            delete info.client_secret;
+            // info["clientSecret"] = info["client_secret"]
+            // delete info.client_secret;
+            obj.clientSecret = info["client_secret"];
         }
 
-        return <IAppCredential>info;
+        return (obj.clientId && obj.clientSecret ? obj : info) as IAppCredential;
     }
 }

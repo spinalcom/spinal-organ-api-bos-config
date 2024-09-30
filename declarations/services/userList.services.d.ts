@@ -25,6 +25,7 @@ export declare class UserListService {
         code: HTTP_CODES;
         data: any;
     }>;
+    getUserDataFormatted(data: any, adminCredential?: any): Promise<any>;
     private _addUserToContext;
     private _hashPassword;
     private _comparePassword;
