@@ -4,15 +4,31 @@ import { HTTP_CODES } from "../../constant";
 
 export async function useLoginProxy(app: express.Application) {
     app.get('/login', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-        const authPlatformIsConnected = await AuthentificationService.getInstance().authPlatformIsConnected;
+        try {
+            const authPlatformInfo = await AuthentificationService.getInstance().getPamToAdminCredential();
 
-        if (authPlatformIsConnected) {
-            const url = getAuthServerUrl();
-            res.redirect(url);
-            return;
+            if (authPlatformInfo) {
+                let server_url = authPlatformInfo.urlAdmin;
+                const client_id = authPlatformInfo.clientId;
+
+                if (!server_url || !client_id) {
+                    return res.send({ status: HTTP_CODES.BAD_REQUEST, message: "Invalid auth server details" });
+                }
+
+                server_url = server_url.endsWith("/") ? server_url : server_url + "/"
+
+                const url = server_url + `login/${client_id}`;
+
+                return res.status(HTTP_CODES.REDIRECT).redirect(url);
+            }
+
+            res.status(HTTP_CODES.BAD_REQUEST).send({ status: HTTP_CODES.BAD_REQUEST, message: "No Authentification server url found, use /admin endpoint to connect as admin" });
+
+
+        } catch (error) {
+            console.error(error.message);
+            res.status(HTTP_CODES.INTERNAL_ERROR).send({ status: HTTP_CODES.INTERNAL_ERROR, message: error.message });
         }
-
-        res.send({ status: HTTP_CODES.BAD_REQUEST, message: "No Authentification server connected, use /admin endpoint to connect as admin" });
     });
 
     app.post("/callback", async (req: express.Request, res: express.Response, next: express.NextFunction) => {

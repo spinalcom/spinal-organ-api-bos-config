@@ -53,24 +53,24 @@ class AuthentificationService {
     }
     init() {
         return __awaiter(this, void 0, void 0, function* () {
-            let urlAdmin = process.env.AUTH_SERVER_URL;
-            const clientId = process.env.AUTH_CLIENT_ID;
-            const clientSecret = process.env.AUTH_CLIENT_SECRET;
-            if (!urlAdmin || !clientId || !clientSecret) {
-                console.info("There is not all the information needed to connect an auth platform in the .env file, so you can only login as admin");
-                this.authPlatformIsConnected = false;
-                return;
-            }
-            return this.registerToAdmin(urlAdmin, clientId, clientSecret)
-                .then(() => __awaiter(this, void 0, void 0, function* () {
-                console.info("Connected to the auth platform");
-                yield this.sendDataToAdmin();
-                this.authPlatformIsConnected = true;
-            })).catch((e) => {
-                console.error("Impossible to connect to the auth platform, please check the information in the .env file");
-                console.error("error message", e.message);
-                this.authPlatformIsConnected = false;
-            });
+            // let urlAdmin = process.env.AUTH_SERVER_URL;
+            // const clientId = process.env.AUTH_CLIENT_ID;
+            // const clientSecret = process.env.AUTH_CLIENT_SECRET;
+            // if (!urlAdmin || !clientId || !clientSecret) {
+            //     console.info("There is not all the information needed to connect an auth platform in the .env file, so you can only login as admin");
+            //     this.authPlatformIsConnected = false;
+            //     return;
+            // }
+            // return this.registerToAdmin(urlAdmin, clientId, clientSecret)
+            //     .then(async () => {
+            //         console.info("Connected to the auth platform");
+            //         await this.sendDataToAdmin();
+            //         this.authPlatformIsConnected = true;
+            //     }).catch((e) => {
+            //         console.error("Impossible to connect to the auth platform, please check the information in the .env file");
+            //         console.error("error message", e.message);
+            //         this.authPlatformIsConnected = false;
+            //     })
         });
     }
     authenticate(info) {
@@ -85,11 +85,11 @@ class AuthentificationService {
     }
     registerToAdmin(urlAdmin, clientId, clientSecret) {
         if (!urlAdmin || !(/^https?:\/\//.test(urlAdmin)))
-            throw new Error("AUTH_SERVER_URL is not valid in .env file");
+            throw new Error("AUTH_SERVER_URL is not valid!");
         if (!clientId)
-            throw new Error("AUTH_CLIENT_ID is not valid in .env file");
+            throw new Error("AUTH_CLIENT_ID is not valid!");
         if (!clientSecret)
-            throw new Error("AUTH_CLIENT_SECRET is not valid in .env file");
+            throw new Error("AUTH_CLIENT_SECRET is not valid!");
         if (urlAdmin[urlAdmin.length - 1] === "/") {
             urlAdmin = urlAdmin.substring(0, urlAdmin.lastIndexOf('/'));
         }
@@ -100,7 +100,11 @@ class AuthentificationService {
         }).then((result) => {
             result.data.url = urlAdmin;
             result.data.clientId = clientId;
+            this.authPlatformIsConnected = true;
             return this._editPamCredential(result.data);
+        }).catch((e) => {
+            this.authPlatformIsConnected = false;
+            throw new Error(e.message);
         });
     }
     // // PAM Credential
