@@ -1,19 +1,19 @@
 /*
  * Copyright 2022 SpinalCom - www.spinalcom.com
- * 
+ *
  * This file is part of SpinalCore.
- * 
+ *
  * Please read all of the following terms and conditions
  * of the Free Software license Agreement ("Agreement")
  * carefully.
- * 
+ *
  * This Agreement is a legally binding contract between
  * the Licensee (as defined below) and SpinalCom that
  * sets forth the terms and conditions that govern your
  * use of the Program. By installing and/or using the
  * Program, you agree to abide by all the terms and
  * conditions stated or referenced herein.
- * 
+ *
  * If you do not agree to abide by these terms and
  * conditions, do not demonstrate your acceptance and do
  * not install or use the Program.
@@ -22,26 +22,42 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
-import { SpinalContext, SpinalGraphService, SpinalNode } from "spinal-env-viewer-graph-service";
-import { AVAILABLE_APPLICATIONS_CONTEXT_NAME, AVAILABLE_APPLICATIONS_CONTEXT_TYPE, PTR_LST_TYPE, CONTEXT_TO_APPS_GROUP, ADMIN_APPS_GROUP_NAME, ADMIN_APPS_GROUP_TYPE, APP_RELATION_NAME, ADMIN_APP_TYPE, BUILDING_APPS_GROUP_NAME, BUILDING_APPS_GROUP_TYPE, BUILDING_APP_TYPE } from "../constant";
-import { IApp } from "../interfaces";
-import { configServiceInstance } from "./configFile.service";
-import { SpinalExcelManager } from "spinal-env-viewer-plugin-excel-manager-service";
-import { AdminProfileService } from "./adminProfile.service";
-import { removeNodeReferences } from "../utils/utils";
+import {
+  SpinalContext,
+  SpinalGraphService,
+  SpinalNode,
+} from 'spinal-env-viewer-graph-service';
+import {
+  AVAILABLE_APPLICATIONS_CONTEXT_NAME,
+  AVAILABLE_APPLICATIONS_CONTEXT_TYPE,
+  PTR_LST_TYPE,
+  CONTEXT_TO_APPS_GROUP,
+  ADMIN_APPS_GROUP_NAME,
+  ADMIN_APPS_GROUP_TYPE,
+  APP_RELATION_NAME,
+  ADMIN_APP_TYPE,
+  BUILDING_APPS_GROUP_NAME,
+  BUILDING_APPS_GROUP_TYPE,
+  BUILDING_APP_TYPE,
+  SUB_APP_RELATION_NAME,
+} from '../constant';
+import { ISpinalApp } from '../interfaces';
+import { configServiceInstance } from './configFile.service';
+import { SpinalExcelManager } from 'spinal-env-viewer-plugin-excel-manager-service';
+import { AdminProfileService } from './adminProfile.service';
+import { removeNodeReferences } from '../utils/utils';
+import { ISubApp } from '../interfaces/ISubApp';
 
 export const AppsType = Object.freeze({
-  admin: "admin",
-  building: "building",
-})
+  admin: 'admin',
+  building: 'building',
+});
 
 export class AppService {
   private static instance: AppService;
   public context: SpinalContext;
 
-
-
-  private constructor() { }
+  private constructor() {}
 
   public static getInstance(): AppService {
     if (!this.instance) {
@@ -52,8 +68,14 @@ export class AppService {
   }
 
   public async init(): Promise<SpinalContext> {
-    this.context = await configServiceInstance.getContext(AVAILABLE_APPLICATIONS_CONTEXT_NAME);
-    if (!this.context) this.context = await configServiceInstance.addContext(AVAILABLE_APPLICATIONS_CONTEXT_NAME, AVAILABLE_APPLICATIONS_CONTEXT_TYPE);
+    this.context = await configServiceInstance.getContext(
+      AVAILABLE_APPLICATIONS_CONTEXT_NAME
+    );
+    if (!this.context)
+      this.context = await configServiceInstance.addContext(
+        AVAILABLE_APPLICATIONS_CONTEXT_NAME,
+        AVAILABLE_APPLICATIONS_CONTEXT_TYPE
+      );
     return this.context;
   }
 
@@ -61,117 +83,193 @@ export class AppService {
   //              CREATE          //
   //////////////////////////////////
 
-  public async createAdminApp(appInfo: IApp): Promise<SpinalNode> {
-    const groupNode = await this._getApplicationGroupNode(ADMIN_APPS_GROUP_NAME, ADMIN_APPS_GROUP_TYPE, true);
+  public async createAdminApp(appInfo: ISpinalApp): Promise<SpinalNode> {
+    const groupNode = await this._getApplicationGroupNode(
+      ADMIN_APPS_GROUP_NAME,
+      ADMIN_APPS_GROUP_TYPE,
+      true
+    );
     if (!groupNode) return;
 
     const children = await groupNode.getChildren([APP_RELATION_NAME]);
-    const appExist = children.find(el => el.getName().get().toLowerCase() === appInfo.name.toLowerCase());
+    const appExist = children.find(
+      (el) => el.getName().get().toLowerCase() === appInfo.name.toLowerCase()
+    );
     if (appExist) return appExist;
 
     appInfo.type = ADMIN_APP_TYPE;
     const appId = SpinalGraphService.createNode(appInfo, undefined);
     const node = SpinalGraphService.getRealNode(appId);
-    return groupNode.addChildInContext(node, APP_RELATION_NAME, PTR_LST_TYPE, this.context).then(async (_node) => {
-      await AdminProfileService.getInstance().addAdminAppToProfil(_node);
-      return _node;
-    })
+    const _node = await groupNode.addChildInContext(
+      node,
+      APP_RELATION_NAME,
+      PTR_LST_TYPE,
+      this.context
+    );
+    await AdminProfileService.getInstance().addAdminAppToProfil(_node);
+    return _node;
   }
 
-  public async createBuildingApp(appInfo: IApp): Promise<SpinalNode> {
-    const groupNode = await this._getApplicationGroupNode(BUILDING_APPS_GROUP_NAME, BUILDING_APPS_GROUP_TYPE, true);
+  public async createBuildingApp(
+    appInfo: ISpinalApp,
+    silenceAlreadyExist = false
+  ): Promise<SpinalNode> {
+    const groupNode = await this._getApplicationGroupNode(
+      BUILDING_APPS_GROUP_NAME,
+      BUILDING_APPS_GROUP_TYPE,
+      true
+    );
     if (!groupNode) return;
 
     const children = await groupNode.getChildren([APP_RELATION_NAME]);
-    const appExist = children.find(el => el.getName().get().toLowerCase() === appInfo.name.toLowerCase());
-    if (appExist) return appExist;
+    const appExist = children.find(
+      (el) => el.getName().get().toLowerCase() === appInfo.name.toLowerCase()
+    );
+    if (appExist)
+      if (silenceAlreadyExist) return appExist;
+      else throw new Error('App already exist');
 
     appInfo.type = BUILDING_APP_TYPE;
     const appId = SpinalGraphService.createNode(appInfo, undefined);
     const node = SpinalGraphService.getRealNode(appId);
-    return groupNode.addChildInContext(node, APP_RELATION_NAME, PTR_LST_TYPE, this.context).then(async (_node) => {
-      await AdminProfileService.getInstance().addAppToProfil(_node);
-      return _node;
-    })
+    const _node = await groupNode.addChildInContext(
+      node,
+      APP_RELATION_NAME,
+      PTR_LST_TYPE,
+      this.context
+    );
+    await AdminProfileService.getInstance().addAppToProfil(_node);
+    return _node;
   }
 
-  public async createOrUpadteAdminApp(appInfo: IApp): Promise<SpinalNode> {
-    const groupNode = await this._getApplicationGroupNode(ADMIN_APPS_GROUP_NAME, ADMIN_APPS_GROUP_TYPE, true);
+  public async createBuildingSubApp(
+    appNode: SpinalNode,
+    appInfo: ISubApp,
+    silenceAlreadyExist = false
+  ): Promise<SpinalNode | string> {
+    // search subApp from appNode
+    const children = await appNode.getChildren([SUB_APP_RELATION_NAME]);
+    const subApp = children.find(
+      (el) => el.getName().get().toLowerCase() === appInfo.name.toLowerCase()
+    );
+    if (subApp)
+      if (silenceAlreadyExist) return subApp;
+      else
+        return 'SubApp already exist, please use the PUT update_building_app API';
+
+    // const groupNode = await this._getApplicationGroupNode(
+    //   BUILDING_APPS_GROUP_NAME,
+    //   BUILDING_APPS_GROUP_TYPE,
+    //   true
+    // );
+    // if (!groupNode) return;
+
+    // const children = await groupNode.getChildren([APP_RELATION_NAME]);
+    // const appExist = children.find(
+    //   (el) => el.getName().get().toLowerCase() === appInfo.name.toLowerCase()
+    // );
+    // if (appExist) return appExist;
+
+    // appInfo.type = BUILDING_APP_TYPE;
+    // const appId = SpinalGraphService.createNode(appInfo, undefined);
+    // const node = SpinalGraphService.getRealNode(appId);
+    // const _node = await groupNode.addChildInContext(
+    //   node,
+    //   APP_RELATION_NAME,
+    //   PTR_LST_TYPE,
+    //   this.context
+    // );
+    // await AdminProfileService.getInstance().addAppToProfil(_node);
+    // return _node;
+  }
+
+  public async createOrUpadteAdminApp(
+    appInfo: ISpinalApp
+  ): Promise<SpinalNode> {
+    const groupNode = await this._getApplicationGroupNode(
+      ADMIN_APPS_GROUP_NAME,
+      ADMIN_APPS_GROUP_TYPE,
+      true
+    );
     if (!groupNode) return;
 
     const children = await groupNode.getChildren([APP_RELATION_NAME]);
-    const appExist = children.find(el => el.getName().get().toLowerCase() === appInfo.name.toLowerCase());
+    const appExist = children.find(
+      (el) => el.getName().get().toLowerCase() === appInfo.name.toLowerCase()
+    );
     if (appExist) {
       return this.updateAdminApp(appExist.getId().get(), appInfo);
-    };
+    }
 
     return this.createAdminApp(appInfo);
   }
-
 
   //////////////////////////////////
   //              GET             //
   //////////////////////////////////
 
   public async getAllAdminApps(): Promise<SpinalNode[]> {
-    const groupNode = await this._getApplicationGroupNode(ADMIN_APPS_GROUP_NAME, ADMIN_APPS_GROUP_TYPE);
+    const groupNode = await this._getApplicationGroupNode(
+      ADMIN_APPS_GROUP_NAME,
+      ADMIN_APPS_GROUP_TYPE
+    );
     if (!groupNode) return [];
     return groupNode.getChildren([APP_RELATION_NAME]);
   }
 
   public async getAllBuildingApps(): Promise<SpinalNode[]> {
-    const groupNode = await this._getApplicationGroupNode(BUILDING_APPS_GROUP_NAME, BUILDING_APPS_GROUP_TYPE);
+    const groupNode = await this._getApplicationGroupNode(
+      BUILDING_APPS_GROUP_NAME,
+      BUILDING_APPS_GROUP_TYPE
+    );
     if (!groupNode) return [];
     return groupNode.getChildren([APP_RELATION_NAME]);
   }
 
-
-
   public async getAdminApp(appId: string): Promise<SpinalNode> {
     const children = await this.getAllAdminApps();
-    return children.find(el => el.getId().get() === appId);
+    return children.find((el) => el.getId().get() === appId);
   }
 
   public async getBuildingApp(appId: string): Promise<SpinalNode> {
     const children = await this.getAllBuildingApps();
-    return children.find(el => el.getId().get() === appId);
+    return children.find((el) => el.getId().get() === appId);
+  }
+
+  public async getBuildingSubApp(
+    appId: string,
+    subAppId: string
+  ): Promise<SpinalNode> {
+    const buildingApp = await this.getBuildingApp(appId);
+    if (!buildingApp) return;
+    const children = await buildingApp.getChildren([SUB_APP_RELATION_NAME]);
+    return children.find((el) => el.getId().get() === subAppId);
   }
 
   public async getApps(appId: string): Promise<SpinalNode> {
     const promises = [this.getAllBuildingApps(), this.getAllAdminApps()];
     return Promise.all(promises).then((apps) => {
-      return apps.flat().find(el => el.getId().get() === appId);
-    })
+      return apps.flat().find((el) => el.getId().get() === appId);
+    });
   }
 
   //////////////////////////////////
   //              UPDATES         //
   //////////////////////////////////
 
-  public async updateAdminApp(appId: string, newInfo: IApp): Promise<SpinalNode> {
+  public async updateAdminApp(
+    appId: string,
+    newInfo: ISpinalApp
+  ): Promise<SpinalNode> {
     const appNode = await this.getAdminApp(appId);
 
     if (appNode) {
       for (const key in newInfo) {
-        if (Object.prototype.hasOwnProperty.call(newInfo, key) && appNode.info[key] || key === "documentationLink") {
-          const element = newInfo[key];
-          if (appNode.info[key]) appNode.info[key].set(element);
-          else appNode.info.add_attr({ [key]: element });
-        }
-      }
-
-      return appNode
-    }
-
-  }
-
-
-  public async updateBuildingApp(appId: string, newInfo: IApp): Promise<SpinalNode> {
-    const appNode = await this.getBuildingApp(appId);
-
-    if (appNode) {
-      for (const key in newInfo) {
-        if (Object.prototype.hasOwnProperty.call(newInfo, key) && appNode.info[key] || key === "documentationLink") {
+        if (
+          (Object.prototype.hasOwnProperty.call(newInfo, key) &&
+            appNode.info[key]) ||
+          key === 'documentationLink'
+        ) {
           const element = newInfo[key];
           if (appNode.info[key]) appNode.info[key].set(element);
           else appNode.info.add_attr({ [key]: element });
@@ -182,6 +280,53 @@ export class AppService {
     }
   }
 
+  public async updateBuildingApp(
+    appId: string,
+    newInfo: ISpinalApp
+  ): Promise<SpinalNode> {
+    const appNode = await this.getBuildingApp(appId);
+
+    if (appNode) {
+      for (const key in newInfo) {
+        if (
+          (Object.prototype.hasOwnProperty.call(newInfo, key) &&
+            appNode.info[key]) ||
+          key === 'documentationLink'
+        ) {
+          const element = newInfo[key];
+          if (appNode.info[key]) appNode.info[key].set(element);
+          else appNode.info.add_attr({ [key]: element });
+        }
+      }
+
+      return appNode;
+    }
+  }
+
+  public async updateBuildingSubApp(
+    appId: string,
+    subAppId: string,
+    newInfo: ISubApp
+  ): Promise<SpinalNode> {
+    const subAppNode = await this.getBuildingSubApp(appId, subAppId);
+    if (subAppNode) {
+      for (const key in newInfo) {
+        if (key === 'appConfig') continue;
+        if (
+          (Object.prototype.hasOwnProperty.call(newInfo, key) &&
+            subAppNode.info[key]) ||
+          key === 'documentationLink'
+        ) {
+          const element = newInfo[key];
+          if (subAppNode.info[key]) subAppNode.info[key].set(element);
+          else subAppNode.info.add_attr({ [key]: element });
+        }
+      }
+      const element = await subAppNode.getElement();
+      element.set(newInfo.appConfig);
+      return subAppNode;
+    }
+  }
 
   //////////////////////////////////
   //              DELETE          //
@@ -210,7 +355,6 @@ export class AppService {
   //////////////////////////////////
   //              LINK            //
   //////////////////////////////////
-
 
   // public async linkAppToPortofolio(portfolioId: string, appId: string): Promise<boolean> {
   //   const portofolio = await PortofolioService.getInstance().getPortofolio(portfolioId);
@@ -242,44 +386,58 @@ export class AppService {
   //         EXCEl / JSON         //
   //////////////////////////////////
 
-
-  public async uploadApps(appType: string, fileData: Buffer, isExcel: boolean = false): Promise<SpinalNode[]> {
+  public async uploadApps(
+    appType: string,
+    fileData: Buffer,
+    isExcel: boolean = false
+  ): Promise<SpinalNode[]> {
     let data;
     if (!isExcel) data = JSON.parse(JSON.stringify(fileData.toString()));
     else data = await this._convertExcelToJson(fileData);
 
     const formattedApps = this._formatAppsJson(data);
-
-    return formattedApps.reduce(async (prom, item) => {
-      const liste = await prom;
-
+    const listRes = [];
+    for (const item of formattedApps) {
       try {
         let app;
-
         if (appType === AppsType.admin) app = await this.createAdminApp(item);
-        else if (appType === AppsType.building) app = await this.createBuildingApp(item);
-
-        liste.push(app)
-      } catch (error) { }
-
-      return liste;
-    }, Promise.resolve([]))
-
+        else if (appType === AppsType.building)
+          app = await this.createBuildingApp(item, true);
+        else
+          console.error(
+            'App type not found, please use AppsType.admin or AppsType.building'
+          );
+        if (app) listRes.push(app);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    return listRes;
   }
-
 
   //////////////////////////////////
   //              PRIVATES        //
   //////////////////////////////////
 
-  private async _getApplicationGroupNode(name: string, type: string, createIt: boolean = false): Promise<SpinalNode | void> {
+  private async _getApplicationGroupNode(
+    name: string,
+    type: string,
+    createIt: boolean = false
+  ): Promise<SpinalNode | void> {
     const children = await this.context.getChildren([CONTEXT_TO_APPS_GROUP]);
 
-    const found = children.find(el => el.getName().get() === name && el.getType().get() === type);
+    const found = children.find(
+      (el) => el.getName().get() === name && el.getType().get() === type
+    );
     if (found || !createIt) return found;
 
     const node = new SpinalNode(name, type);
-    return this.context.addChildInContext(node, CONTEXT_TO_APPS_GROUP, PTR_LST_TYPE, this.context);
+    return await this.context.addChildInContext(
+      node,
+      CONTEXT_TO_APPS_GROUP,
+      PTR_LST_TYPE,
+      this.context
+    );
   }
 
   private async _convertExcelToJson(excelData: Buffer) {
@@ -287,25 +445,32 @@ export class AppService {
     return Object.values(data).flat();
   }
 
-  private _formatAppsJson(jsonData: IApp[]): IApp[] {
+  private _formatAppsJson(jsonData: ISpinalApp[]): ISpinalApp[] {
     return jsonData.reduce((liste, app) => {
-      const requiredAttrs = ["name", "icon", "tags", "categoryName", "groupName"];
+      const requiredAttrs = [
+        'name',
+        'icon',
+        'tags',
+        'categoryName',
+        'groupName',
+      ];
 
-      const notValid = requiredAttrs.find(el => !app[el]);
+      const notValid = requiredAttrs.find((el) => !app[el]);
       if (!notValid) {
         app.hasViewer = app.hasViewer || false;
         app.packageName = app.packageName || app.name;
-        app.isExternalApp = app.isExternalApp?.toString().toLocaleLowerCase() == "false" ? false : Boolean(app.isExternalApp)
+        app.isExternalApp =
+          app.isExternalApp?.toString().toLocaleLowerCase() == 'false'
+            ? false
+            : Boolean(app.isExternalApp);
         if (app.isExternalApp) app.link = app.link;
 
-        if (typeof app.tags === "string") app.tags = (<any>app.tags).split(",")
+        if (typeof app.tags === 'string') app.tags = (<any>app.tags).split(',');
 
         liste.push(app);
       }
 
       return liste;
-    }, [])
-
+    }, []);
   }
-
 }
