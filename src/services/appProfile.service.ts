@@ -43,7 +43,6 @@ import {
 } from '../interfaces';
 import { authorizationInstance } from './authorization.service';
 import { configServiceInstance } from './configFile.service';
-import {} from '../utils/profileUtils';
 
 export class AppProfileService {
   private static instance: AppProfileService;
