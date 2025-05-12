@@ -107,6 +107,18 @@ export class AdminProfileService {
       apps.map((el) => el.getId().get())
     );
   }
+  async addSubAppToProfil(
+    app: SpinalNode,
+    subApp: SpinalNode
+  ): Promise<SpinalNode[]> {
+    // if (!Array.isArray(apps)) apps = [apps];
+
+    return UserProfileService.getInstance().authorizeProfileToAccessSubApps(
+      this._adminNode,
+      [app],
+      subApp.getId().get()
+    );
+  }
 
   async addAdminAppToProfil(
     apps: SpinalNode | SpinalNode[]

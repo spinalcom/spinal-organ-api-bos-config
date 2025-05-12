@@ -34,15 +34,6 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DigitaltwinController = void 0;
 const services_1 = require("../services");
@@ -56,201 +47,182 @@ let DigitaltwinController = class DigitaltwinController extends tsoa_1.Controlle
     constructor() {
         super();
     }
-    addDigitalTwin(req, data, set_as_actual_digitaltwin) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                if (!data.name || !data.name.trim()) {
-                    this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
-                    return { message: "The file name is mandatory" };
-                }
-                try {
-                    const node = yield serviceInstance.createDigitalTwin(data.name, data.url, set_as_actual_digitaltwin);
-                    this.setStatus(constant_1.HTTP_CODES.CREATED);
-                    return node.info.get();
-                }
-                catch (error) {
-                    this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
-                    return { message: error.message };
-                }
-            }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
-    }
-    getAllDigitalTwins(req) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const digitalTwins = yield serviceInstance.getAllDigitalTwins();
-                this.setStatus(constant_1.HTTP_CODES.OK);
-                return digitalTwins.map(el => el.info.get());
-            }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
-    }
-    getDigitalTwin(req, digitaltwinId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const digitaltwin = yield serviceInstance.getDigitalTwin(digitaltwinId);
-                if (digitaltwin) {
-                    this.setStatus(constant_1.HTTP_CODES.OK);
-                    return digitaltwin.info.get();
-                }
-                this.setStatus(constant_1.HTTP_CODES.NOT_FOUND);
-                return { message: `No digitalTwin found for ${digitaltwinId}` };
-            }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
-    }
-    setActualDigitalTwin(req, digitaltwinId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const node = yield serviceInstance.setActualDigitalTwin(digitaltwinId);
-                if (node) {
-                    this.setStatus(constant_1.HTTP_CODES.OK);
-                    return node.info.get();
-                }
-                this.setStatus(constant_1.HTTP_CODES.NOT_FOUND);
-                return { message: `No digitalTwin found for ${digitaltwinId}` };
-            }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
-    }
-    getActualDigitalTwin(req) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const node = yield serviceInstance.getActualDigitalTwin();
-                if (node) {
-                    this.setStatus(constant_1.HTTP_CODES.OK);
-                    return node.info.get();
-                }
-                this.setStatus(constant_1.HTTP_CODES.NOT_FOUND);
-                return { message: `No digitaltwin is set up` };
-            }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
-    }
-    getDefaultDigitalTwinContexts(req) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const contexts = yield serviceInstance.getDigitalTwinContexts();
-                this.setStatus(constant_1.HTTP_CODES.OK);
-                return contexts.map(el => el.info.get());
-            }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
-    }
-    getDigitalTwinContexts(req, digitaltwinId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const contexts = yield serviceInstance.getDigitalTwinContexts(digitaltwinId);
-                this.setStatus(constant_1.HTTP_CODES.OK);
-                return contexts.map(el => el.info.get());
-            }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
-    }
-    editDigitalTwin(req, digitaltwinId, data) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const node = yield serviceInstance.editDigitalTwin(digitaltwinId, data);
-                if (node) {
-                    this.setStatus(constant_1.HTTP_CODES.OK);
-                    return node.info.get();
-                }
-                this.setStatus(constant_1.HTTP_CODES.NOT_FOUND);
-                return { message: `No digitaltwin found for ${digitaltwinId}` };
-            }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
-    }
-    removeDigitalTwin(req, digitaltwinId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const deleted = yield serviceInstance.removeDigitalTwin(digitaltwinId);
-                if (deleted) {
-                    this.setStatus(constant_1.HTTP_CODES.OK);
-                    return { message: `digitaltwin deleted with success` };
-                }
+    async addDigitalTwin(req, data, set_as_actual_digitaltwin) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            if (!data.name || !data.name.trim()) {
                 this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
-                return { message: `sommething went wrong, please check digitaltwin id` };
+                return { message: "The file name is mandatory" };
             }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
-    }
-    removeActualDigitaTwin(req) {
-        return __awaiter(this, void 0, void 0, function* () {
             try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const deleted = yield serviceInstance.removeActualDigitaTwin();
-                if (deleted) {
-                    this.setStatus(constant_1.HTTP_CODES.OK);
-                    return { message: `actual digitaltwin deleted with success` };
-                }
-                this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
-                return { message: `sommething went wrong, please check if default digitaltwin is set up` };
+                const node = await serviceInstance.createDigitalTwin(data.name, data.url, set_as_actual_digitaltwin);
+                this.setStatus(constant_1.HTTP_CODES.CREATED);
+                return node.info.get();
             }
             catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+                this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
                 return { message: error.message };
             }
-        });
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+    async getAllDigitalTwins(req) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const digitalTwins = await serviceInstance.getAllDigitalTwins();
+            this.setStatus(constant_1.HTTP_CODES.OK);
+            return digitalTwins.map(el => el.info.get());
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+    async getDigitalTwin(req, digitaltwinId) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const digitaltwin = await serviceInstance.getDigitalTwin(digitaltwinId);
+            if (digitaltwin) {
+                this.setStatus(constant_1.HTTP_CODES.OK);
+                return digitaltwin.info.get();
+            }
+            this.setStatus(constant_1.HTTP_CODES.NOT_FOUND);
+            return { message: `No digitalTwin found for ${digitaltwinId}` };
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+    async setActualDigitalTwin(req, digitaltwinId) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const node = await serviceInstance.setActualDigitalTwin(digitaltwinId);
+            if (node) {
+                this.setStatus(constant_1.HTTP_CODES.OK);
+                return node.info.get();
+            }
+            this.setStatus(constant_1.HTTP_CODES.NOT_FOUND);
+            return { message: `No digitalTwin found for ${digitaltwinId}` };
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+    async getActualDigitalTwin(req) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const node = await serviceInstance.getActualDigitalTwin();
+            if (node) {
+                this.setStatus(constant_1.HTTP_CODES.OK);
+                return node.info.get();
+            }
+            this.setStatus(constant_1.HTTP_CODES.NOT_FOUND);
+            return { message: `No digitaltwin is set up` };
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+    async getDefaultDigitalTwinContexts(req) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const contexts = await serviceInstance.getDigitalTwinContexts();
+            this.setStatus(constant_1.HTTP_CODES.OK);
+            return contexts.map(el => el.info.get());
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+    async getDigitalTwinContexts(req, digitaltwinId) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const contexts = await serviceInstance.getDigitalTwinContexts(digitaltwinId);
+            this.setStatus(constant_1.HTTP_CODES.OK);
+            return contexts.map(el => el.info.get());
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+    async editDigitalTwin(req, digitaltwinId, data) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const node = await serviceInstance.editDigitalTwin(digitaltwinId, data);
+            if (node) {
+                this.setStatus(constant_1.HTTP_CODES.OK);
+                return node.info.get();
+            }
+            this.setStatus(constant_1.HTTP_CODES.NOT_FOUND);
+            return { message: `No digitaltwin found for ${digitaltwinId}` };
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+    async removeDigitalTwin(req, digitaltwinId) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const deleted = await serviceInstance.removeDigitalTwin(digitaltwinId);
+            if (deleted) {
+                this.setStatus(constant_1.HTTP_CODES.OK);
+                return { message: `digitaltwin deleted with success` };
+            }
+            this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
+            return { message: `sommething went wrong, please check digitaltwin id` };
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+    async removeActualDigitaTwin(req) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const deleted = await serviceInstance.removeActualDigitaTwin();
+            if (deleted) {
+                this.setStatus(constant_1.HTTP_CODES.OK);
+                return { message: `actual digitaltwin deleted with success` };
+            }
+            this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
+            return { message: `sommething went wrong, please check if default digitaltwin is set up` };
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
 };
+exports.DigitaltwinController = DigitaltwinController;
 __decorate([
     (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Post)("/add_digitaltwin"),
@@ -339,11 +311,10 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], DigitaltwinController.prototype, "removeActualDigitaTwin", null);
-DigitaltwinController = __decorate([
+exports.DigitaltwinController = DigitaltwinController = __decorate([
     (0, tsoa_1.Route)("/api/v1"),
     (0, tsoa_1.Tags)("DigitalTwin"),
     __metadata("design:paramtypes", [])
 ], DigitaltwinController);
-exports.DigitaltwinController = DigitaltwinController;
 exports.default = new DigitaltwinController();
 //# sourceMappingURL=digitalTwin.controller.js.map

@@ -118,6 +118,7 @@ export const BUILDING_APPS_GROUP_TYPE = 'BuildingAppsGroup';
 export const ADMIN_APP_TYPE = 'AdminApp';
 export const PORTOFOLIO_APP_TYPE = 'PortofolioApp';
 export const BUILDING_APP_TYPE = 'BuildingApp';
+export const BUILDING_SUB_APP_TYPE = 'BuildingSubApp';
 export const TOKEN_TYPE = 'token';
 
 export const BUILDING_API_GROUP_TYPE = 'BuildingApis';
@@ -163,6 +164,7 @@ export const USER_TO_FAVORITE_APP_RELATION = 'hasFavoriteApp';
 export const PTR_LST_TYPE = SPINAL_RELATION_PTR_LST_TYPE;
 export const LST_PTR_TYPE = SPINAL_RELATION_LST_PTR_TYPE;
 export const REF_TYPE = SPINAL_RELATION_TYPE;
+export const PROFILE_TO_AUTHORIZED_SUB_APP = 'hasAccessToSubApps';
 export const PROFILE_TO_AUTHORIZED_APP = 'hasAccessToApps';
 export const PROFILE_TO_AUTHORIZED_ADMIN_APP = 'hasAccessToAdminApp';
 export const PROFILE_TO_AUTHORIZED_API = 'hasAccessToApis';
@@ -181,20 +183,32 @@ export const USER_NOT_FOUND = 'User Not Found';
 export const CANNOT_CREATE_INTERNAL_ERROR =
   ERROR_PREFIX + ' Internal error: cannot create process';
 
-export const routesToProxy = [
-  '/sceen',
-  '/get_user_id',
-  '/get_admin_id',
-  '/get_new_account',
-  '/get_confirm_new_account',
-  '/get_resend_confirmation',
-  '/get_new_password',
-  '/get_change_user_password',
-  '/get_delete_account',
-  '/get_change_user_password_by_admin',
-  '/get_delete_account_by_admin',
-  '/get_change_account_rights_by_admin',
-];
+export const routesToProxy = {
+  get: [
+    '/sceen',
+    '/get_user_id',
+    '/get_admin_id',
+    '/get_new_account',
+    '/get_confirm_new_account',
+    '/get_resend_confirmation',
+    '/get_new_password',
+    '/get_change_user_password',
+    '/get_delete_account',
+    '/get_change_user_password_by_admin',
+    '/get_delete_account_by_admin',
+    '/get_change_account_rights_by_admin',
+  ],
+  post: [
+    '/api/user_id',
+    '/api/admin_id',
+    '/api/new_account',
+    '/api/change_user_password',
+    '/api/delete_account',
+    '/api/change_user_password_by_admin',
+    '/api/delete_account_by_admin',
+    '/api/change_account_rights_by_admin',
+  ],
+};
 
 export const BOS_BASE_URI = '/api/v1';
 export const BOS_CONFIG_BASE_URI = '/api/v1';

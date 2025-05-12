@@ -22,15 +22,6 @@
  * with this file. If not, see
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.configServiceInstance = void 0;
 const path = require("path");
@@ -50,16 +41,14 @@ class ConfigFileService {
         }
         return ConfigFileService.instance;
     }
-    init(connect) {
-        return this.loadOrMakeConfigFile(connect).then((graph) => {
-            this.hubConnect = connect;
-            this.graph = graph;
-            return this._initServices().then((result) => __awaiter(this, void 0, void 0, function* () {
-                // await DigitalTwinService.getInstance().init(connect);
-                yield (0, adminApps_1.createDefaultAdminApps)();
-                return result;
-            }));
-        });
+    async init(connect) {
+        const graph = await this.loadOrMakeConfigFile(connect);
+        this.hubConnect = connect;
+        this.graph = graph;
+        const result_1 = await this._initServices();
+        // await DigitalTwinService.getInstance().init(connect);
+        await (0, adminApps_1.createDefaultAdminApps)();
+        return await result_1;
     }
     getContext(contextName) {
         return this.graph.getContext(contextName);
@@ -68,12 +57,16 @@ class ConfigFileService {
         const context = new spinal_model_graph_1.SpinalContext(contextName, contextType);
         return this.graph.addContext(context);
     }
-    loadOrMakeConfigFile(connect) {
-        return new Promise((resolve, reject) => {
-            spinal_core_connectorjs_type_1.spinalCore.load(connect, path.resolve(`${directory_path}/${fileName}`), (graph) => resolve(graph), () => connect.load_or_make_dir(directory_path, (directory) => {
-                resolve(this._createFile(directory, fileName));
-            }));
-        });
+    async loadOrMakeConfigFile(connect) {
+        try {
+            const graph = await spinal_core_connectorjs_type_1.spinalCore.load(connect, path.resolve(`${directory_path}/${fileName}`));
+            return graph;
+        }
+        catch (error) {
+            const dir = await connect.load_or_make_dir(directory_path);
+            const graph = this._createFile(dir, fileName);
+            return graph;
+        }
     }
     _createFile(directory, fileName = constant_1.CONFIG_DEFAULT_NAME) {
         const graph = new spinal_model_graph_1.SpinalGraph(constant_1.CONFIG_DEFAULT_NAME);

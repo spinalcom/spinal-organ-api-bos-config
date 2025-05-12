@@ -25,7 +25,6 @@
 import {
   AppService,
   AppsType,
-  TokenService,
   UserListService,
   UserProfileService,
 } from '../services';
@@ -43,10 +42,15 @@ import {
   UploadedFile,
   Request,
 } from 'tsoa';
-import { HTTP_CODES, SECURITY_MESSAGES, SECURITY_NAME } from '../constant';
+import {
+  BUILDING_SUB_APP_TYPE,
+  HTTP_CODES,
+  SECURITY_MESSAGES,
+  SECURITY_NAME,
+  SUB_APP_RELATION_NAME,
+} from '../constant';
 import { ISpinalApp } from '../interfaces';
 import * as express from 'express';
-import { getToken } from '../security/utils';
 import { AuthError } from '../security/AuthError';
 import {
   checkAndGetTokenInfo,
@@ -54,6 +58,7 @@ import {
   getProfileId,
 } from '../security/authentication';
 import { ISubApp } from '../interfaces/ISubApp';
+import { searchById, searchByNameOrId } from '../utils/findNodeBySearchKey';
 
 const appServiceInstance = AppService.getInstance();
 
@@ -127,12 +132,16 @@ export class AppsController extends Controller {
       const profileId = await getProfileId(req);
       const appNode =
         await UserProfileService.getInstance().profileHasAccessToApp(
+          searchById,
           profileId,
           appId
         );
 
       if (!appNode) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
-
+      if (appInfo && !appInfo.appConfig) {
+        this.setStatus(HTTP_CODES.BAD_REQUEST);
+        return { message: 'AppConfig is required' };
+      }
       const subAppNode = await appServiceInstance.createBuildingSubApp(
         appNode,
         appInfo
@@ -182,8 +191,10 @@ export class AppsController extends Controller {
       if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
       const nodes = await appServiceInstance.getAllBuildingApps();
+      const res = await appServiceInstance.formatAppsAndAddSubApps(nodes);
+
       this.setStatus(HTTP_CODES.OK);
-      return nodes.map((el) => el.info.get());
+      return res;
     } catch (error) {
       this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
       return { message: error.message };
@@ -191,53 +202,109 @@ export class AppsController extends Controller {
   }
 
   @Security(SECURITY_NAME.bearerAuth)
-  @Get('/get_admin_app/{appId}')
+  @Get('/get_admin_app/{appNameOrId}')
   public async getAdminApp(
     @Request() req: express.Request,
-    @Path() appId: string
+    @Path() appNameOrId: string
   ): Promise<ISpinalApp | { message: string }> {
     try {
       const isAdmin = await checkIfItIsAdmin(req);
       if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
-      const node = await appServiceInstance.getAdminApp(appId);
+      const node = await appServiceInstance.getAdminApp(
+        searchByNameOrId,
+        appNameOrId
+      );
       if (node) {
         this.setStatus(HTTP_CODES.OK);
         return node.info.get();
       }
 
       this.setStatus(HTTP_CODES.NOT_FOUND);
-      return { message: `No application found for this id (${appId})` };
+      return { message: `No application found for this id (${appNameOrId})` };
     } catch (error) {
       this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
       return { message: error.message };
     }
   }
 
+  /**
+   * Get building app by name or id
+   * @param {express.Request} req express request
+   * @param {string} appNaneOrId app name or id
+   * @return {*}  {(Promise<ISpinalApp | { message: string }>)}
+   * @memberof AppsController
+   */
   @Security(SECURITY_NAME.bearerAuth)
-  @Get('/get_building_app/{appId}')
+  @Get('/get_building_app/{appNaneOrId}')
   public async getBuildingApp(
     @Request() req: express.Request,
-    @Path() appId: string
+    @Path() appNaneOrId: string
   ): Promise<ISpinalApp | { message: string }> {
     try {
       const profileId = await getProfileId(req);
       const node = await UserProfileService.getInstance().profileHasAccessToApp(
+        searchByNameOrId,
         profileId,
-        appId
+        appNaneOrId
       );
 
       if (!node) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
-
-      // const node = await appServiceInstance.getBuildingApp(appId);
-
       if (node) {
+        const res = await appServiceInstance.formatAppAndAddSubApps(node);
         this.setStatus(HTTP_CODES.OK);
-        return node.info.get();
+        return res;
       }
 
       this.setStatus(HTTP_CODES.NOT_FOUND);
-      return { message: `No application found for this id (${appId})` };
+      return {
+        message: `No application found for appNaneOrId : '${appNaneOrId}'`,
+      };
+    } catch (error) {
+      this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
+      return { message: error.message };
+    }
+  }
+
+  /**
+   * Get building sub app configuration by name or id
+   * @param {express.Request} req
+   * @param {string} appNameOrId
+   * @param {string} subAppNameOrId
+   * @return {*}  {(Promise<any | { message: string }>)}
+   * @memberof AppsController
+   */
+  @Security(SECURITY_NAME.bearerAuth)
+  @Get('/get_building_sub_app/{appNameOrId}/{subAppNameOrId}')
+  public async getBuildingSubApp(
+    @Request() req: express.Request,
+    @Path() appNameOrId: string,
+    @Path() subAppNameOrId: string
+  ): Promise<any | { message: string }> {
+    try {
+      const profileId = await getProfileId(req);
+      const node =
+        await UserProfileService.getInstance().profileHasAccessToSubApp(
+          searchByNameOrId,
+          profileId,
+          appNameOrId,
+          subAppNameOrId
+        );
+
+      if (!node) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+      if (node) {
+        const elem = await node.getElement();
+        if (elem) {
+          const res = elem.get();
+          this.setStatus(HTTP_CODES.OK);
+          return res;
+        }
+        this.setStatus(HTTP_CODES.INTERNAL_ERROR);
+        return { message: `Failed to load configuration` };
+      }
+
+      this.setStatus(HTTP_CODES.NOT_FOUND);
+      return { message: `Failed to load configuration` };
     } catch (error) {
       this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
       return { message: error.message };
@@ -282,8 +349,9 @@ export class AppsController extends Controller {
 
       const node = await appServiceInstance.updateBuildingApp(appId, newInfo);
       if (node) {
+        const res = await appServiceInstance.formatAppAndAddSubApps(node);
         this.setStatus(HTTP_CODES.OK);
-        return node.info.get();
+        return res;
       }
 
       this.setStatus(HTTP_CODES.BAD_REQUEST);
@@ -306,7 +374,7 @@ export class AppsController extends Controller {
       const isAdmin = await checkIfItIsAdmin(req);
       if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
-      const node = await appServiceInstance.updateBuildingSubApp(
+      const node = await appServiceInstance.updateBuildingSubAppInfo(
         appId,
         subAppId,
         newInfo
@@ -358,6 +426,33 @@ export class AppsController extends Controller {
       if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
       const isDeleted = await appServiceInstance.deleteBuildingApp(appId);
+      const status = isDeleted ? HTTP_CODES.OK : HTTP_CODES.BAD_REQUEST;
+      const message = isDeleted
+        ? `${appId} is deleted with success`
+        : 'something went wrong, please check your input data';
+      this.setStatus(status);
+      return { message };
+    } catch (error) {
+      this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
+      return { message: error.message };
+    }
+  }
+
+  @Security(SECURITY_NAME.bearerAuth)
+  @Delete('/delete_building_sub_app/{appId}/{subAppId}')
+  public async deleteBuildingSubApp(
+    @Request() req: express.Request,
+    @Path() appId: string,
+    @Path() subAppId: string
+  ): Promise<{ message: string }> {
+    try {
+      const isAdmin = await checkIfItIsAdmin(req);
+      if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
+      const isDeleted = await appServiceInstance.deleteBuildingSubApp(
+        appId,
+        subAppId
+      );
       const status = isDeleted ? HTTP_CODES.OK : HTTP_CODES.BAD_REQUEST;
       const message = isDeleted
         ? `${appId} is deleted with success`
@@ -462,6 +557,56 @@ export class AppsController extends Controller {
   }
 
   @Security(SECURITY_NAME.bearerAuth)
+  @Post('/upload_building_sub_apps')
+  public async uploadBuildingSubApp(
+    @Request() req: express.Request,
+    @UploadedFile() file
+  ): Promise<{ subApps?: ISpinalApp[]; errors?: string[] | string }> {
+    try {
+      const isAdmin = await checkIfItIsAdmin(req);
+      if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
+      if (!file) {
+        this.setStatus(HTTP_CODES.BAD_REQUEST);
+        return { errors: 'No file uploaded' };
+      }
+
+      if (
+        file &&
+        !(
+          /.*\.json$/.test(file.originalname) ||
+          /.*\.xlsx$/.test(file.originalname)
+        )
+      ) {
+        this.setStatus(HTTP_CODES.BAD_REQUEST);
+        return { errors: 'The selected file must be a json or excel file' };
+      }
+
+      const isExcel = /.*\.xlsx$/.test(file.originalname);
+      const apps = await appServiceInstance.uploadSubApps(file.buffer, isExcel);
+
+      if (apps && apps.subApps.length > 0) {
+        this.setStatus(HTTP_CODES.CREATED);
+        const result: { subApps?: ISpinalApp[]; errors?: string[] } = {
+          subApps: apps.subApps.map((node) => node.info.get()),
+        };
+        if (apps.errors && apps.errors.length > 0) {
+          result.errors = apps.errors;
+        }
+        return result;
+      }
+      this.setStatus(HTTP_CODES.BAD_REQUEST);
+      return {
+        errors:
+          apps.errors || 'something went wrong, please check your input data',
+      };
+    } catch (error) {
+      this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
+      return { errors: error.message };
+    }
+  }
+
+  @Security(SECURITY_NAME.bearerAuth)
   @Get('/get_favorite_apps')
   public async getFavoriteApps(@Request() request: express.Request) {
     try {
@@ -472,8 +617,23 @@ export class AppsController extends Controller {
       const nodes = await UserListService.getInstance().getFavoriteApps(
         userName
       );
+      const subApps = nodes.filter(
+        (node) => node.info.type.get() === BUILDING_SUB_APP_TYPE
+      );
+      const parents = await Promise.all(
+        subApps.map((node) => node.getParents(SUB_APP_RELATION_NAME))
+      );
+      const apps = nodes.reduce((acc, node) => {
+        if (node.info.type.get() !== BUILDING_SUB_APP_TYPE) acc.add(node);
+        return acc;
+      }, new Set(parents.flat()));
+      // const res = nodes.map((node) => node.info.get());
+      const res = await AppService.getInstance().formatAppsAndAddSubApps(
+        Array.from(apps),
+        subApps
+      );
       this.setStatus(HTTP_CODES.OK);
-      return nodes.map((node) => node.info.get());
+      return res;
     } catch (error) {
       this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
       return { message: error.message };
@@ -488,18 +648,37 @@ export class AppsController extends Controller {
   ) {
     try {
       const tokenInfo: any = await checkAndGetTokenInfo(request);
-
       let profileId =
         tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId;
       let userName = tokenInfo.userInfo.userName;
 
-      const nodes = await UserListService.getInstance().addFavoriteApp(
+      await UserListService.getInstance().addFavoriteApp(
         userName,
         profileId,
         data.appIds
       );
+      const nodes = await UserListService.getInstance().getFavoriteApps(
+        userName
+      );
+
+      const subApps = nodes.filter(
+        (node) => node.info.type.get() === BUILDING_SUB_APP_TYPE
+      );
+      const parents = await Promise.all(
+        subApps.map((node) => node.getParents(SUB_APP_RELATION_NAME))
+      );
+      const apps = nodes.reduce((acc, node) => {
+        if (node.info.type.get() !== BUILDING_SUB_APP_TYPE) acc.add(node);
+        return acc;
+      }, new Set(parents.flat()));
+      // const res = nodes.map((node) => node.info.get());
+      const res = await AppService.getInstance().formatAppsAndAddSubApps(
+        Array.from(apps),
+        subApps
+      );
       this.setStatus(HTTP_CODES.OK);
-      return nodes.map((node) => node.info.get());
+      return res;
+      // return nodes.map((node) => node.info.get());
     } catch (error) {
       this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
       return { message: error.message };
@@ -519,13 +698,33 @@ export class AppsController extends Controller {
         tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId;
       let userName = tokenInfo.userInfo.userName;
 
-      const nodes = await UserListService.getInstance().removeFavoriteApp(
+      await UserListService.getInstance().removeFavoriteApp(
         userName,
         profileId,
         data.appIds
       );
+      const nodes = await UserListService.getInstance().getFavoriteApps(
+        userName
+      );
+
+      const subApps = nodes.filter(
+        (node) => node.info.type.get() === BUILDING_SUB_APP_TYPE
+      );
+      const parents = await Promise.all(
+        subApps.map((node) => node.getParents(SUB_APP_RELATION_NAME))
+      );
+      const apps = nodes.reduce((acc, node) => {
+        if (node.info.type.get() !== BUILDING_SUB_APP_TYPE) acc.add(node);
+        return acc;
+      }, new Set(parents.flat()));
+      // const res = nodes.map((node) => node.info.get());
+      const res = await AppService.getInstance().formatAppsAndAddSubApps(
+        Array.from(apps),
+        subApps
+      );
       this.setStatus(HTTP_CODES.OK);
-      return nodes.map((node) => node.info.get());
+      return res;
+      // nodes.map((node) => node.info.get());
     } catch (error) {
       this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
       return { message: error.message };

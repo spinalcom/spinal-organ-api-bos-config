@@ -29,6 +29,7 @@ import {
   PROFILE_TO_AUTHORIZED_API,
   REF_TYPE,
   PROFILE_TO_AUTHORIZED_ADMIN_APP,
+  PROFILE_TO_AUTHORIZED_SUB_APP,
 } from '../constant';
 import {
   SpinalContext,
@@ -40,6 +41,12 @@ import { DigitalTwinService } from './digitalTwin.service';
 import { AppService } from './apps.service';
 import apisController from '../controllers/apis.controller';
 import { APIService } from './apis.service';
+import {
+  findNodeBySearchKey,
+  isNodeMatchSearchKey,
+  searchById,
+  TAppSearch,
+} from '../utils/findNodeBySearchKey';
 
 export default class AuthorizationService {
   private static instance: AuthorizationService;
@@ -103,17 +110,47 @@ export default class AuthorizationService {
     if (!Array.isArray(appIds)) appIds = [appIds];
     return appIds.reduce(async (prom, appId) => {
       const liste = await prom;
-      const app = await AppService.getInstance().getBuildingApp(appId);
+      const app = await AppService.getInstance().getBuildingApp(
+        searchById,
+        appId
+      );
 
       if (app) {
         try {
           await profile.addChild(app, PROFILE_TO_AUTHORIZED_APP, PTR_LST_TYPE);
           liste.push(app);
         } catch (error) {}
-
         return liste;
       }
     }, Promise.resolve([]));
+  }
+
+  public async authorizeProfileToAccessSubApps(
+    profile: SpinalNode,
+    appNodes: SpinalNode[],
+    subAppIds: string | string[]
+  ): Promise<SpinalNode[]> {
+    if (!Array.isArray(subAppIds)) subAppIds = [subAppIds];
+
+    const promises: Promise<SpinalNode>[] = [];
+    for (const subAppId of subAppIds) {
+      const subAppNode =
+        await AppService.getInstance().findBuildingSubAppInApps(
+          searchById,
+          appNodes,
+          subAppId
+        );
+      if (subAppNode) {
+        promises.push(
+          // Attempt to add the subApp to the profile as a child node. If the subApp is already added, catch the error and return the subApp node regardless.
+          profile
+            .addChild(subAppNode, PROFILE_TO_AUTHORIZED_SUB_APP, PTR_LST_TYPE)
+            .catch(() => null)
+            .finally(() => subAppNode)
+        );
+      }
+    }
+    return Promise.all(promises);
   }
 
   public async authorizeProfileToAccessAdminApps(
@@ -123,7 +160,7 @@ export default class AuthorizationService {
     if (!Array.isArray(appIds)) appIds = [appIds];
     return appIds.reduce(async (prom, appId) => {
       const liste = await prom;
-      const app = await AppService.getInstance().getAdminApp(appId);
+      const app = await AppService.getInstance().getAdminApp(searchById, appId);
 
       if (app) {
         try {
@@ -186,6 +223,12 @@ export default class AuthorizationService {
 
   public async getAuthorizedApps(profile: SpinalNode): Promise<SpinalNode[]> {
     return profile.getChildren(PROFILE_TO_AUTHORIZED_APP);
+  }
+
+  public async getAuthorizedSubApps(
+    profile: SpinalNode
+  ): Promise<SpinalNode[]> {
+    return profile.getChildren(PROFILE_TO_AUTHORIZED_SUB_APP);
   }
 
   public async getAuthorizedAdminApps(
@@ -280,7 +323,10 @@ export default class AuthorizationService {
     if (!Array.isArray(appIds)) appIds = [appIds];
     return appIds.reduce(async (prom, appId) => {
       const liste = await prom;
-      const app = await AppService.getInstance().getBuildingApp(appId);
+      const app = await AppService.getInstance().getBuildingApp(
+        searchById,
+        appId
+      );
 
       if (app) {
         try {
@@ -295,6 +341,29 @@ export default class AuthorizationService {
         return liste;
       }
     }, Promise.resolve([]));
+  }
+
+  public async unauthorizeProfileToAccessSubApps(
+    profile: SpinalNode,
+    subAppIds: string | string[]
+  ): Promise<SpinalNode[]> {
+    if (!Array.isArray(subAppIds)) subAppIds = [subAppIds];
+    const result: SpinalNode[] = [];
+    const apps = await AppService.getInstance().getAllBuildingAppsAndSubApp();
+    for (const subAppId of subAppIds) {
+      const subApp = apps.find((app) => app.info.id.get() === subAppId);
+      if (subApp) {
+        try {
+          await profile.removeChild(
+            subApp,
+            PROFILE_TO_AUTHORIZED_APP,
+            PTR_LST_TYPE
+          );
+          result.push(subApp);
+        } catch (error) {}
+      }
+    }
+    return result;
   }
 
   public async unauthorizeProfileToAccessApis(
@@ -335,14 +404,34 @@ export default class AuthorizationService {
   }
 
   public async profileHasAccessToApp(
+    searchKeys: TAppSearch,
     profile: SpinalNode,
-    appId: string
+    appNameId: string
   ): Promise<SpinalNode> {
     const contexts = await Promise.all([
       this.getAuthorizedApps(profile),
+      this.getAuthorizedSubApps(profile),
       this.getAuthorizedAdminApps(profile),
     ]);
-    return contexts.flat().find((el) => el.getId().get() === appId);
+    return contexts
+      .flat()
+      .find(isNodeMatchSearchKey.bind(null, searchKeys, appNameId));
+  }
+
+  public async profileHasAccessToSubApp(
+    searchKeys: TAppSearch,
+    profile: SpinalNode,
+    appId: string,
+    subAppId: string
+  ): Promise<SpinalNode> {
+    const [subApp, subAppsFromProfile] = await Promise.all([
+      // subApp from context App
+      AppService.getInstance().getBuildingSubApp(searchKeys, appId, subAppId),
+      // subApps from profile
+      this.getAuthorizedSubApps(profile),
+    ]);
+    if (!subApp) return;
+    return findNodeBySearchKey(subAppsFromProfile, searchKeys, subAppId);
   }
 
   public async profileHasAccessToApi(

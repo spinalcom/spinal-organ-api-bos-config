@@ -22,15 +22,6 @@
  * with this file. If not, see
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TokenService = void 0;
 const spinal_env_viewer_graph_service_1 = require("spinal-env-viewer-graph-service");
@@ -52,143 +43,123 @@ class TokenService {
             this.instance = new TokenService();
         return this.instance;
     }
-    init() {
-        return __awaiter(this, void 0, void 0, function* () {
-            this.context = yield configFile_service_1.configServiceInstance.getContext(constant_1.TOKEN_LIST_CONTEXT_NAME);
-            if (!this.context) {
-                this.context = yield configFile_service_1.configServiceInstance.addContext(constant_1.TOKEN_LIST_CONTEXT_NAME, constant_1.TOKEN_LIST_CONTEXT_TYPE);
-            }
-            yield this._scheduleTokenPurge();
-            return this.context;
-        });
+    async init() {
+        this.context = await configFile_service_1.configServiceInstance.getContext(constant_1.TOKEN_LIST_CONTEXT_NAME);
+        if (!this.context) {
+            this.context = await configFile_service_1.configServiceInstance.addContext(constant_1.TOKEN_LIST_CONTEXT_NAME, constant_1.TOKEN_LIST_CONTEXT_TYPE);
+        }
+        await this._scheduleTokenPurge();
+        return this.context;
     }
-    purgeToken() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const tokens = yield this._getAllTokens();
-            const promises = tokens.map((token) => this.tokenIsValid(token, true));
-            return Promise.all(promises);
-        });
+    async purgeToken() {
+        const tokens = await this._getAllTokens();
+        const promises = tokens.map((token) => this.tokenIsValid(token, true));
+        return Promise.all(promises);
     }
-    addUserToken(userNode, token, playload) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const tokenNode = yield this.addTokenToContext(token, playload);
-            yield userNode.addChild(tokenNode, constant_1.TOKEN_RELATION_NAME, constant_1.PTR_LST_TYPE);
-            return playload;
-        });
+    async addUserToken(userNode, token, playload) {
+        const tokenNode = await this.addTokenToContext(token, playload);
+        await userNode.addChild(tokenNode, constant_1.TOKEN_RELATION_NAME, constant_1.PTR_LST_TYPE);
+        return playload;
     }
-    getAdminPlayLoad(userNode, secret, durationInMin) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const playload = {
-                userInfo: userNode.info.get(),
-            };
-            durationInMin = durationInMin || 7 * 24 * 60 * 60; // par default 7jrs
-            const key = secret || this._generateString(15);
-            const token = jwt.sign(playload, key, { expiresIn: durationInMin });
-            const adminProfile = yield adminProfile_service_1.AdminProfileService.getInstance().getAdminProfile();
-            const now = Date.now();
-            playload.createdToken = now;
-            playload.expieredToken = now + durationInMin * 60 * 1000;
-            playload.userId = userNode.getId().get();
-            playload.token = token;
-            playload.profile = {
-                profileId: adminProfile.getId().get(),
-            };
-            return playload;
-        });
+    async getAdminPlayLoad(userNode, secret, durationInMin) {
+        const playload = {
+            userInfo: userNode.info.get(),
+        };
+        durationInMin = durationInMin || 7 * 24 * 60 * 60; // par default 7jrs
+        const key = secret || this._generateString(15);
+        const token = jwt.sign(playload, key, { expiresIn: durationInMin });
+        const adminProfile = await adminProfile_service_1.AdminProfileService.getInstance().getAdminProfile();
+        const now = Date.now();
+        playload.createdToken = now;
+        playload.expieredToken = now + durationInMin * 60 * 1000;
+        playload.userId = userNode.getId().get();
+        playload.token = token;
+        playload.profile = {
+            profileId: adminProfile.getId().get(),
+        };
+        return playload;
     }
-    addTokenToContext(token, data) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const node = new spinal_env_viewer_graph_service_1.SpinalNode(token, constant_1.TOKEN_TYPE, new spinal_core_connectorjs_type_1.Model(data));
-            const child = yield this.context.addChildInContext(node, constant_1.TOKEN_RELATION_NAME, constant_1.PTR_LST_TYPE);
-            globalCache.set(data.token, data);
-            return child;
-        });
+    async addTokenToContext(token, data) {
+        const node = new spinal_env_viewer_graph_service_1.SpinalNode(token, constant_1.TOKEN_TYPE, new spinal_core_connectorjs_type_1.Model(data));
+        const child = await this.context.addChildInContext(node, constant_1.TOKEN_RELATION_NAME, constant_1.PTR_LST_TYPE);
+        globalCache.set(data.token, data);
+        return child;
     }
-    getTokenData(token) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const data = globalCache.get(token);
-            if (data)
-                return data;
-            const children = yield this.context.getChildren([constant_1.TOKEN_RELATION_NAME]);
-            const found = children.find((node) => node.getName().get() === token);
-            if (!found)
-                return this._checkTokenNearAuthPlateform(token);
-            const element = yield found.getElement(true);
-            if (element) {
-                globalCache.set(token, element.get());
-                return element.get();
-            }
-        });
-    }
-    deleteToken(token) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const found = token instanceof spinal_env_viewer_graph_service_1.SpinalNode
-                ? token
-                : yield this.context.getChild((node) => node.getName().get() === token, constant_1.TOKEN_RELATION_NAME, constant_1.PTR_LST_TYPE);
-            if (!found)
-                return true;
-            try {
-                const parents = yield found.getParents(constant_1.TOKEN_RELATION_NAME);
-                for (const parent of parents) {
-                    yield parent.removeChild(found, constant_1.TOKEN_RELATION_NAME, constant_1.PTR_LST_TYPE);
-                }
-                return true;
-            }
-            catch (error) {
-                return false;
-            }
-        });
-    }
-    tokenIsValid(token, deleteIfExpired = false) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const data = yield this.getTokenData(token);
-            if (!data)
-                return;
-            const expirationTime = data.expieredToken;
-            const tokenExpired = expirationTime
-                ? Date.now() >= expirationTime * 1000
-                : true;
-            if (tokenExpired) {
-                if (deleteIfExpired)
-                    yield this.deleteToken(token);
-                return;
-            }
+    async getTokenData(token) {
+        const data = globalCache.get(token);
+        if (data)
             return data;
-        });
+        const children = await this.context.getChildren([constant_1.TOKEN_RELATION_NAME]);
+        const found = children.find((node) => node.getName().get() === token);
+        if (!found)
+            return this._checkTokenNearAuthPlateform(token);
+        const element = await found.getElement(true);
+        if (element) {
+            globalCache.set(token, element.get());
+            return element.get();
+        }
+    }
+    async deleteToken(token) {
+        const found = token instanceof spinal_env_viewer_graph_service_1.SpinalNode
+            ? token
+            : await this.context.getChild((node) => node.getName().get() === token, constant_1.TOKEN_RELATION_NAME, constant_1.PTR_LST_TYPE);
+        if (!found)
+            return true;
+        try {
+            const parents = await found.getParents(constant_1.TOKEN_RELATION_NAME);
+            for (const parent of parents) {
+                await parent.removeChild(found, constant_1.TOKEN_RELATION_NAME, constant_1.PTR_LST_TYPE);
+            }
+            return true;
+        }
+        catch (error) {
+            return false;
+        }
+    }
+    async tokenIsValid(token, deleteIfExpired = false) {
+        const data = await this.getTokenData(token);
+        if (!data)
+            return;
+        const expirationTime = data.expieredToken;
+        const tokenExpired = expirationTime
+            ? Date.now() >= expirationTime * 1000
+            : true;
+        if (tokenExpired) {
+            if (deleteIfExpired)
+                await this.deleteToken(token);
+            return;
+        }
+        return data;
     }
     //////////////////////////////////////////////////
     //                        PRIVATE               //
     //////////////////////////////////////////////////
-    _checkTokenNearAuthPlateform(token) {
-        return __awaiter(this, void 0, void 0, function* () {
+    async _checkTokenNearAuthPlateform(token) {
+        try {
+            const authPlateform = await this._getAuthPlateformInfo();
+            let info;
             try {
-                const authPlateform = yield this._getAuthPlateformInfo();
-                let info;
-                try {
-                    info = yield this._checkRequest(authPlateform, token, 'user');
-                }
-                catch (error) {
-                    info = yield this._checkRequest(authPlateform, token, 'application');
-                }
-                return info;
+                info = await this._checkRequest(authPlateform, token, 'user');
             }
             catch (error) {
-                return;
+                info = await this._checkRequest(authPlateform, token, 'application');
             }
-        });
-    }
-    _checkRequest(authPlateform, token, actor) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const url = `${authPlateform.urlAdmin}/tokens/verifyToken`;
-            const result = yield axios_1.default.post(url, { tokenParam: token, actor });
-            const info = result.data;
-            const instance = actor === 'user'
-                ? userList_services_1.UserListService.getInstance()
-                : appList_services_1.AppListService.getInstance();
-            info.profile = yield instance._getProfileInfo(token, authPlateform);
             return info;
-            // info.userInfo = await instance.
-        });
+        }
+        catch (error) {
+            return;
+        }
+    }
+    async _checkRequest(authPlateform, token, actor) {
+        const url = `${authPlateform.urlAdmin}/tokens/verifyToken`;
+        const result = await axios_1.default.post(url, { tokenParam: token, actor });
+        const info = result.data;
+        const instance = actor === 'user'
+            ? userList_services_1.UserListService.getInstance()
+            : appList_services_1.AppListService.getInstance();
+        info.profile = await instance._getProfileInfo(token, authPlateform);
+        return info;
+        // info.userInfo = await instance.
     }
     _generateString(length = 10) {
         const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789*/-_@#&';
@@ -198,26 +169,22 @@ class TokenService {
         }
         return text;
     }
-    _getAllTokens() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const tokens = yield this.context.getChildren(constant_1.TOKEN_RELATION_NAME);
-            return tokens.map((el) => el.getName().get());
-        });
+    async _getAllTokens() {
+        const tokens = await this.context.getChildren(constant_1.TOKEN_RELATION_NAME);
+        return tokens.map((el) => el.getName().get());
     }
     _scheduleTokenPurge() {
         // cron.schedule('0 0 23 * * *', async () => {
-        cron.schedule('30 */1 * * *', () => __awaiter(this, void 0, void 0, function* () {
+        cron.schedule('30 */1 * * *', async () => {
             console.log(new Date().toUTCString(), 'purge invalid tokens');
-            yield this.purgeToken();
-        }));
-    }
-    _getAuthPlateformInfo() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const adminCredential = yield authentification_service_1.AuthentificationService.getInstance().getPamToAdminCredential();
-            if (!adminCredential)
-                throw new Error('No authentication platform is registered');
-            return adminCredential;
+            await this.purgeToken();
         });
+    }
+    async _getAuthPlateformInfo() {
+        const adminCredential = await authentification_service_1.AuthentificationService.getInstance().getPamToAdminCredential();
+        if (!adminCredential)
+            throw new Error('No authentication platform is registered');
+        return adminCredential;
     }
 }
 exports.TokenService = TokenService;

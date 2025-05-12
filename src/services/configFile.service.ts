@@ -23,8 +23,8 @@
  */
 
 import * as path from 'path';
-import {spinalCore} from 'spinal-core-connectorjs_type';
-import {SpinalGraph, SpinalContext} from 'spinal-model-graph';
+import { spinalCore } from 'spinal-core-connectorjs_type';
+import { SpinalGraph, SpinalContext } from 'spinal-model-graph';
 import {
   CONFIG_DEFAULT_NAME,
   CONFIG_FILE_MODEl_TYPE,
@@ -45,7 +45,7 @@ import {
   WebsocketLogsService,
 } from '.';
 
-import {createDefaultAdminApps} from '../defaultApps/adminApps';
+import { createDefaultAdminApps } from '../defaultApps/adminApps';
 
 // const { config: { directory_path, fileName } } = require("../../config");
 
@@ -67,16 +67,14 @@ export default class ConfigFileService {
     return ConfigFileService.instance;
   }
 
-  public init(connect: spinal.FileSystem): Promise<SpinalContext[]> {
-    return this.loadOrMakeConfigFile(connect).then((graph: SpinalGraph) => {
-      this.hubConnect = connect;
-      this.graph = graph;
-      return this._initServices().then(async (result) => {
-        // await DigitalTwinService.getInstance().init(connect);
-        await createDefaultAdminApps();
-        return result;
-      });
-    });
+  public async init(connect: spinal.FileSystem): Promise<SpinalContext[]> {
+    const graph = await this.loadOrMakeConfigFile(connect);
+    this.hubConnect = connect;
+    this.graph = graph;
+    const result_1 = await this._initServices();
+    // await DigitalTwinService.getInstance().init(connect);
+    await createDefaultAdminApps();
+    return await result_1;
   }
 
   public getContext(contextName: string): Promise<SpinalContext> {
@@ -91,20 +89,20 @@ export default class ConfigFileService {
     return this.graph.addContext(context);
   }
 
-  private loadOrMakeConfigFile(
+  private async loadOrMakeConfigFile(
     connect: spinal.FileSystem
   ): Promise<SpinalGraph> {
-    return new Promise((resolve, reject) => {
-      spinalCore.load(
+    try {
+      const graph = await spinalCore.load<SpinalGraph>(
         connect,
-        path.resolve(`${directory_path}/${fileName}`),
-        (graph: SpinalGraph) => resolve(graph),
-        () =>
-          connect.load_or_make_dir(directory_path, (directory) => {
-            resolve(this._createFile(directory, fileName));
-          })
+        path.resolve(`${directory_path}/${fileName}`)
       );
-    });
+      return graph;
+    } catch (error) {
+      const dir = await connect.load_or_make_dir(directory_path);
+      const graph = this._createFile(dir, fileName);
+      return graph;
+    }
   }
 
   private _createFile(

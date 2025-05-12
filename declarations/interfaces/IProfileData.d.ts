@@ -1,7 +1,7 @@
-import { IApiRoute, IApp } from ".";
+import { IApiRoute, ISpinalApp } from '.';
 export interface IProfileData {
     [key: string]: any;
-    apps?: IApp[];
+    apps?: ISpinalApp[];
     apis?: IApiRoute[];
     contexts?: {
         [key: string]: any;

@@ -40,13 +40,23 @@ import {
   BUILDING_APPS_GROUP_TYPE,
   BUILDING_APP_TYPE,
   SUB_APP_RELATION_NAME,
+  BUILDING_SUB_APP_TYPE,
 } from '../constant';
 import { ISpinalApp } from '../interfaces';
 import { configServiceInstance } from './configFile.service';
 import { SpinalExcelManager } from 'spinal-env-viewer-plugin-excel-manager-service';
 import { AdminProfileService } from './adminProfile.service';
 import { removeNodeReferences } from '../utils/utils';
-import { ISubApp } from '../interfaces/ISubApp';
+import { ISubApp, ISubAppExel } from '../interfaces/ISubApp';
+import {
+  TAppSearch,
+  findNodeBySearchKey,
+  isNodeMatchSearchKey,
+  searchById,
+  searchByName,
+  searchByNameOrId,
+} from '../utils/findNodeBySearchKey';
+import { Model } from 'spinal-core-connectorjs';
 
 export const AppsType = Object.freeze({
   admin: 'admin',
@@ -92,9 +102,8 @@ export class AppService {
     if (!groupNode) return;
 
     const children = await groupNode.getChildren([APP_RELATION_NAME]);
-    const appExist = children.find(
-      (el) => el.getName().get().toLowerCase() === appInfo.name.toLowerCase()
-    );
+    const appExist = findNodeBySearchKey(children, searchByName, appInfo.name);
+
     if (appExist) return appExist;
 
     appInfo.type = ADMIN_APP_TYPE;
@@ -122,12 +131,10 @@ export class AppService {
     if (!groupNode) return;
 
     const children = await groupNode.getChildren([APP_RELATION_NAME]);
-    const appExist = children.find(
-      (el) => el.getName().get().toLowerCase() === appInfo.name.toLowerCase()
-    );
+    const appExist = findNodeBySearchKey(children, searchByName, appInfo.name);
     if (appExist)
       if (silenceAlreadyExist) return appExist;
-      else throw new Error('App already exist');
+      else throw new Error(`App ${appInfo.name} already exist`);
 
     appInfo.type = BUILDING_APP_TYPE;
     const appId = SpinalGraphService.createNode(appInfo, undefined);
@@ -149,38 +156,24 @@ export class AppService {
   ): Promise<SpinalNode | string> {
     // search subApp from appNode
     const children = await appNode.getChildren([SUB_APP_RELATION_NAME]);
-    const subApp = children.find(
-      (el) => el.getName().get().toLowerCase() === appInfo.name.toLowerCase()
-    );
+    const subApp = findNodeBySearchKey(children, searchByName, appInfo.name);
     if (subApp)
       if (silenceAlreadyExist) return subApp;
       else
-        return 'SubApp already exist, please use the PUT update_building_app API';
-
-    // const groupNode = await this._getApplicationGroupNode(
-    //   BUILDING_APPS_GROUP_NAME,
-    //   BUILDING_APPS_GROUP_TYPE,
-    //   true
-    // );
-    // if (!groupNode) return;
-
-    // const children = await groupNode.getChildren([APP_RELATION_NAME]);
-    // const appExist = children.find(
-    //   (el) => el.getName().get().toLowerCase() === appInfo.name.toLowerCase()
-    // );
-    // if (appExist) return appExist;
-
-    // appInfo.type = BUILDING_APP_TYPE;
-    // const appId = SpinalGraphService.createNode(appInfo, undefined);
-    // const node = SpinalGraphService.getRealNode(appId);
-    // const _node = await groupNode.addChildInContext(
-    //   node,
-    //   APP_RELATION_NAME,
-    //   PTR_LST_TYPE,
-    //   this.context
-    // );
-    // await AdminProfileService.getInstance().addAppToProfil(_node);
-    // return _node;
+        return `SubApp ${appInfo.name} already exist, please use the PUT update_building_sub_app API`;
+    const appConfig = new Model(appInfo.appConfig)!;
+    delete appInfo.appConfig;
+    appInfo.type = BUILDING_SUB_APP_TYPE;
+    const appId = SpinalGraphService.createNode(appInfo, appConfig);
+    const node = SpinalGraphService.getRealNode(appId);
+    const _node = await appNode.addChildInContext(
+      node,
+      SUB_APP_RELATION_NAME,
+      PTR_LST_TYPE,
+      this.context
+    );
+    await AdminProfileService.getInstance().addSubAppToProfil(appNode, _node);
+    return _node;
   }
 
   public async createOrUpadteAdminApp(
@@ -194,13 +187,10 @@ export class AppService {
     if (!groupNode) return;
 
     const children = await groupNode.getChildren([APP_RELATION_NAME]);
-    const appExist = children.find(
-      (el) => el.getName().get().toLowerCase() === appInfo.name.toLowerCase()
-    );
+    const appExist = findNodeBySearchKey(children, searchByName, appInfo.name);
     if (appExist) {
       return this.updateAdminApp(appExist.getId().get(), appInfo);
     }
-
     return this.createAdminApp(appInfo);
   }
 
@@ -226,31 +216,121 @@ export class AppService {
     return groupNode.getChildren([APP_RELATION_NAME]);
   }
 
-  public async getAdminApp(appId: string): Promise<SpinalNode> {
-    const children = await this.getAllAdminApps();
-    return children.find((el) => el.getId().get() === appId);
+  public async getAllBuildingAppsAndSubApp(): Promise<SpinalNode[]> {
+    const groupNode = await this._getApplicationGroupNode(
+      BUILDING_APPS_GROUP_NAME,
+      BUILDING_APPS_GROUP_TYPE
+    );
+    if (!groupNode) return [];
+    const children = await groupNode.getChildren([APP_RELATION_NAME]);
+    const res: SpinalNode[] = [...children];
+    for (const app of children) {
+      const subApps = await app.getChildren([SUB_APP_RELATION_NAME]);
+      res.push(...subApps);
+    }
+    return res;
   }
 
-  public async getBuildingApp(appId: string): Promise<SpinalNode> {
-    const children = await this.getAllBuildingApps();
-    return children.find((el) => el.getId().get() === appId);
-  }
-
-  public async getBuildingSubApp(
-    appId: string,
-    subAppId: string
+  public async getAdminApp(
+    searchKeys: TAppSearch,
+    appNameOrId: string
   ): Promise<SpinalNode> {
-    const buildingApp = await this.getBuildingApp(appId);
-    if (!buildingApp) return;
-    const children = await buildingApp.getChildren([SUB_APP_RELATION_NAME]);
-    return children.find((el) => el.getId().get() === subAppId);
+    const nodes = await this.getAllAdminApps();
+    return findNodeBySearchKey(nodes, searchKeys, appNameOrId);
   }
 
-  public async getApps(appId: string): Promise<SpinalNode> {
-    const promises = [this.getAllBuildingApps(), this.getAllAdminApps()];
-    return Promise.all(promises).then((apps) => {
-      return apps.flat().find((el) => el.getId().get() === appId);
+  public async getBuildingApp(
+    searchKeys: TAppSearch,
+    appNameOrId: string
+  ): Promise<SpinalNode> {
+    const nodes = await this.getAllBuildingApps();
+    return findNodeBySearchKey(nodes, searchKeys, appNameOrId);
+  }
+
+  /**
+   * Get a building subApp from a building app
+   * if subAppNameOrId is not provided, return the first subApp found
+   * if subAppNameOrId is provided, return the subApp with the id or name or undefined
+   * @param {TAppSearch} searchKeys
+   * @param {string} appNameOrId
+   * @param {string} [subAppNameOrId]
+   * @return {*}  {Promise<SpinalNode>}
+   * @memberof AppService
+   */
+  public async getBuildingSubApp(
+    searchKeys: TAppSearch,
+    appNameOrId: string,
+    subAppNameOrId: string
+  ): Promise<SpinalNode> {
+    const buildingApp = await this.getBuildingApp(searchKeys, appNameOrId);
+    if (!buildingApp) return;
+    const nodes = await buildingApp.getChildren([SUB_APP_RELATION_NAME]);
+    return findNodeBySearchKey(nodes, searchKeys, subAppNameOrId);
+  }
+
+  public async findBuildingSubAppInApps(
+    searchKeys: TAppSearch,
+    appsNodes: SpinalNode[],
+    subAppNameOrId: string
+  ): Promise<SpinalNode> {
+    const promises = appsNodes.map((el) =>
+      el.getChildren([SUB_APP_RELATION_NAME])
+    );
+    const subApps = await Promise.all(promises);
+    return subApps
+      .flat()
+      .find(isNodeMatchSearchKey.bind(null, searchKeys, subAppNameOrId));
+  }
+
+  public async formatAppsAndAddSubApps(
+    appsNodes: SpinalNode[],
+    subAppsNodes?: SpinalNode[]
+  ): Promise<ISpinalApp[]> {
+    const proms = appsNodes.map((el) => {
+      return this.formatAppAndAddSubApps(el, subAppsNodes);
     });
+    const items = await Promise.all(proms);
+    return items.filter((el) => el !== undefined) as ISpinalApp[];
+  }
+
+  public async formatAppAndAddSubApps(
+    appsNode: SpinalNode,
+    subAppsNodes?: SpinalNode[]
+  ): Promise<ISpinalApp> {
+    const res = appsNode.info.get();
+    if (res.type === BUILDING_APP_TYPE) {
+      const subApps = await appsNode.getChildren([SUB_APP_RELATION_NAME]);
+      if (subApps.length !== 0) {
+        res.subApps = subApps.reduce((acc, el) => {
+          if (
+            !subAppsNodes ||
+            subAppsNodes.find(
+              (subApp) => subApp.info.id.get() === el.info.id.get()
+            )
+          )
+            acc.push(el.info.get());
+          return acc;
+        }, []);
+        // app have sub apps but not in the subAppsNodes
+        if (Array.isArray(subAppsNodes) && res.subApps.length === 0)
+          return undefined;
+      }
+    }
+    return res;
+  }
+
+  public async getApps(
+    searchKeys: TAppSearch,
+    appNameOrId: string
+  ): Promise<SpinalNode> {
+    const promises = [
+      this.getAllBuildingAppsAndSubApp(),
+      this.getAllAdminApps(),
+    ];
+    const apps = await Promise.all(promises);
+    return apps
+      .flat()
+      .find(isNodeMatchSearchKey.bind(null, searchKeys, appNameOrId));
   }
 
   //////////////////////////////////
@@ -261,31 +341,19 @@ export class AppService {
     appId: string,
     newInfo: ISpinalApp
   ): Promise<SpinalNode> {
-    const appNode = await this.getAdminApp(appId);
-
-    if (appNode) {
-      for (const key in newInfo) {
-        if (
-          (Object.prototype.hasOwnProperty.call(newInfo, key) &&
-            appNode.info[key]) ||
-          key === 'documentationLink'
-        ) {
-          const element = newInfo[key];
-          if (appNode.info[key]) appNode.info[key].set(element);
-          else appNode.info.add_attr({ [key]: element });
-        }
-      }
-
-      return appNode;
-    }
+    const appNode = await this.getAdminApp(searchById, appId);
+    return this._updateAppInfo(appNode, newInfo);
   }
 
   public async updateBuildingApp(
     appId: string,
     newInfo: ISpinalApp
   ): Promise<SpinalNode> {
-    const appNode = await this.getBuildingApp(appId);
+    const appNode = await this.getBuildingApp(['id'], appId);
+    return this._updateAppInfo(appNode, newInfo);
+  }
 
+  private _updateAppInfo(appNode: SpinalNode, newInfo: ISpinalApp) {
     if (appNode) {
       for (const key in newInfo) {
         if (
@@ -295,31 +363,27 @@ export class AppService {
         ) {
           const element = newInfo[key];
           if (appNode.info[key]) appNode.info[key].set(element);
-          else appNode.info.add_attr({ [key]: element });
+          else appNode.info.add_attr(key, element);
         }
       }
-
       return appNode;
     }
   }
 
-  public async updateBuildingSubApp(
+  public async updateBuildingSubAppInfo(
     appId: string,
     subAppId: string,
     newInfo: ISubApp
   ): Promise<SpinalNode> {
-    const subAppNode = await this.getBuildingSubApp(appId, subAppId);
+    const subAppNode = await this.getBuildingSubApp(['id'], appId, subAppId);
+    const keysToSkip = ['id', 'appConfig', 'parentApp'];
     if (subAppNode) {
       for (const key in newInfo) {
-        if (key === 'appConfig') continue;
-        if (
-          (Object.prototype.hasOwnProperty.call(newInfo, key) &&
-            subAppNode.info[key]) ||
-          key === 'documentationLink'
-        ) {
+        if (keysToSkip.includes(key)) continue;
+        if (Object.prototype.hasOwnProperty.call(newInfo, key)) {
           const element = newInfo[key];
           if (subAppNode.info[key]) subAppNode.info[key].set(element);
-          else subAppNode.info.add_attr({ [key]: element });
+          else subAppNode.info.add_attr(key, element);
         }
       }
       const element = await subAppNode.getElement();
@@ -333,7 +397,7 @@ export class AppService {
   //////////////////////////////////
 
   public async deleteAdminApp(appId: string): Promise<boolean> {
-    const appNode = await this.getAdminApp(appId);
+    const appNode = await this.getAdminApp(searchById, appId);
     if (appNode) {
       await appNode.removeFromGraph();
       await removeNodeReferences(appNode);
@@ -343,8 +407,13 @@ export class AppService {
   }
 
   public async deleteBuildingApp(appId: string): Promise<boolean> {
-    const appNode = await this.getBuildingApp(appId);
+    const appNode = await this.getBuildingApp(searchById, appId);
     if (appNode) {
+      // remove subApps
+      const subApps = await appNode.getChildren([SUB_APP_RELATION_NAME]);
+      for (const subApp of subApps) {
+        await subApp.removeFromGraph();
+      }
       await appNode.removeFromGraph();
       await removeNodeReferences(appNode);
       return true;
@@ -352,48 +421,43 @@ export class AppService {
     return false;
   }
 
-  //////////////////////////////////
-  //              LINK            //
-  //////////////////////////////////
-
-  // public async linkAppToPortofolio(portfolioId: string, appId: string): Promise<boolean> {
-  //   const portofolio = await PortofolioService.getInstance().getPortofolio(portfolioId);
-  //   if (!(portofolio instanceof SpinalNode)) return false;
-  //   const app = await this.getPortofolioApp(appId);
-  //   if (!(app instanceof SpinalNode)) return false;
-
-  //   try {
-  //     await portofolio.addChild(app, APP_RELATION_NAME, PTR_LST_TYPE);
-  //   } catch (error) { }
-
-  //   return true
-  // }
-
-  // public async linkAppToBuilding(buildingId: string, appId: string): Promise<boolean> {
-  //   const building = await BuildingService.getInstance().getBuildingById(buildingId);
-  //   if (!(building instanceof SpinalNode)) return false;
-  //   const app = await this.getBuildingApp(appId);
-  //   if (!(app instanceof SpinalNode)) return false;
-
-  //   try {
-  //     await building.addChild(app, APP_RELATION_NAME, PTR_LST_TYPE);
-  //   } catch (error) { }
-
-  //   return true
-  // }
+  /**
+   * Delete a subApp from a building app
+   * @param {string} appId
+   * @param {string} subAppId
+   * @return {*} {Promise<boolean>} true if the subApp is deleted, false if not found
+   * @memberof AppService
+   */
+  public async deleteBuildingSubApp(
+    appId: string,
+    subAppId: string
+  ): Promise<boolean> {
+    const appNode = await this.getBuildingApp(searchById, appId);
+    if (appNode) {
+      const subApps = await appNode.getChildren([SUB_APP_RELATION_NAME]);
+      for (const subApp of subApps) {
+        if (subApp.getId().get() === subAppId) {
+          await subApp.removeFromGraph();
+          return true;
+        }
+      }
+      return false;
+    }
+    return false;
+  }
 
   //////////////////////////////////
   //         EXCEl / JSON         //
   //////////////////////////////////
 
   public async uploadApps(
-    appType: string,
+    appType: keyof typeof AppsType,
     fileData: Buffer,
     isExcel: boolean = false
   ): Promise<SpinalNode[]> {
-    let data;
-    if (!isExcel) data = JSON.parse(JSON.stringify(fileData.toString()));
-    else data = await this._convertExcelToJson(fileData);
+    const data = isExcel
+      ? await this._convertExcelToJson(fileData)
+      : JSON.parse(JSON.stringify(fileData.toString()));
 
     const formattedApps = this._formatAppsJson(data);
     const listRes = [];
@@ -407,12 +471,53 @@ export class AppService {
           console.error(
             'App type not found, please use AppsType.admin or AppsType.building'
           );
-        if (app) listRes.push(app);
+        if (app) {
+          this._updateAppInfo(app, item);
+          listRes.push(app);
+        }
       } catch (error) {
         console.error(error);
       }
     }
     return listRes;
+  }
+
+  public async uploadSubApps(
+    fileData: Buffer,
+    isExcel: boolean = false
+  ): Promise<{ subApps: SpinalNode[]; errors: string[] }> {
+    const data = isExcel
+      ? await this._convertExcelToJson(fileData)
+      : JSON.parse(JSON.stringify(fileData.toString()));
+
+    const formattedApps = this._formatSubAppsJson(data);
+    const subAppsNodes: SpinalNode[] = [];
+    const errors = formattedApps.errors;
+    for (const item of formattedApps.subApps) {
+      try {
+        const app = await this.getBuildingApp(searchByNameOrId, item.parentApp);
+        if (app) {
+          errors.push(`App ${item.parentApp} not found`);
+          continue;
+        }
+        let subApp = await this.createBuildingSubApp(app, item, true);
+        if (subApp) {
+          if (typeof subApp === 'string') errors.push(subApp);
+          else {
+            // update subApp with appInfo
+            await this.updateBuildingSubAppInfo(
+              app.info.id.get(),
+              subApp.info.id.get(),
+              item
+            );
+            subAppsNodes.push(subApp);
+          }
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    return { subApps: subAppsNodes, errors };
   }
 
   //////////////////////////////////
@@ -455,8 +560,8 @@ export class AppService {
         'groupName',
       ];
 
-      const notValid = requiredAttrs.find((el) => !app[el]);
-      if (!notValid) {
+      const missingAttr = requiredAttrs.find((el) => !app[el]);
+      if (!missingAttr) {
         app.hasViewer = app.hasViewer || false;
         app.packageName = app.packageName || app.name;
         app.isExternalApp =
@@ -472,5 +577,32 @@ export class AppService {
 
       return liste;
     }, []);
+  }
+
+  private _formatSubAppsJson(jsonData: ISubAppExel[]): {
+    subApps: ISubAppExel[];
+    errors: string[];
+  } {
+    const result: ISubAppExel[] = [];
+    const errors: string[] = [];
+    for (const app of jsonData) {
+      const requiredAttrs = ['name', 'parent', 'appConfig'];
+
+      const notValid = requiredAttrs.find((el) => !app[el]);
+      if (!notValid) {
+        if (typeof app.tags === 'string') app.tags = (<any>app.tags).split(',');
+        if (typeof app.appConfig === 'string') {
+          try {
+            app.appConfig = JSON.parse(app.appConfig);
+          } catch (error) {
+            errors.push(`SubApp ${app.name} error parsing appConfig`);
+          }
+        }
+        result.push(app);
+      } else {
+        errors.push(`SubApp ${app.name} is not valid`);
+      }
+    }
+    return { subApps: result, errors };
   }
 }

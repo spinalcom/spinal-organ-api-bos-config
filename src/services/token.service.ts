@@ -22,7 +22,7 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
-import {SpinalContext, SpinalNode} from 'spinal-env-viewer-graph-service';
+import { SpinalContext, SpinalNode } from 'spinal-env-viewer-graph-service';
 import {
   TOKEN_LIST_CONTEXT_TYPE,
   TOKEN_LIST_CONTEXT_NAME,
@@ -30,17 +30,17 @@ import {
   PTR_LST_TYPE,
   TOKEN_RELATION_NAME,
 } from '../constant';
-import {configServiceInstance} from './configFile.service';
-import {Model} from 'spinal-core-connectorjs_type';
-import {AdminProfileService} from './adminProfile.service';
+import { configServiceInstance } from './configFile.service';
+import { Model } from 'spinal-core-connectorjs_type';
+import { AdminProfileService } from './adminProfile.service';
 import * as jwt from 'jsonwebtoken';
 import * as globalCache from 'global-cache';
-import {IApplicationToken, IUserToken} from '../interfaces';
+import { IApplicationToken, IUserToken } from '../interfaces';
 import * as cron from 'node-cron';
-import {AuthentificationService} from './authentification.service';
+import { AuthentificationService } from './authentification.service';
 import axios from 'axios';
-import {UserListService} from './userList.services';
-import {AppListService} from './appList.services';
+import { UserListService } from './userList.services';
+import { AppListService } from './appList.services';
 
 export class TokenService {
   private static instance: TokenService;
@@ -95,7 +95,7 @@ export class TokenService {
 
     durationInMin = durationInMin || 7 * 24 * 60 * 60; // par default 7jrs
     const key = secret || this._generateString(15);
-    const token = jwt.sign(playload, key, {expiresIn: durationInMin});
+    const token = jwt.sign(playload, key, { expiresIn: durationInMin });
 
     const adminProfile =
       await AdminProfileService.getInstance().getAdminProfile();
@@ -209,7 +209,7 @@ export class TokenService {
   ) {
     const url = `${authPlateform.urlAdmin}/tokens/verifyToken`;
 
-    const result = await axios.post(url, {tokenParam: token, actor});
+    const result = await axios.post(url, { tokenParam: token, actor });
     const info = result.data;
     const instance =
       actor === 'user'

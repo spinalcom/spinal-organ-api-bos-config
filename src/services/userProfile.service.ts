@@ -46,6 +46,7 @@ import { authorizationInstance } from './authorization.service';
 import { configServiceInstance } from './configFile.service';
 import {} from '../utils/profileUtils';
 import { AdminProfileService } from './adminProfile.service';
+import { TAppSearch } from '../utils/findNodeBySearchKey';
 
 export class UserProfileService {
   private static instance: UserProfileService;
@@ -90,11 +91,18 @@ export class UserProfileService {
         profileNode,
         userProfile.apisIds
       );
-    if (userProfile.appsIds)
+    if (userProfile.appsIds) {
       obj.apps = await this.authorizeProfileToAccessApps(
         profileNode,
         userProfile.appsIds
       );
+      if (userProfile.subAppsIds)
+        obj.subApps = await this.authorizeProfileToAccessSubApps(
+          profileNode,
+          obj.apps,
+          userProfile.subAppsIds
+        );
+    }
     if (userProfile.contextIds)
       obj.contexts = await this.authorizeProfileToAccessContext(
         profileNode,
@@ -145,6 +153,11 @@ export class UserProfileService {
         profileNode,
         userProfile.unauthorizeAppsIds
       );
+    if (userProfile.unauthorizeSubAppsIds)
+      await this.unauthorizeProfileToAccessSubApps(
+        profileNode,
+        userProfile.unauthorizeSubAppsIds
+      );
     if (userProfile.unauthorizeContextIds)
       await this.unauthorizeProfileToAccessContext(
         profileNode,
@@ -153,8 +166,18 @@ export class UserProfileService {
 
     if (userProfile.apisIds)
       await this.authorizeProfileToAccessApis(profileNode, userProfile.apisIds);
-    if (userProfile.appsIds)
-      await this.authorizeProfileToAccessApps(profileNode, userProfile.appsIds);
+    if (userProfile.appsIds) {
+      const nodeApps = await this.authorizeProfileToAccessApps(
+        profileNode,
+        userProfile.appsIds
+      );
+      if (userProfile.subAppsIds)
+        await this.authorizeProfileToAccessSubApps(
+          profileNode,
+          nodeApps,
+          userProfile.subAppsIds
+        );
+    }
     if (userProfile.contextIds)
       await this.authorizeProfileToAccessContext(
         profileNode,
@@ -230,6 +253,22 @@ export class UserProfileService {
     return authorizationInstance.authorizeProfileToAccessApps(profile, appIds);
   }
 
+  public async authorizeProfileToAccessSubApps(
+    userProfile: string | SpinalNode,
+    apps: SpinalNode[],
+    subAppIds: string | string[]
+  ) {
+    const profile =
+      userProfile instanceof SpinalNode
+        ? userProfile
+        : await this._getUserProfileNode(userProfile);
+    return authorizationInstance.authorizeProfileToAccessSubApps(
+      profile,
+      apps,
+      subAppIds
+    );
+  }
+
   public async authorizeProfileToAccessApis(
     userProfile: string | SpinalNode,
     apiIds: string | string[]
@@ -249,15 +288,26 @@ export class UserProfileService {
       userProfile instanceof SpinalNode
         ? userProfile
         : await this._getUserProfileNode(userProfile);
-
-    return {
+    const res: IProfileAuthRes = {
       contexts: await this.getAuthorizedContexts(profile, digitalTwinId),
       apis: await this.getAuthorizedApis(profile),
       apps: await this.getAuthorizedApps(profile),
-      ...(profile.getType().get() === ADMIN_PROFILE_TYPE && {
-        adminApps: await this.getAuthorizedAdminApps(profile),
-      }),
+      subApps: await this.getAuthorizedSubApps(profile),
     };
+
+    if (profile.getType().get() === ADMIN_PROFILE_TYPE) {
+      res.adminApps = await this.getAuthorizedAdminApps(profile);
+    }
+    return res;
+    // return {
+    //   contexts: await this.getAuthorizedContexts(profile, digitalTwinId),
+    //   apis: await this.getAuthorizedApis(profile),
+    //   subApps: await this.getAuthorizedSubApps(profile),
+    //   apps: await this.getAuthorizedApps(profile),
+    //   ...(profile.getType().get() === ADMIN_PROFILE_TYPE && {
+    //     adminApps: await this.getAuthorizedAdminApps(profile),
+    //   }),
+    // };
   }
 
   /////////////////////////////////////////////
@@ -291,6 +341,20 @@ export class UserProfileService {
     return authorizationInstance.unauthorizeProfileToAccessApps(
       profile,
       appIds
+    );
+  }
+
+  public async unauthorizeProfileToAccessSubApps(
+    userProfile: string | SpinalNode,
+    subAppIds: string | string[]
+  ): Promise<SpinalNode[]> {
+    const profile =
+      userProfile instanceof SpinalNode
+        ? userProfile
+        : await this._getUserProfileNode(userProfile);
+    return authorizationInstance.unauthorizeProfileToAccessSubApps(
+      profile,
+      subAppIds
     );
   }
 
@@ -329,6 +393,7 @@ export class UserProfileService {
   }
 
   public async profileHasAccessToApp(
+    searchKeys: TAppSearch,
     userProfile: string | SpinalNode,
     appId: string
   ): Promise<SpinalNode> {
@@ -336,7 +401,28 @@ export class UserProfileService {
       userProfile instanceof SpinalNode
         ? userProfile
         : await this._getUserProfileNode(userProfile);
-    return authorizationInstance.profileHasAccessToApp(profile, appId);
+    return authorizationInstance.profileHasAccessToApp(
+      searchKeys,
+      profile,
+      appId
+    );
+  }
+  public async profileHasAccessToSubApp(
+    searchKeys: TAppSearch,
+    userProfile: string | SpinalNode,
+    appNameOrId: string,
+    subAppNameOrId: string
+  ): Promise<SpinalNode> {
+    const profile =
+      userProfile instanceof SpinalNode
+        ? userProfile
+        : await this._getUserProfileNode(userProfile);
+    return authorizationInstance.profileHasAccessToSubApp(
+      searchKeys,
+      profile,
+      appNameOrId,
+      subAppNameOrId
+    );
   }
 
   public async profileHasAccessToApi(
@@ -373,6 +459,16 @@ export class UserProfileService {
         ? userProfile
         : await this._getUserProfileNode(userProfile);
     return authorizationInstance.getAuthorizedApps(profile);
+  }
+
+  public async getAuthorizedSubApps(
+    userProfile: string | SpinalNode
+  ): Promise<SpinalNode[]> {
+    const profile =
+      userProfile instanceof SpinalNode
+        ? userProfile
+        : await this._getUserProfileNode(userProfile);
+    return authorizationInstance.getAuthorizedSubApps(profile);
   }
 
   public async getAuthorizedAdminApps(

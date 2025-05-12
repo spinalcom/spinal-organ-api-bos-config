@@ -24,8 +24,8 @@
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.LOG_CONTEXT_TYPE = exports.AVAILABLE_APPLICATIONS_CONTEXT_TYPE = exports.TOKEN_LIST_CONTEXT_TYPE = exports.PORTOFOLIO_CONTEXT_TYPE = exports.ADMIN_CREDENTIAL_CONTEXT_TYPE = exports.BOS_CREDENTIAL_CONTEXT_TYPE = exports.AUTHORIZED_BOS_CONTEXT_TYPE = exports.AUTHORIZED_API_CONTEXT_TYPE = exports.AUTHORIZED_PORTOFOLIO_CONTEXT_TYPE = exports.ORGAN_LIST_CONTEXT_TYPE = exports.API_ROUTES_CONTEXT_TYPE = exports.DIGITALTWIN_CONTEXT_TYPE = exports.BUILDING_CONTEXT_TYPE = exports.APP_LIST_CONTEXT_TYPE = exports.ROLES_CONTEXT_TYPE = exports.USER_LIST_CONTEXT_TYPE = exports.APP_PROFILE_CONTEXT_TYPE = exports.USER_PROFILE_CONTEXT_TYPE = exports.WEBSOCKET_LOG_CONTEXT_NAME = exports.LOG_CONTEXT_NAME = exports.ADMIN_PROFILE_NAME = exports.PORTOFOLIO_API_GROUP_NAME = exports.BUILDING_API_GROUP_NAME = exports.TOKEN_LIST_CONTEXT_NAME = exports.BUILDING_APPS_GROUP_NAME = exports.PORTOFOLIO_APPS_GROUP_NAME = exports.ADMIN_APPS_GROUP_NAME = exports.PORTOFOLIO_CONTEXT_NAME = exports.ADMIN_CREDENTIAL_CONTEXT_NAME = exports.BOS_CREDENTIAL_CONTEXT_NAME = exports.AUTHORIZED_BOS_CONTEXT_NAME = exports.AUTHORIZED_API_CONTEXT_NAME = exports.AUTHORIZED_PORTOFOLIO_CONTEXT_NAME = exports.ORGAN_LIST_CONTEXT_NAME = exports.API_ROUTES_CONTEXT_NAME = exports.DIGITALTWIN_CONTEXT_NAME = exports.BUILDING_CONTEXT_NAME = exports.APP_LIST_CONTEXT_NAME = exports.ROLES_CONTEXT_NAME = exports.USER_LIST_CONTEXT_NAME = exports.APP_PROFILE_CONTEXT_NAME = exports.USER_PROFILE_CONTEXT_NAME = exports.AVAILABLE_APPLICATIONS_CONTEXT_NAME = exports.USER_TYPES = exports.CONTEXT_TO_ADMIN_USER_RELATION = exports.ADMIN_USER_TYPE = exports.ADMIN_USERNAME = exports.CONFIG_DEFAULT_DIRECTORY_PATH = exports.CONFIG_DEFAULT_NAME = exports.CONFIG_FILE_MODEl_TYPE = void 0;
-exports.USER_NOT_FOUND = exports.USER_BASE_EMPTY = exports.ROLE_METHODS = exports.DEFAULT_ROLES = exports.PROFILE_TO_AUTHORIZED_API = exports.PROFILE_TO_AUTHORIZED_ADMIN_APP = exports.PROFILE_TO_AUTHORIZED_APP = exports.REF_TYPE = exports.LST_PTR_TYPE = exports.PTR_LST_TYPE = exports.USER_TO_FAVORITE_APP_RELATION = exports.PROFILE_TO_AUTHORIZED_DIGITAL_TWIN_RELATION_NAME = exports.PROFILE_TO_AUTHORIZED_BOS_RELATION = exports.PROFILE_TO_AUTHORIZED_PORTOFOLIO_RELATION = exports.BUILDING_RELATION_NAME = exports.APP_RELATION_NAME = exports.TOKEN_RELATION_NAME = exports.CONTEXT_TO_AUTHORIZED_APIS_RELATION_NAME = exports.CONTEXT_TO_PORTOFOLIO_RELATION_NAME = exports.API_RELATION_NAME = exports.CONTEXT_TO_API_ROUTE_GROUP_RELATION_NAME = exports.CONTEXT_TO_DIGITALTWIN_RELATION_NAME = exports.CONTEXT_TO_APP_RELATION_NAME = exports.CONTEXT_TO_USER_RELATION_NAME = exports.CONTEXT_TO_ROLE_RELATION_NAME = exports.CONTEXT_TO_APP_PROFILE_RELATION_NAME = exports.CONTEXT_TO_USER_PROFILE_RELATION_NAME = exports.CONTEXT_TO_APPS_GROUP = exports.ADMIN_PROFILE_TYPE = exports.PORTOFOLIO_API_GROUP_TYPE = exports.BUILDING_API_GROUP_TYPE = exports.TOKEN_TYPE = exports.BUILDING_APP_TYPE = exports.PORTOFOLIO_APP_TYPE = exports.ADMIN_APP_TYPE = exports.BUILDING_APPS_GROUP_TYPE = exports.PORTOFOLIO_APPS_GROUP_TYPE = exports.ADMIN_APPS_GROUP_TYPE = exports.PORTOFOLIO_TYPE = exports.API_ROUTE_GROUP_TYPE = exports.API_ROUTE_TYPE = exports.DIGITALTWIN_TYPE = exports.BUILDING_TYPE = exports.APP_TYPE = exports.APP_GROUP_TYPE = exports.APP_CATEGORY_TYPE = exports.APP_PROFILE_TYPE = exports.USER_PROFILE_TYPE = exports.ROLE_TYPE = exports.WEBSOCKET_LOG_CONTEXT_TYPE = void 0;
-exports.EXCLUDES_TYPES = exports.SECURITY_NAME = exports.SECURITY_MESSAGES = exports.HTTP_CODES = exports.BOS_CONFIG_BASE_URI = exports.BOS_BASE_URI = exports.routesToProxy = exports.CANNOT_CREATE_INTERNAL_ERROR = void 0;
+exports.DEFAULT_ROLES = exports.PROFILE_TO_AUTHORIZED_API = exports.PROFILE_TO_AUTHORIZED_ADMIN_APP = exports.PROFILE_TO_AUTHORIZED_APP = exports.PROFILE_TO_AUTHORIZED_SUB_APP = exports.REF_TYPE = exports.LST_PTR_TYPE = exports.PTR_LST_TYPE = exports.USER_TO_FAVORITE_APP_RELATION = exports.PROFILE_TO_AUTHORIZED_DIGITAL_TWIN_RELATION_NAME = exports.PROFILE_TO_AUTHORIZED_BOS_RELATION = exports.PROFILE_TO_AUTHORIZED_PORTOFOLIO_RELATION = exports.SUB_APP_RELATION_NAME = exports.BUILDING_RELATION_NAME = exports.APP_RELATION_NAME = exports.TOKEN_RELATION_NAME = exports.CONTEXT_TO_AUTHORIZED_APIS_RELATION_NAME = exports.CONTEXT_TO_PORTOFOLIO_RELATION_NAME = exports.API_RELATION_NAME = exports.CONTEXT_TO_API_ROUTE_GROUP_RELATION_NAME = exports.CONTEXT_TO_DIGITALTWIN_RELATION_NAME = exports.CONTEXT_TO_APP_RELATION_NAME = exports.CONTEXT_TO_USER_RELATION_NAME = exports.CONTEXT_TO_ROLE_RELATION_NAME = exports.CONTEXT_TO_APP_PROFILE_RELATION_NAME = exports.CONTEXT_TO_USER_PROFILE_RELATION_NAME = exports.CONTEXT_TO_APPS_GROUP = exports.ADMIN_PROFILE_TYPE = exports.PORTOFOLIO_API_GROUP_TYPE = exports.BUILDING_API_GROUP_TYPE = exports.TOKEN_TYPE = exports.BUILDING_SUB_APP_TYPE = exports.BUILDING_APP_TYPE = exports.PORTOFOLIO_APP_TYPE = exports.ADMIN_APP_TYPE = exports.BUILDING_APPS_GROUP_TYPE = exports.PORTOFOLIO_APPS_GROUP_TYPE = exports.ADMIN_APPS_GROUP_TYPE = exports.PORTOFOLIO_TYPE = exports.API_ROUTE_GROUP_TYPE = exports.API_ROUTE_TYPE = exports.DIGITALTWIN_TYPE = exports.BUILDING_TYPE = exports.APP_TYPE = exports.APP_GROUP_TYPE = exports.APP_CATEGORY_TYPE = exports.APP_PROFILE_TYPE = exports.USER_PROFILE_TYPE = exports.ROLE_TYPE = exports.WEBSOCKET_LOG_CONTEXT_TYPE = void 0;
+exports.EXCLUDES_TYPES = exports.SECURITY_NAME = exports.SECURITY_MESSAGES = exports.HTTP_CODES = exports.BOS_CONFIG_BASE_URI = exports.BOS_BASE_URI = exports.routesToProxy = exports.CANNOT_CREATE_INTERNAL_ERROR = exports.USER_NOT_FOUND = exports.USER_BASE_EMPTY = exports.ROLE_METHODS = void 0;
 const spinal_model_timeseries_1 = require("spinal-model-timeseries");
 const constants_1 = require("spinal-env-viewer-plugin-documentation-service/dist/Models/constants");
 const spinal_env_viewer_graph_service_1 = require("spinal-env-viewer-graph-service");
@@ -107,6 +107,7 @@ exports.BUILDING_APPS_GROUP_TYPE = 'BuildingAppsGroup';
 exports.ADMIN_APP_TYPE = 'AdminApp';
 exports.PORTOFOLIO_APP_TYPE = 'PortofolioApp';
 exports.BUILDING_APP_TYPE = 'BuildingApp';
+exports.BUILDING_SUB_APP_TYPE = 'BuildingSubApp';
 exports.TOKEN_TYPE = 'token';
 exports.BUILDING_API_GROUP_TYPE = 'BuildingApis';
 exports.PORTOFOLIO_API_GROUP_TYPE = 'PortofolioApis';
@@ -134,6 +135,7 @@ exports.CONTEXT_TO_AUTHORIZED_APIS_RELATION_NAME = 'profileHasApis';
 exports.TOKEN_RELATION_NAME = 'hasToken';
 exports.APP_RELATION_NAME = 'hasApps';
 exports.BUILDING_RELATION_NAME = 'hasBuilding';
+exports.SUB_APP_RELATION_NAME = 'hasSubApps';
 exports.PROFILE_TO_AUTHORIZED_PORTOFOLIO_RELATION = 'hasAccessToPortofolio';
 exports.PROFILE_TO_AUTHORIZED_BOS_RELATION = 'hasAccessToBos';
 exports.PROFILE_TO_AUTHORIZED_DIGITAL_TWIN_RELATION_NAME = 'hasAccessToDigitalTwin';
@@ -142,6 +144,7 @@ exports.USER_TO_FAVORITE_APP_RELATION = 'hasFavoriteApp';
 exports.PTR_LST_TYPE = spinal_env_viewer_graph_service_1.SPINAL_RELATION_PTR_LST_TYPE;
 exports.LST_PTR_TYPE = spinal_env_viewer_graph_service_1.SPINAL_RELATION_LST_PTR_TYPE;
 exports.REF_TYPE = spinal_env_viewer_graph_service_1.SPINAL_RELATION_TYPE;
+exports.PROFILE_TO_AUTHORIZED_SUB_APP = 'hasAccessToSubApps';
 exports.PROFILE_TO_AUTHORIZED_APP = 'hasAccessToApps';
 exports.PROFILE_TO_AUTHORIZED_ADMIN_APP = 'hasAccessToAdminApp';
 exports.PROFILE_TO_AUTHORIZED_API = 'hasAccessToApis';
@@ -156,20 +159,32 @@ const ERROR_PREFIX = 'BOS Admin Service App Error: ';
 exports.USER_BASE_EMPTY = 'User Base Empty';
 exports.USER_NOT_FOUND = 'User Not Found';
 exports.CANNOT_CREATE_INTERNAL_ERROR = ERROR_PREFIX + ' Internal error: cannot create process';
-exports.routesToProxy = [
-    '/sceen',
-    '/get_user_id',
-    '/get_admin_id',
-    '/get_new_account',
-    '/get_confirm_new_account',
-    '/get_resend_confirmation',
-    '/get_new_password',
-    '/get_change_user_password',
-    '/get_delete_account',
-    '/get_change_user_password_by_admin',
-    '/get_delete_account_by_admin',
-    '/get_change_account_rights_by_admin',
-];
+exports.routesToProxy = {
+    get: [
+        '/sceen',
+        '/get_user_id',
+        '/get_admin_id',
+        '/get_new_account',
+        '/get_confirm_new_account',
+        '/get_resend_confirmation',
+        '/get_new_password',
+        '/get_change_user_password',
+        '/get_delete_account',
+        '/get_change_user_password_by_admin',
+        '/get_delete_account_by_admin',
+        '/get_change_account_rights_by_admin',
+    ],
+    post: [
+        '/api/user_id',
+        '/api/admin_id',
+        '/api/new_account',
+        '/api/change_user_password',
+        '/api/delete_account',
+        '/api/change_user_password_by_admin',
+        '/api/delete_account_by_admin',
+        '/api/change_account_rights_by_admin',
+    ],
+};
 exports.BOS_BASE_URI = '/api/v1';
 exports.BOS_CONFIG_BASE_URI = '/api/v1';
 // export const BOS_BASE_URI_V1 = "/api/v1/building";
@@ -184,21 +199,22 @@ var HTTP_CODES;
     HTTP_CODES[HTTP_CODES["UNAUTHORIZED"] = 401] = "UNAUTHORIZED";
     HTTP_CODES[HTTP_CODES["FORBIDDEN"] = 403] = "FORBIDDEN";
     HTTP_CODES[HTTP_CODES["NOT_FOUND"] = 404] = "NOT_FOUND";
+    HTTP_CODES[HTTP_CODES["CONFLICT"] = 409] = "CONFLICT";
     HTTP_CODES[HTTP_CODES["INTERNAL_ERROR"] = 500] = "INTERNAL_ERROR";
-})(HTTP_CODES = exports.HTTP_CODES || (exports.HTTP_CODES = {}));
+})(HTTP_CODES || (exports.HTTP_CODES = HTTP_CODES = {}));
 var SECURITY_MESSAGES;
 (function (SECURITY_MESSAGES) {
     SECURITY_MESSAGES["INVALID_TOKEN"] = "Invalid or expired token !";
     SECURITY_MESSAGES["UNAUTHORIZED"] = "Unauthorized";
     SECURITY_MESSAGES["NO_PROFILE_FOUND"] = "No Profile found for this token";
-})(SECURITY_MESSAGES = exports.SECURITY_MESSAGES || (exports.SECURITY_MESSAGES = {}));
+})(SECURITY_MESSAGES || (exports.SECURITY_MESSAGES = SECURITY_MESSAGES = {}));
 var SECURITY_NAME;
 (function (SECURITY_NAME) {
     SECURITY_NAME["admin"] = "admin";
     SECURITY_NAME["profile"] = "profile";
     SECURITY_NAME["bearerAuth"] = "bearerAuth";
     SECURITY_NAME["all"] = "all";
-})(SECURITY_NAME = exports.SECURITY_NAME || (exports.SECURITY_NAME = {}));
+})(SECURITY_NAME || (exports.SECURITY_NAME = SECURITY_NAME = {}));
 exports.EXCLUDES_TYPES = [
     constants_1.URL_TYPE,
     constants_1.NOTE_TYPE,

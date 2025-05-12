@@ -43,6 +43,7 @@ import {
 } from '../interfaces';
 import { authorizationInstance } from './authorization.service';
 import { configServiceInstance } from './configFile.service';
+import { TAppSearch } from '../utils/findNodeBySearchKey';
 
 export class AppProfileService {
   private static instance: AppProfileService;
@@ -319,6 +320,7 @@ export class AppProfileService {
   }
 
   public async profileHasAccessToApp(
+    searchKeys: TAppSearch,
     appProfile: string | SpinalNode,
     appId: string
   ): Promise<SpinalNode> {
@@ -326,7 +328,11 @@ export class AppProfileService {
       appProfile instanceof SpinalNode
         ? appProfile
         : await this._getAppProfileNode(appProfile);
-    return authorizationInstance.profileHasAccessToApp(profile, appId);
+    return authorizationInstance.profileHasAccessToApp(
+      searchKeys,
+      profile,
+      appId
+    );
   }
 
   public async profileHasAccessToApi(

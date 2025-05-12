@@ -71,7 +71,7 @@ export class AppProfileController extends Controller {
 
       const profile = await serviceInstance.createAppProfile(data);
       this.setStatus(HTTP_CODES.CREATED);
-      return _formatProfile(profile);
+      return await _formatProfile(profile);
     } catch (error) {
       this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
       return { message: error.message };
@@ -91,7 +91,7 @@ export class AppProfileController extends Controller {
       const data = await serviceInstance.getAppProfile(id);
       if (data) {
         this.setStatus(HTTP_CODES.OK);
-        return _formatProfile(data);
+        return await _formatProfile(data);
       }
 
       this.setStatus(HTTP_CODES.NOT_FOUND);
@@ -113,7 +113,7 @@ export class AppProfileController extends Controller {
 
       const nodes = (await serviceInstance.getAllAppProfile()) || [];
       this.setStatus(HTTP_CODES.OK);
-      return nodes.map((el) => _formatProfile(el));
+      return await Promise.all(nodes.map((el) => _formatProfile(el)));
     } catch (error) {
       this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
       return { message: error.message };
@@ -134,7 +134,7 @@ export class AppProfileController extends Controller {
       const node = await serviceInstance.updateAppProfile(id, data);
       if (node) {
         this.setStatus(HTTP_CODES.OK);
-        return _formatProfile(node);
+        return await _formatProfile(node);
       }
 
       this.setStatus(HTTP_CODES.NOT_FOUND);

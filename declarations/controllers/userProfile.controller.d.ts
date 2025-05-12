@@ -1,6 +1,6 @@
-import { IProfile, IProfileAuthEdit, IProfileData } from "../interfaces";
-import { Controller } from "tsoa";
-import * as express from "express";
+import { IProfile, IProfileAuthEdit, IProfileData } from '../interfaces';
+import { Controller } from 'tsoa';
+import * as express from 'express';
 export declare class UserProfileController extends Controller {
     constructor();
     createUserProfile(req: express.Request, data: IProfile): Promise<IProfileData | {
@@ -56,6 +56,9 @@ export declare class UserProfileController extends Controller {
         message: any;
     }>;
     profileHasAccessToApp(req: express.Request, profileId: string, appId: string): Promise<boolean | {
+        message: any;
+    }>;
+    profileHasAccessToSubApp(req: express.Request, profileId: string, appNameOrId: string, subAppNameOrId: string): Promise<boolean | {
         message: any;
     }>;
 }

@@ -22,6 +22,8 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
+import type { ISubApp } from "./ISubApp";
+
 export interface ISpinalApp {
   name: string;
   icon: string;
@@ -34,5 +36,6 @@ export interface ISpinalApp {
   packageName?: string;
   isExternalApp?: boolean;
   link?: string;
+  subApps?: ISubApp[];
   [key: string]: any;
 }

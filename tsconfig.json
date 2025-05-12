@@ -11,19 +11,32 @@
     "downlevelIteration": true,
     "baseUrl": "server",
     "outDir": "dist",
-    "target": "es6",
+    "target": "ES2020",
     "skipLibCheck": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "noEmitOnError": true
   },
-  "hooks": ["copy-files"],
+  "hooks": [
+    "copy-files"
+  ],
   "experimentalDecorators": true,
   "paths": {
-    "@/*": ["src/*"],
-    "/@/*": ["src/*"],
-    "/@/img/*": ["src/assets/img/*"]
+    "@/*": [
+      "src/*"
+    ],
+    "/@/*": [
+      "src/*"
+    ],
+    "/@/img/*": [
+      "src/assets/img/*"
+    ]
   },
-  "exclude": ["node_modules", "client"],
-  "include": ["./src/**/*"]
+  "exclude": [
+    "node_modules",
+    "client"
+  ],
+  "include": [
+    "./src/**/*"
+  ]
 }

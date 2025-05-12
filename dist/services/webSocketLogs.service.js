@@ -22,15 +22,6 @@
  * with this file. If not, see
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.WebsocketLogsService = void 0;
 const spinal_service_pubsub_logs_1 = require("spinal-service-pubsub-logs");
@@ -52,15 +43,13 @@ class WebsocketLogsService {
     setIo(io) {
         this._io = io;
     }
-    init() {
-        return __awaiter(this, void 0, void 0, function* () {
-            this.context = yield _1.configServiceInstance.getContext(constant_1.WEBSOCKET_LOG_CONTEXT_NAME);
-            if (!this.context) {
-                this.context = yield _1.configServiceInstance.addContext(constant_1.WEBSOCKET_LOG_CONTEXT_NAME, constant_1.WEBSOCKET_LOG_CONTEXT_TYPE);
-            }
-            this._listenSpinalQueueEvent();
-            return this.context;
-        });
+    async init() {
+        this.context = await _1.configServiceInstance.getContext(constant_1.WEBSOCKET_LOG_CONTEXT_NAME);
+        if (!this.context) {
+            this.context = await _1.configServiceInstance.addContext(constant_1.WEBSOCKET_LOG_CONTEXT_NAME, constant_1.WEBSOCKET_LOG_CONTEXT_TYPE);
+        }
+        this._listenSpinalQueueEvent();
+        return this.context;
     }
     createLog(type, action, targetInfo, nodeInfo) {
         const contextId = this.context.getId().get();
@@ -69,73 +58,57 @@ class WebsocketLogsService {
         this._addLogs(type, action, targetInfo, nodeInfo);
         this._startTimer();
     }
-    getClientConnected() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const sockets = yield this._io.of(`/`).fetchSockets();
-            let count = (sockets === null || sockets === void 0 ? void 0 : sockets.length) || 0;
-            return { numberOfClientConnected: count };
-        });
+    async getClientConnected() {
+        const sockets = await this._io.of(`/`).fetchSockets();
+        let count = sockets?.length || 0;
+        return { numberOfClientConnected: count };
     }
     ///////////////////////////////
     // SpinalLog
     //////////////////////////////
-    getLogModel() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const contextId = this.context.getId().get();
-            if (this._logPromMap.has(contextId))
-                return this._logPromMap.get(contextId);
-            const spinalLog = yield spinal_service_pubsub_logs_1.SpinalServiceLog.getInstance().getLog(this.context);
-            if (!spinalLog)
-                return;
-            this._logPromMap.set(contextId, spinalLog);
-            return spinalLog;
-        });
+    async getLogModel() {
+        const contextId = this.context.getId().get();
+        if (this._logPromMap.has(contextId))
+            return this._logPromMap.get(contextId);
+        const spinalLog = await spinal_service_pubsub_logs_1.SpinalServiceLog.getInstance().getLog(this.context);
+        if (!spinalLog)
+            return;
+        this._logPromMap.set(contextId, spinalLog);
+        return spinalLog;
     }
-    getWebsocketState() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const spinalLog = yield this.getLogModel();
-            if (!spinalLog)
-                return { state: spinal_service_pubsub_logs_1.WEBSOCKET_STATE.unknow, since: 0 };
-            return spinal_service_pubsub_logs_1.SpinalServiceLog.getInstance().getWebsocketState(spinalLog);
-        });
+    async getWebsocketState() {
+        const spinalLog = await this.getLogModel();
+        if (!spinalLog)
+            return { state: spinal_service_pubsub_logs_1.WEBSOCKET_STATE.unknow, since: 0 };
+        return spinal_service_pubsub_logs_1.SpinalServiceLog.getInstance().getWebsocketState(spinalLog);
     }
-    getCurrent() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const spinalLog = yield this.getLogModel();
-            return spinal_service_pubsub_logs_1.SpinalServiceLog.getInstance().getCurrent(spinalLog);
-        });
+    async getCurrent() {
+        const spinalLog = await this.getLogModel();
+        return spinal_service_pubsub_logs_1.SpinalServiceLog.getInstance().getCurrent(spinalLog);
     }
-    getDataFromLast24Hours() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const spinalLog = yield this.getLogModel();
-            if (!spinalLog)
-                return [];
-            return spinal_service_pubsub_logs_1.SpinalServiceLog.getInstance().getDataFromLast24Hours(spinalLog);
-        });
+    async getDataFromLast24Hours() {
+        const spinalLog = await this.getLogModel();
+        if (!spinalLog)
+            return [];
+        return spinal_service_pubsub_logs_1.SpinalServiceLog.getInstance().getDataFromLast24Hours(spinalLog);
     }
-    getDataFromLastHours(numberOfHours) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const spinalLog = yield this.getLogModel();
-            if (!spinalLog)
-                return [];
-            return spinal_service_pubsub_logs_1.SpinalServiceLog.getInstance().getDataFromLastHours(spinalLog, numberOfHours);
-        });
+    async getDataFromLastHours(numberOfHours) {
+        const spinalLog = await this.getLogModel();
+        if (!spinalLog)
+            return [];
+        return spinal_service_pubsub_logs_1.SpinalServiceLog.getInstance().getDataFromLastHours(spinalLog, numberOfHours);
     }
-    getDataFromYesterday() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const spinalLog = yield this.getLogModel();
-            if (!spinalLog)
-                return [];
-            return spinal_service_pubsub_logs_1.SpinalServiceLog.getInstance().getDataFromYesterday(spinalLog);
-        });
+    async getDataFromYesterday() {
+        const spinalLog = await this.getLogModel();
+        if (!spinalLog)
+            return [];
+        return spinal_service_pubsub_logs_1.SpinalServiceLog.getInstance().getDataFromYesterday(spinalLog);
     }
-    getFromIntervalTime(start, end) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const spinalLog = yield this.getLogModel();
-            if (!spinalLog)
-                return [];
-            return spinal_service_pubsub_logs_1.SpinalServiceLog.getInstance().getFromIntervalTime(spinalLog, start, end);
-        });
+    async getFromIntervalTime(start, end) {
+        const spinalLog = await this.getLogModel();
+        if (!spinalLog)
+            return [];
+        return spinal_service_pubsub_logs_1.SpinalServiceLog.getInstance().getFromIntervalTime(spinalLog, start, end);
     }
     ////////////////////////////////////////////////
     //             PRIVATE                        //
@@ -158,33 +131,27 @@ class WebsocketLogsService {
         //  }
         return this._addLogs('Alert', 'alert');
     }
-    _addLogs(logType, action, targetInfo, nodeInfo) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const log = { targetInfo, type: logType, action, nodeInfo };
-            console.log('log', log);
-            this._addToQueue(log);
-        });
+    async _addLogs(logType, action, targetInfo, nodeInfo) {
+        const log = { targetInfo, type: logType, action, nodeInfo };
+        console.log('log', log);
+        this._addToQueue(log);
     }
     _addToQueue(log) {
         this._spinalQueue.addToQueue(log);
     }
-    _createLogsInGraph() {
-        return __awaiter(this, void 0, void 0, function* () {
-            while (!this._spinalQueue.isEmpty()) {
-                const log = this._spinalQueue.dequeue();
-                const actualState = log.type.toLowerCase() === 'alert'
-                    ? spinal_service_pubsub_logs_1.WEBSOCKET_STATE.alert
-                    : spinal_service_pubsub_logs_1.WEBSOCKET_STATE.running;
-                yield spinal_service_pubsub_logs_1.SpinalServiceLog.getInstance().pushFromNode(this.context, log);
-                yield this._changeBuildingState(actualState);
-            }
-        });
+    async _createLogsInGraph() {
+        while (!this._spinalQueue.isEmpty()) {
+            const log = this._spinalQueue.dequeue();
+            const actualState = log.type.toLowerCase() === 'alert'
+                ? spinal_service_pubsub_logs_1.WEBSOCKET_STATE.alert
+                : spinal_service_pubsub_logs_1.WEBSOCKET_STATE.running;
+            await spinal_service_pubsub_logs_1.SpinalServiceLog.getInstance().pushFromNode(this.context, log);
+            await this._changeBuildingState(actualState);
+        }
     }
-    _changeBuildingState(actualState) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const spinalLog = yield this.getLogModel();
-            return spinal_service_pubsub_logs_1.SpinalServiceLog.getInstance().changeWebsocketState(spinalLog, actualState);
-        });
+    async _changeBuildingState(actualState) {
+        const spinalLog = await this.getLogModel();
+        return spinal_service_pubsub_logs_1.SpinalServiceLog.getInstance().changeWebsocketState(spinalLog, actualState);
     }
     _getDirectory(connect) {
         return new Promise((resolve, reject) => {
@@ -197,10 +164,9 @@ class WebsocketLogsService {
         });
     }
     _fileExistInDirectory(directory, fileName) {
-        var _a;
         for (let i = 0; i < directory.length; i++) {
             const element = directory[i];
-            if (((_a = element.name) === null || _a === void 0 ? void 0 : _a.get()) === fileName)
+            if (element.name?.get() === fileName)
                 return element;
         }
     }

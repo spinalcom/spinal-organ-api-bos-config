@@ -1,5 +1,6 @@
 import { SpinalGraph, SpinalContext, SpinalNode } from 'spinal-env-viewer-graph-service';
 import { IProfile, IProfileAuthEdit, IProfileAuthRes, IProfileRes } from '../interfaces';
+import { TAppSearch } from '../utils/findNodeBySearchKey';
 export declare class UserProfileService {
     private static instance;
     context: SpinalContext;
@@ -16,16 +17,20 @@ export declare class UserProfileService {
     getUserProfileNodeGraph(profileId: string, digitalTwinId?: string): Promise<SpinalGraph | void>;
     authorizeProfileToAccessContext(userProfile: string | SpinalNode, contextIds: string | string[], digitalTwinId?: string): Promise<SpinalContext[]>;
     authorizeProfileToAccessApps(userProfile: string | SpinalNode, appIds: string | string[]): Promise<SpinalNode<any>[]>;
+    authorizeProfileToAccessSubApps(userProfile: string | SpinalNode, apps: SpinalNode[], subAppIds: string | string[]): Promise<SpinalNode<any>[]>;
     authorizeProfileToAccessApis(userProfile: string | SpinalNode, apiIds: string | string[]): Promise<SpinalNode<any>[]>;
     getAutorizationStructure(userProfile: string | SpinalNode, digitalTwinId?: string): Promise<IProfileAuthRes>;
     unauthorizeProfileToAccessContext(userProfile: string | SpinalNode, contextIds: string | string[], digitalTwinId?: string): Promise<SpinalContext[]>;
     unauthorizeProfileToAccessApps(userProfile: string | SpinalNode, appIds: string | string[]): Promise<SpinalNode[]>;
+    unauthorizeProfileToAccessSubApps(userProfile: string | SpinalNode, subAppIds: string | string[]): Promise<SpinalNode[]>;
     unauthorizeProfileToAccessApis(userProfile: string | SpinalNode, apiIds: string | string[]): Promise<SpinalNode[]>;
     profileHasAccessToContext(userProfile: string | SpinalNode, contextId: string, digitalTwinId?: string): Promise<SpinalNode>;
-    profileHasAccessToApp(userProfile: string | SpinalNode, appId: string): Promise<SpinalNode>;
+    profileHasAccessToApp(searchKeys: TAppSearch, userProfile: string | SpinalNode, appId: string): Promise<SpinalNode>;
+    profileHasAccessToSubApp(searchKeys: TAppSearch, userProfile: string | SpinalNode, appNameOrId: string, subAppNameOrId: string): Promise<SpinalNode>;
     profileHasAccessToApi(userProfile: string | SpinalNode, apiId: string): Promise<SpinalNode>;
     getAuthorizedContexts(userProfile: string | SpinalNode, digitalTwinId?: string): Promise<SpinalContext[]>;
     getAuthorizedApps(userProfile: string | SpinalNode): Promise<SpinalNode[]>;
+    getAuthorizedSubApps(userProfile: string | SpinalNode): Promise<SpinalNode[]>;
     getAuthorizedAdminApps(userProfile: string | SpinalNode): Promise<SpinalNode[]>;
     getAuthorizedApis(userProfile: string | SpinalNode): Promise<SpinalNode[]>;
     _getUserProfileNode(userProfileId: string): Promise<SpinalNode>;

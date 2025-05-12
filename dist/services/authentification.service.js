@@ -22,15 +22,6 @@
  * with this file. If not, see
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthentificationService = void 0;
 const axios_1 = require("axios");
@@ -50,15 +41,13 @@ class AuthentificationService {
             this.instance = new AuthentificationService();
         return this.instance;
     }
-    authenticate(info) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const isUser = "userName" in info && "password" in info ? true : false;
-            if (isUser) {
-                return userList_services_1.UserListService.getInstance().authenticateUser(info);
-            }
-            const appInfo = this._formatInfo(info);
-            return appList_services_1.AppListService.getInstance().authenticateApplication(appInfo);
-        });
+    async authenticate(info) {
+        const isUser = "userName" in info && "password" in info ? true : false;
+        if (isUser) {
+            return userList_services_1.UserListService.getInstance().authenticateUser(info);
+        }
+        const appInfo = this._formatInfo(info);
+        return appList_services_1.AppListService.getInstance().authenticateApplication(appInfo);
     }
     // PAM Credential
     registerToAdmin(pamInfo, adminInfo) {
@@ -74,24 +63,20 @@ class AuthentificationService {
             return this._editPamCredential(result.data);
         });
     }
-    getPamToAdminCredential() {
-        return __awaiter(this, void 0, void 0, function* () {
-            let context = yield configFile_service_1.configServiceInstance.getContext(constant_1.BOS_CREDENTIAL_CONTEXT_NAME);
-            if (!context)
-                return;
-            return context.info.get();
-        });
+    async getPamToAdminCredential() {
+        let context = await configFile_service_1.configServiceInstance.getContext(constant_1.BOS_CREDENTIAL_CONTEXT_NAME);
+        if (!context)
+            return;
+        return context.info.get();
     }
-    deleteCredentials() {
-        return __awaiter(this, void 0, void 0, function* () {
-            let context = yield configFile_service_1.configServiceInstance.getContext(constant_1.BOS_CREDENTIAL_CONTEXT_NAME);
-            if (context)
-                yield context.removeFromGraph();
-            let adminContext = yield configFile_service_1.configServiceInstance.getContext(constant_1.ADMIN_CREDENTIAL_CONTEXT_NAME);
-            if (!adminContext)
-                yield adminContext.removeFromGraph();
-            return { removed: true };
-        });
+    async deleteCredentials() {
+        let context = await configFile_service_1.configServiceInstance.getContext(constant_1.BOS_CREDENTIAL_CONTEXT_NAME);
+        if (context)
+            await context.removeFromGraph();
+        let adminContext = await configFile_service_1.configServiceInstance.getContext(constant_1.ADMIN_CREDENTIAL_CONTEXT_NAME);
+        if (!adminContext)
+            await adminContext.removeFromGraph();
+        return { removed: true };
     }
     // Admin credential
     createAdminCredential() {
@@ -102,36 +87,30 @@ class AuthentificationService {
             TokenAdminToPam: token
         });
     }
-    editAdminCredential(admin) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const context = yield this._getOrCreateContext(constant_1.ADMIN_CREDENTIAL_CONTEXT_NAME, constant_1.ADMIN_CREDENTIAL_CONTEXT_TYPE);
-            context.info.mod_attr("idPlatformOfAdmin", admin.idPlatformOfAdmin);
-            context.info.mod_attr("TokenAdminToPam", admin.TokenAdminToPam);
-            return admin;
-        });
+    async editAdminCredential(admin) {
+        const context = await this._getOrCreateContext(constant_1.ADMIN_CREDENTIAL_CONTEXT_NAME, constant_1.ADMIN_CREDENTIAL_CONTEXT_TYPE);
+        context.info.mod_attr("idPlatformOfAdmin", admin.idPlatformOfAdmin);
+        context.info.mod_attr("TokenAdminToPam", admin.TokenAdminToPam);
+        return admin;
     }
-    getAdminCredential() {
-        return __awaiter(this, void 0, void 0, function* () {
-            let context = yield configFile_service_1.configServiceInstance.getContext(constant_1.ADMIN_CREDENTIAL_CONTEXT_NAME);
-            if (!context)
-                return;
-            return context.info.get();
-        });
+    async getAdminCredential() {
+        let context = await configFile_service_1.configServiceInstance.getContext(constant_1.ADMIN_CREDENTIAL_CONTEXT_NAME);
+        if (!context)
+            return;
+        return context.info.get();
     }
-    sendDataToAdmin(update = false) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const bosCredential = yield this.getPamToAdminCredential();
-            if (!bosCredential)
-                throw new Error("No admin registered, register an admin and retry !");
-            // const endpoint = update ? "update" : "register";
-            const endpoint = "register";
-            const adminCredential = !update ? yield this._getOrCreateAdminCredential(true) : {};
-            const data = yield this._getRequestBody(update, bosCredential, adminCredential);
-            return axios_1.default.put(`${bosCredential.urlAdmin}/${endpoint}`, data, {
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
+    async sendDataToAdmin(update = false) {
+        const bosCredential = await this.getPamToAdminCredential();
+        if (!bosCredential)
+            throw new Error("No admin registered, register an admin and retry !");
+        // const endpoint = update ? "update" : "register";
+        const endpoint = "register";
+        const adminCredential = !update ? await this._getOrCreateAdminCredential(true) : {};
+        const data = await this._getRequestBody(update, bosCredential, adminCredential);
+        return axios_1.default.put(`${bosCredential.urlAdmin}/${endpoint}`, data, {
+            headers: {
+                'Content-Type': 'application/json',
+            },
         });
     }
     // public async updateToken(oldToken: string) {
@@ -144,50 +123,47 @@ class AuthentificationService {
     //////////////////////////////////////////////////
     //                      PRIVATE                 //
     //////////////////////////////////////////////////
-    _getOrCreateAdminCredential(createIfNotExist = false) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const credentials = yield this.getAdminCredential();
-            if (credentials)
-                return credentials;
-            if (createIfNotExist)
-                return this.createAdminCredential();
-        });
+    async _getOrCreateAdminCredential(createIfNotExist = false) {
+        const credentials = await this.getAdminCredential();
+        if (credentials)
+            return credentials;
+        if (createIfNotExist)
+            return this.createAdminCredential();
     }
-    getJsonData() {
-        return __awaiter(this, void 0, void 0, function* () {
-            return {
-                userProfileList: yield this._formatUserProfiles(),
-                appProfileList: yield this._formatAppProfiles(),
-                organList: [],
-                // appList: await this._formatAppList()
-            };
-        });
+    async getJsonData() {
+        return {
+            userProfileList: await this._formatUserProfiles(),
+            appProfileList: await this._formatAppProfiles(),
+            organList: [],
+            // appList: await this._formatAppList()
+        };
     }
-    _getRequestBody(update, bosCredential, adminCredential) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return JSON.stringify(Object.assign({ TokenBosAdmin: bosCredential.tokenPamToAdmin, platformId: bosCredential.idPlateform, jsonData: yield this.getJsonData() }, (!update && {
+    async _getRequestBody(update, bosCredential, adminCredential) {
+        return JSON.stringify({
+            TokenBosAdmin: bosCredential.tokenPamToAdmin,
+            platformId: bosCredential.idPlateform,
+            jsonData: await this.getJsonData(),
+            ...(!update && {
                 URLBos: `http://localhost:8060`,
                 TokenAdminBos: adminCredential.TokenAdminToPam,
                 idPlatformOfAdmin: adminCredential.idPlatformOfAdmin
-            })));
+            }),
         });
     }
-    _editPamCredential(bosCredential) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const context = yield this._getOrCreateContext(constant_1.BOS_CREDENTIAL_CONTEXT_NAME, constant_1.BOS_CREDENTIAL_CONTEXT_TYPE);
-            const contextInfo = context.info;
-            if (bosCredential.TokenBosAdmin)
-                contextInfo.mod_attr("tokenPamToAdmin", bosCredential.TokenBosAdmin);
-            if (bosCredential.name)
-                contextInfo.mod_attr("pamName", bosCredential.name);
-            if (bosCredential.id)
-                contextInfo.mod_attr("idPlateform", bosCredential.id);
-            if (bosCredential.url)
-                contextInfo.mod_attr("urlAdmin", bosCredential.url);
-            if (bosCredential.registerKey)
-                contextInfo.mod_attr("registerKey", bosCredential.registerKey);
-            return contextInfo.get();
-        });
+    async _editPamCredential(bosCredential) {
+        const context = await this._getOrCreateContext(constant_1.BOS_CREDENTIAL_CONTEXT_NAME, constant_1.BOS_CREDENTIAL_CONTEXT_TYPE);
+        const contextInfo = context.info;
+        if (bosCredential.TokenBosAdmin)
+            contextInfo.mod_attr("tokenPamToAdmin", bosCredential.TokenBosAdmin);
+        if (bosCredential.name)
+            contextInfo.mod_attr("pamName", bosCredential.name);
+        if (bosCredential.id)
+            contextInfo.mod_attr("idPlateform", bosCredential.id);
+        if (bosCredential.url)
+            contextInfo.mod_attr("urlAdmin", bosCredential.url);
+        if (bosCredential.registerKey)
+            contextInfo.mod_attr("registerKey", bosCredential.registerKey);
+        return contextInfo.get();
     }
     _formatUserProfiles() {
         return userProfile_service_1.UserProfileService.getInstance().getAllUserProfileNodes().then((nodes) => {
@@ -205,13 +181,11 @@ class AuthentificationService {
             }));
         });
     }
-    _getOrCreateContext(contextName, contextType) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let context = yield configFile_service_1.configServiceInstance.getContext(contextName);
-            if (!context)
-                context = yield configFile_service_1.configServiceInstance.addContext(contextName, contextType);
-            return context;
-        });
+    async _getOrCreateContext(contextName, contextType) {
+        let context = await configFile_service_1.configServiceInstance.getContext(contextName);
+        if (!context)
+            context = await configFile_service_1.configServiceInstance.addContext(contextName, contextType);
+        return context;
     }
     _formatInfo(info) {
         if ("client_id" in info) {

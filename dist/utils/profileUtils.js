@@ -23,17 +23,25 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports._getNodeListInfo = exports._formatAuthRes = exports._formatProfile = void 0;
-function _formatProfile(data) {
-    return Object.assign(Object.assign({}, data.node.info.get()), (_formatAuthRes(data)));
-}
 exports._formatProfile = _formatProfile;
-function _formatAuthRes(data) {
-    return Object.assign({ apps: _getNodeListInfo(data.apps), apis: _getNodeListInfo(data.apis), contexts: _getNodeListInfo(data.contexts) }, (data.adminApps && { adminApps: _getNodeListInfo(data.adminApps) }));
-}
 exports._formatAuthRes = _formatAuthRes;
-function _getNodeListInfo(nodes = []) {
-    return nodes.map(el => el.info.get());
-}
 exports._getNodeListInfo = _getNodeListInfo;
+const services_1 = require("../services");
+async function _formatProfile(data) {
+    return {
+        ...data.node.info.get(),
+        ...(await _formatAuthRes(data)),
+    };
+}
+async function _formatAuthRes(data) {
+    return {
+        apps: await services_1.AppService.getInstance().formatAppsAndAddSubApps(data.apps, data.subApps),
+        apis: _getNodeListInfo(data.apis),
+        contexts: _getNodeListInfo(data.contexts),
+        ...(data.adminApps && { adminApps: _getNodeListInfo(data.adminApps) }),
+    };
+}
+function _getNodeListInfo(nodes = []) {
+    return nodes.map((el) => el.info.get());
+}
 //# sourceMappingURL=profileUtils.js.map

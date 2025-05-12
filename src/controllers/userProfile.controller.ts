@@ -44,6 +44,7 @@ import * as express from 'express';
 import { AuthError } from '../security/AuthError';
 import { checkIfItIsAdmin, getProfileId } from '../security/authentication';
 import { AdminProfileService } from '../services/adminProfile.service';
+import { searchById } from '../utils/findNodeBySearchKey';
 
 const serviceInstance = UserProfileService.getInstance();
 
@@ -71,7 +72,7 @@ export class UserProfileController extends Controller {
 
       const profile = await serviceInstance.createUserProfile(data);
       this.setStatus(HTTP_CODES.CREATED);
-      return _formatProfile(profile);
+      return await _formatProfile(profile);
     } catch (error) {
       this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
       return { message: error.message };
@@ -95,7 +96,7 @@ export class UserProfileController extends Controller {
       const data = await serviceInstance.getUserProfile(id);
       if (data) {
         this.setStatus(HTTP_CODES.OK);
-        return _formatProfile(data);
+        return await _formatProfile(data);
       }
 
       this.setStatus(HTTP_CODES.NOT_FOUND);
@@ -116,7 +117,8 @@ export class UserProfileController extends Controller {
       const data = await serviceInstance.getUserProfile(profileId);
       if (data) {
         this.setStatus(HTTP_CODES.OK);
-        return _formatProfile(data);
+        const res = await _formatProfile(data);
+        return res;
       }
 
       // this.setStatus(HTTP_CODES.NOT_FOUND)
@@ -138,7 +140,7 @@ export class UserProfileController extends Controller {
 
       const nodes = (await serviceInstance.getAllUserProfile()) || [];
       this.setStatus(HTTP_CODES.OK);
-      return nodes.map((el) => _formatProfile(el));
+      return await Promise.all(nodes.map((el) => _formatProfile(el)));
     } catch (error) {
       this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
       return { message: error.message };
@@ -159,7 +161,7 @@ export class UserProfileController extends Controller {
       const node = await serviceInstance.updateUserProfile(id, data);
       if (node) {
         this.setStatus(HTTP_CODES.OK);
-        return _formatProfile(node);
+        return await _formatProfile(node);
       }
 
       this.setStatus(HTTP_CODES.NOT_FOUND);
@@ -405,8 +407,37 @@ export class UserProfileController extends Controller {
       if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
       const hasAccess = await serviceInstance.profileHasAccessToApp(
+        searchById,
         profileId,
         appId
+      );
+      this.setStatus(HTTP_CODES.OK);
+      return hasAccess ? true : false;
+    } catch (error) {
+      this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
+      return { message: error.message };
+    }
+  }
+
+  @Security(SECURITY_NAME.bearerAuth)
+  @Get(
+    '/profile_has_access_to_sub_app/{profileId}/{appNameOrId}/{subAppNameOrId}'
+  )
+  public async profileHasAccessToSubApp(
+    @Request() req: express.Request,
+    @Path() profileId: string,
+    @Path() appNameOrId: string,
+    @Path() subAppNameOrId: string
+  ) {
+    try {
+      const isAdmin = await checkIfItIsAdmin(req);
+      if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
+      const hasAccess = await serviceInstance.profileHasAccessToSubApp(
+        searchById,
+        profileId,
+        appNameOrId,
+        subAppNameOrId
       );
       this.setStatus(HTTP_CODES.OK);
       return hasAccess ? true : false;

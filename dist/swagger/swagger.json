@@ -36,7 +36,50 @@
                     "type": "string"
                 }
             },
-            "IApp": {
+            "ISubApp": {
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "icon": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "tags": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array"
+                    },
+                    "categoryName": {
+                        "type": "string"
+                    },
+                    "groupName": {
+                        "type": "string"
+                    },
+                    "hasViewer": {
+                        "type": "boolean"
+                    },
+                    "documentationLink": {
+                        "type": "string"
+                    },
+                    "appConfig": {}
+                },
+                "required": [
+                    "name"
+                ],
+                "type": "object",
+                "additionalProperties": false
+            },
+            "ISpinalApp": {
                 "properties": {
                     "name": {
                         "type": "string"
@@ -73,6 +116,12 @@
                     },
                     "link": {
                         "type": "string"
+                    },
+                    "subApps": {
+                        "items": {
+                            "$ref": "#/components/schemas/ISubApp"
+                        },
+                        "type": "array"
                     }
                 },
                 "required": [
@@ -90,7 +139,7 @@
                 "properties": {
                     "apps": {
                         "items": {
-                            "$ref": "#/components/schemas/IApp"
+                            "$ref": "#/components/schemas/ISpinalApp"
                         },
                         "type": "array"
                     },
@@ -112,6 +161,12 @@
             "IProfile": {
                 "properties": {
                     "appsIds": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array"
+                    },
+                    "subAppsIds": {
                         "items": {
                             "type": "string"
                         },
@@ -147,6 +202,12 @@
                         },
                         "type": "array"
                     },
+                    "subAppsIds": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array"
+                    },
                     "apisIds": {
                         "items": {
                             "type": "string"
@@ -163,6 +224,12 @@
                         "type": "string"
                     },
                     "unauthorizeAppsIds": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array"
+                    },
+                    "unauthorizeSubAppsIds": {
                         "items": {
                             "type": "string"
                         },
@@ -420,6 +487,7 @@
                     401,
                     403,
                     404,
+                    409,
                     500
                 ],
                 "type": "number"
@@ -1631,7 +1699,7 @@
                                 "schema": {
                                     "anyOf": [
                                         {
-                                            "$ref": "#/components/schemas/IApp"
+                                            "$ref": "#/components/schemas/ISpinalApp"
                                         },
                                         {
                                             "properties": {
@@ -1664,7 +1732,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/IApp"
+                                "$ref": "#/components/schemas/ISpinalApp"
                             }
                         }
                     }
@@ -1682,7 +1750,7 @@
                                 "schema": {
                                     "anyOf": [
                                         {
-                                            "$ref": "#/components/schemas/IApp"
+                                            "$ref": "#/components/schemas/ISpinalApp"
                                         },
                                         {
                                             "properties": {
@@ -1715,7 +1783,67 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/IApp"
+                                "$ref": "#/components/schemas/ISpinalApp"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/create_building_sub_app/{appId}": {
+            "post": {
+                "operationId": "CreateBuildingSubApp",
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "anyOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ISubApp"
+                                        },
+                                        {
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "message"
+                                            ],
+                                            "type": "object"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "Applications"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "appId",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ISubApp"
                             }
                         }
                     }
@@ -1734,7 +1862,7 @@
                                     "anyOf": [
                                         {
                                             "items": {
-                                                "$ref": "#/components/schemas/IApp"
+                                                "$ref": "#/components/schemas/ISpinalApp"
                                             },
                                             "type": "array"
                                         },
@@ -1778,7 +1906,7 @@
                                     "anyOf": [
                                         {
                                             "items": {
-                                                "$ref": "#/components/schemas/IApp"
+                                                "$ref": "#/components/schemas/ISpinalApp"
                                             },
                                             "type": "array"
                                         },
@@ -1810,7 +1938,7 @@
                 "parameters": []
             }
         },
-        "/api/v1/get_admin_app/{appId}": {
+        "/api/v1/get_admin_app/{appNameOrId}": {
             "get": {
                 "operationId": "GetAdminApp",
                 "responses": {
@@ -1821,7 +1949,7 @@
                                 "schema": {
                                     "anyOf": [
                                         {
-                                            "$ref": "#/components/schemas/IApp"
+                                            "$ref": "#/components/schemas/ISpinalApp"
                                         },
                                         {
                                             "properties": {
@@ -1851,7 +1979,7 @@
                 "parameters": [
                     {
                         "in": "path",
-                        "name": "appId",
+                        "name": "appNameOrId",
                         "required": true,
                         "schema": {
                             "type": "string"
@@ -1860,7 +1988,7 @@
                 ]
             }
         },
-        "/api/v1/get_building_app/{appId}": {
+        "/api/v1/get_building_app/{appNaneOrId}": {
             "get": {
                 "operationId": "GetBuildingApp",
                 "responses": {
@@ -1871,7 +1999,7 @@
                                 "schema": {
                                     "anyOf": [
                                         {
-                                            "$ref": "#/components/schemas/IApp"
+                                            "$ref": "#/components/schemas/ISpinalApp"
                                         },
                                         {
                                             "properties": {
@@ -1890,6 +2018,57 @@
                         }
                     }
                 },
+                "description": "Get building app by name or id",
+                "tags": [
+                    "Applications"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "description": "app name or id",
+                        "in": "path",
+                        "name": "appNaneOrId",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ]
+            }
+        },
+        "/api/v1/get_building_sub_app/{appNameOrId}/{subAppNameOrId}": {
+            "get": {
+                "operationId": "GetBuildingSubApp",
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "anyOf": [
+                                        {},
+                                        {
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "message"
+                                            ],
+                                            "type": "object"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                "description": "Get building sub app configuration by name or id",
                 "tags": [
                     "Applications"
                 ],
@@ -1901,7 +2080,15 @@
                 "parameters": [
                     {
                         "in": "path",
-                        "name": "appId",
+                        "name": "appNameOrId",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "path",
+                        "name": "subAppNameOrId",
                         "required": true,
                         "schema": {
                             "type": "string"
@@ -1921,7 +2108,7 @@
                                 "schema": {
                                     "anyOf": [
                                         {
-                                            "$ref": "#/components/schemas/IApp"
+                                            "$ref": "#/components/schemas/ISpinalApp"
                                         },
                                         {
                                             "properties": {
@@ -1963,7 +2150,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/IApp"
+                                "$ref": "#/components/schemas/ISpinalApp"
                             }
                         }
                     }
@@ -1981,7 +2168,7 @@
                                 "schema": {
                                     "anyOf": [
                                         {
-                                            "$ref": "#/components/schemas/IApp"
+                                            "$ref": "#/components/schemas/ISpinalApp"
                                         },
                                         {
                                             "properties": {
@@ -2023,7 +2210,75 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/IApp"
+                                "$ref": "#/components/schemas/ISpinalApp"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/update_building_sub_app/{appId}/{subAppId}": {
+            "put": {
+                "operationId": "UpdateBuildingSubApp",
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "anyOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ISubApp"
+                                        },
+                                        {
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "message"
+                                            ],
+                                            "type": "object"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "Applications"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "appId",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "path",
+                        "name": "subAppId",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ISubApp"
                             }
                         }
                     }
@@ -2116,6 +2371,57 @@
                 ]
             }
         },
+        "/api/v1/delete_building_sub_app/{appId}/{subAppId}": {
+            "delete": {
+                "operationId": "DeleteBuildingSubApp",
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "Applications"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "appId",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "path",
+                        "name": "subAppId",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ]
+            }
+        },
         "/api/v1/upload_admin_apps": {
             "post": {
                 "operationId": "UploadAdminApp",
@@ -2128,7 +2434,7 @@
                                     "anyOf": [
                                         {
                                             "items": {
-                                                "$ref": "#/components/schemas/IApp"
+                                                "$ref": "#/components/schemas/ISpinalApp"
                                             },
                                             "type": "array"
                                         },
@@ -2191,7 +2497,7 @@
                                     "anyOf": [
                                         {
                                             "items": {
-                                                "$ref": "#/components/schemas/IApp"
+                                                "$ref": "#/components/schemas/ISpinalApp"
                                             },
                                             "type": "array"
                                         },
@@ -2242,6 +2548,72 @@
                 }
             }
         },
+        "/api/v1/upload_building_sub_apps": {
+            "post": {
+                "operationId": "UploadBuildingSubApp",
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errors": {
+                                            "anyOf": [
+                                                {
+                                                    "items": {
+                                                        "type": "string"
+                                                    },
+                                                    "type": "array"
+                                                },
+                                                {
+                                                    "type": "string"
+                                                }
+                                            ]
+                                        },
+                                        "subApps": {
+                                            "items": {
+                                                "$ref": "#/components/schemas/ISpinalApp"
+                                            },
+                                            "type": "array"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "Applications"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "file": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "required": [
+                                    "file"
+                                ]
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/get_favorite_apps": {
             "get": {
                 "operationId": "GetFavoriteApps",
@@ -2253,7 +2625,9 @@
                                 "schema": {
                                     "anyOf": [
                                         {
-                                            "items": {},
+                                            "items": {
+                                                "$ref": "#/components/schemas/ISpinalApp"
+                                            },
                                             "type": "array"
                                         },
                                         {
@@ -2293,7 +2667,9 @@
                                 "schema": {
                                     "anyOf": [
                                         {
-                                            "items": {},
+                                            "items": {
+                                                "$ref": "#/components/schemas/ISpinalApp"
+                                            },
                                             "type": "array"
                                         },
                                         {
@@ -2354,7 +2730,9 @@
                                 "schema": {
                                     "anyOf": [
                                         {
-                                            "items": {},
+                                            "items": {
+                                                "$ref": "#/components/schemas/ISpinalApp"
+                                            },
                                             "type": "array"
                                         },
                                         {
@@ -4090,6 +4468,70 @@
                     {
                         "in": "path",
                         "name": "appId",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ]
+            }
+        },
+        "/api/v1/user_profile/profile_has_access_to_sub_app/{profileId}/{appNameOrId}/{subAppNameOrId}": {
+            "get": {
+                "operationId": "ProfileHasAccessToSubApp",
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "anyOf": [
+                                        {
+                                            "type": "boolean"
+                                        },
+                                        {
+                                            "properties": {
+                                                "message": {}
+                                            },
+                                            "required": [
+                                                "message"
+                                            ],
+                                            "type": "object"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "user Profiles"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "profileId",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "path",
+                        "name": "appNameOrId",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "path",
+                        "name": "subAppNameOrId",
                         "required": true,
                         "schema": {
                             "type": "string"

@@ -22,17 +22,14 @@
  * with this file. If not, see
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.authenticateRequest = exports._formatValidationError = exports.errorHandler = exports.useApiMiddleWare = exports.initSwagger = exports.useClientMiddleWare = exports.useHubProxy = void 0;
+exports.useHubProxy = useHubProxy;
+exports.useClientMiddleWare = useClientMiddleWare;
+exports.initSwagger = initSwagger;
+exports.useApiMiddleWare = useApiMiddleWare;
+exports.errorHandler = errorHandler;
+exports._formatValidationError = _formatValidationError;
+exports.authenticateRequest = authenticateRequest;
 const cors = require("cors");
 const express = require("express");
 const path = require("path");
@@ -68,11 +65,13 @@ function useHubProxy(app) {
             return req.originalUrl;
         },
     });
-    for (const routeToProxy of constant_1.routesToProxy) {
-        app.use(routeToProxy, proxyHub);
+    for (const routeToProxy of constant_1.routesToProxy.get) {
+        app.get(routeToProxy, proxyHub);
+    }
+    for (const routeToProxy of constant_1.routesToProxy.post) {
+        app.post(routeToProxy, proxyHub);
     }
 }
-exports.useHubProxy = useHubProxy;
 function useClientMiddleWare(app) {
     const root = process.env.PATH_DIR_STATIC_HTML || path.resolve(__dirname, '..');
     app.use(express.static(root));
@@ -80,7 +79,6 @@ function useClientMiddleWare(app) {
         res.redirect('/spinalcom-api-docs');
     });
 }
-exports.useClientMiddleWare = useClientMiddleWare;
 function initSwagger(app) {
     app.use('/admin/swagger.json', (req, res) => {
         res.sendFile(path.resolve(__dirname, '../swagger/swagger.json'));
@@ -93,11 +91,10 @@ function initSwagger(app) {
     // app.use("/admin_docs", swaggerUi.serve, async (req, res) => {
     // return res.send(swaggerUi.generateHTML(await import("../swagger/swagger.json"), swaggerOption))
     // });
-    app.use('/admin_docs', swaggerUi.serve, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
-        return swaggerUi.setup(yield Promise.resolve().then(() => require('../swagger/swagger.json')), swaggerOption)(req, res, next);
-    }));
+    app.use('/admin_docs', swaggerUi.serve, async (req, res, next) => {
+        return swaggerUi.setup(await Promise.resolve().then(() => require('../swagger/swagger.json')), swaggerOption)(req, res, next);
+    });
 }
-exports.initSwagger = initSwagger;
 function useApiMiddleWare(app) {
     app.use(cors({ origin: '*' }));
     const bodyParserTicket = bodyParser.json({ limit: '500mb' });
@@ -110,7 +107,6 @@ function useApiMiddleWare(app) {
     // app.use(express.json());
     app.use(bodyParser.urlencoded({ extended: true }));
 }
-exports.useApiMiddleWare = useApiMiddleWare;
 function errorHandler(err, req, res, next) {
     if (err instanceof tsoa_1.ValidateError) {
         return res.status(constant_1.HTTP_CODES.BAD_REQUEST).send(_formatValidationError(err));
@@ -125,31 +121,28 @@ function errorHandler(err, req, res, next) {
     }
     next();
 }
-exports.errorHandler = errorHandler;
 function _formatValidationError(err) {
     err;
     return {
         message: 'Validation Failed',
-        details: err === null || err === void 0 ? void 0 : err.fields,
+        details: err?.fields,
     };
 }
-exports._formatValidationError = _formatValidationError;
 function authenticateRequest(app) {
-    app.all(/\/api\/v1\/*/, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+    app.all(/\/api\/v1\/*/, async (req, res, next) => {
         let err;
         try {
             const isAdmin = isAdminRoute(req.url);
             if (isAdmin)
                 return next();
-            yield (0, authentication_1.checkBeforeRedirectToApi)(req, constant_1.SECURITY_NAME.profile);
+            await (0, authentication_1.checkBeforeRedirectToApi)(req, constant_1.SECURITY_NAME.profile);
         }
         catch (error) {
             err = error;
         }
         next(err);
-    }));
+    });
 }
-exports.authenticateRequest = authenticateRequest;
 function isAdminRoute(apiRoute) {
     const route = apiRoute.includes('?')
         ? apiRoute.substring(0, apiRoute.indexOf('?'))

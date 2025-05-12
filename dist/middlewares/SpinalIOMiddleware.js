@@ -22,15 +22,6 @@
  * with this file. If not, see
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 const SpinalAPIMiddleware_1 = require("./SpinalAPIMiddleware");
 const spinal_env_viewer_graph_service_1 = require("spinal-env-viewer-graph-service");
@@ -62,108 +53,93 @@ class SpinalIOMiddleware {
         return this.instance;
     }
     tokenCheckMiddleware(io) {
-        io.use((socket, next) => __awaiter(this, void 0, void 0, function* () {
+        io.use(async (socket, next) => {
             let err;
             try {
-                yield this._getTokenInfo(socket);
+                await this._getTokenInfo(socket);
             }
             catch (error) {
                 err = error;
             }
             next(err);
-        }));
+        });
     }
     getGraph() {
         return SpinalAPIMiddleware_1.default.getInstance().getGraph();
     }
-    getProfileGraph(socket) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let profileId = yield this._getProfileId(socket);
-            return SpinalAPIMiddleware_1.default.getInstance().getProfileGraph(profileId);
+    async getProfileGraph(socket) {
+        let profileId = await this._getProfileId(socket);
+        return SpinalAPIMiddleware_1.default.getInstance().getProfileGraph(profileId);
+    }
+    async getContext(contextId, socket) {
+        const profileId = await this._getProfileId(socket);
+        if (typeof contextId === 'undefined')
+            return;
+        if (!isNaN(contextId))
+            return SpinalAPIMiddleware_1.default.getInstance().load(contextId, profileId);
+        const graph = await SpinalAPIMiddleware_1.default.getInstance().getProfileGraph(profileId);
+        if (!graph)
+            return;
+        const contexts = await graph.getChildren();
+        return contexts.find((el) => {
+            if (el.getId().get() === contextId || el._server_id == contextId) {
+                return true;
+            }
+            return false;
         });
     }
-    getContext(contextId, socket) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const profileId = yield this._getProfileId(socket);
-            if (typeof contextId === 'undefined')
-                return;
-            if (!isNaN(contextId))
-                return SpinalAPIMiddleware_1.default.getInstance().load(contextId, profileId);
-            const graph = yield SpinalAPIMiddleware_1.default.getInstance().getProfileGraph(profileId);
-            if (!graph)
-                return;
-            const contexts = yield graph.getChildren();
-            return contexts.find((el) => {
-                if (el.getId().get() === contextId || el._server_id == contextId) {
+    async getNodeWithServerId(server_id, socket) {
+        const profileId = await this._getProfileId(socket);
+        return SpinalAPIMiddleware_1.default.getInstance().load(server_id, profileId);
+    }
+    async getNodeWithStaticId(nodeId, contextId, socket) {
+        if (nodeId === contextId) {
+            return this.getContext(nodeId, socket);
+        }
+        const context = await this.getContext(contextId, socket);
+        if (context instanceof spinal_env_viewer_graph_service_1.SpinalContext) {
+            const found = await context.findInContext(context, (node, stop) => {
+                if (node.getId().get() === nodeId) {
+                    stop();
                     return true;
                 }
                 return false;
             });
-        });
+            return Array.isArray(found) ? found[0] : found;
+        }
     }
-    getNodeWithServerId(server_id, socket) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const profileId = yield this._getProfileId(socket);
-            return SpinalAPIMiddleware_1.default.getInstance().load(server_id, profileId);
-        });
-    }
-    getNodeWithStaticId(nodeId, contextId, socket) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (nodeId === contextId) {
-                return this.getContext(nodeId, socket);
-            }
-            const context = yield this.getContext(contextId, socket);
-            if (context instanceof spinal_env_viewer_graph_service_1.SpinalContext) {
-                const found = yield context.findInContext(context, (node, stop) => {
-                    if (node.getId().get() === nodeId) {
-                        stop();
-                        return true;
-                    }
-                    return false;
-                });
-                return Array.isArray(found) ? found[0] : found;
-            }
-        });
-    }
-    getNode(nodeId, contextId, socket) {
-        return __awaiter(this, void 0, void 0, function* () {
+    async getNode(nodeId, contextId, socket) {
+        //@ts-ignore
+        if (!isNaN(nodeId)) {
+            const node = await this.getNodeWithServerId(nodeId, socket);
             //@ts-ignore
-            if (!isNaN(nodeId)) {
-                const node = yield this.getNodeWithServerId(nodeId, socket);
-                //@ts-ignore
-                if (node && node instanceof spinal_env_viewer_graph_service_1.SpinalNode)
-                    SpinalGraphService._addNode(node);
-                return node;
-            }
-            return this.getNodeWithStaticId(nodeId === null || nodeId === void 0 ? void 0 : nodeId.toString(), contextId, socket);
-        });
+            if (node && node instanceof spinal_env_viewer_graph_service_1.SpinalNode)
+                SpinalGraphService._addNode(node);
+            return node;
+        }
+        return this.getNodeWithStaticId(nodeId?.toString(), contextId, socket);
     }
-    _getTokenInfo(socket) {
-        var _a, _b, _c;
-        return __awaiter(this, void 0, void 0, function* () {
-            const { header, auth, query } = socket.handshake;
-            const token = (auth === null || auth === void 0 ? void 0 : auth.token) || (header === null || header === void 0 ? void 0 : header.token) || (query === null || query === void 0 ? void 0 : query.token);
-            if (!token)
-                throw new Error(constant_1.SECURITY_MESSAGES.INVALID_TOKEN);
-            const tokenInfo = yield services_1.TokenService.getInstance().tokenIsValid(token);
-            if (!tokenInfo)
-                throw new Error(constant_1.SECURITY_MESSAGES.INVALID_TOKEN);
-            const sessionId = (_a = tokenInfo.userInfo) === null || _a === void 0 ? void 0 : _a.id;
-            socket.sessionId = sessionId;
-            socket.userInfo = {
-                id: (_b = tokenInfo.userInfo) === null || _b === void 0 ? void 0 : _b.id,
-                name: (_c = tokenInfo.userInfo) === null || _c === void 0 ? void 0 : _c.userName,
-            };
-            return tokenInfo;
-        });
+    async _getTokenInfo(socket) {
+        const { header, auth, query } = socket.handshake;
+        const token = auth?.token || header?.token || query?.token;
+        if (!token)
+            throw new Error(constant_1.SECURITY_MESSAGES.INVALID_TOKEN);
+        const tokenInfo = await services_1.TokenService.getInstance().tokenIsValid(token);
+        if (!tokenInfo)
+            throw new Error(constant_1.SECURITY_MESSAGES.INVALID_TOKEN);
+        const sessionId = tokenInfo.userInfo?.id;
+        socket.sessionId = sessionId;
+        socket.userInfo = {
+            id: tokenInfo.userInfo?.id,
+            name: tokenInfo.userInfo?.userName,
+        };
+        return tokenInfo;
     }
-    _getProfileId(socket) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const tokenInfo = yield this._getTokenInfo(socket);
-            return (tokenInfo.profile.profileId ||
-                tokenInfo.profile.userProfileBosConfigId ||
-                tokenInfo.profile.appProfileBosConfigId);
-        });
+    async _getProfileId(socket) {
+        const tokenInfo = await this._getTokenInfo(socket);
+        return (tokenInfo.profile.profileId ||
+            tokenInfo.profile.userProfileBosConfigId ||
+            tokenInfo.profile.appProfileBosConfigId);
     }
 }
 exports.default = SpinalIOMiddleware;

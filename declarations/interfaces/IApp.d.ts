@@ -1,4 +1,5 @@
-export interface IApp {
+import type { ISubApp } from "./ISubApp";
+export interface ISpinalApp {
     name: string;
     icon: string;
     description: string;
@@ -10,5 +11,6 @@ export interface IApp {
     packageName?: string;
     isExternalApp?: boolean;
     link?: string;
+    subApps?: ISubApp[];
     [key: string]: any;
 }

@@ -34,15 +34,6 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthController = void 0;
 const services_1 = require("../services");
@@ -57,128 +48,115 @@ let AuthController = class AuthController extends tsoa_1.Controller {
     constructor() {
         super();
     }
-    authenticate(credential) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const { code, data } = yield serviceInstance.authenticate(credential);
-                this.setStatus(code);
-                return data;
-            }
-            catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+    async authenticate(credential) {
+        try {
+            const { code, data } = await serviceInstance.authenticate(credential);
+            this.setStatus(code);
+            return data;
+        }
+        catch (error) {
+            this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-    registerToAdmin(req, data) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const registeredData = yield serviceInstance.registerToAdmin(data.pamInfo, data.adminInfo);
-                yield serviceInstance.sendDataToAdmin();
+    async registerToAdmin(req, data) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const registeredData = await serviceInstance.registerToAdmin(data.pamInfo, data.adminInfo);
+            await serviceInstance.sendDataToAdmin();
+            this.setStatus(constant_1.HTTP_CODES.OK);
+            return registeredData;
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+    async getBosToAdminCredential(req) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const bosCredential = await serviceInstance.getPamToAdminCredential();
+            if (bosCredential) {
                 this.setStatus(constant_1.HTTP_CODES.OK);
-                return registeredData;
+                return bosCredential;
             }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+            this.setStatus(constant_1.HTTP_CODES.NOT_FOUND);
+            return { message: "No admin registered" };
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-    getBosToAdminCredential(req) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const bosCredential = yield serviceInstance.getPamToAdminCredential();
-                if (bosCredential) {
-                    this.setStatus(constant_1.HTTP_CODES.OK);
-                    return bosCredential;
-                }
-                this.setStatus(constant_1.HTTP_CODES.NOT_FOUND);
-                return { message: "No admin registered" };
-            }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+    async deleteAdmin(req) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const deleted = await serviceInstance.deleteCredentials();
+            const status = deleted ? constant_1.HTTP_CODES.OK : constant_1.HTTP_CODES.BAD_REQUEST;
+            const message = deleted ? "deleted with success" : "something went wrong, please check your input data";
+            this.setStatus(status);
+            return { message };
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-    deleteAdmin(req) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const deleted = yield serviceInstance.deleteCredentials();
-                const status = deleted ? constant_1.HTTP_CODES.OK : constant_1.HTTP_CODES.BAD_REQUEST;
-                const message = deleted ? "deleted with success" : "something went wrong, please check your input data";
-                this.setStatus(status);
-                return { message };
-            }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
-    }
-    getAdminCredential(req) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const isAdmin = yield (0, authentication_1.checkIfItIsAdmin)(req);
-                if (!isAdmin)
-                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-                const adminCredential = yield serviceInstance.getAdminCredential();
-                if (adminCredential) {
-                    this.setStatus(constant_1.HTTP_CODES.OK);
-                    return adminCredential;
-                }
-                this.setStatus(constant_1.HTTP_CODES.NOT_FOUND);
-                return { message: "No admin registered" };
-            }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
-    }
-    syncDataToAdmin(req) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const resp = yield serviceInstance.sendDataToAdmin(true);
+    async getAdminCredential(req) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const adminCredential = await serviceInstance.getAdminCredential();
+            if (adminCredential) {
                 this.setStatus(constant_1.HTTP_CODES.OK);
-                return { message: "updated" };
+                return adminCredential;
             }
-            catch (error) {
-                this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-                return { message: error.message };
-            }
-        });
+            this.setStatus(constant_1.HTTP_CODES.NOT_FOUND);
+            return { message: "No admin registered" };
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
     }
-    tokenIsValid(data) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const token = yield tokenService.tokenIsValid(data.token);
-                const code = token ? constant_1.HTTP_CODES.OK : constant_1.HTTP_CODES.UNAUTHORIZED;
-                this.setStatus(code);
-                return {
-                    code,
-                    data: token
-                };
-            }
-            catch (error) {
-                this.setStatus(constant_1.HTTP_CODES.UNAUTHORIZED);
-                return {
-                    code: constant_1.HTTP_CODES.UNAUTHORIZED,
-                    message: "Token is expired or invalid"
-                };
-            }
-        });
+    async syncDataToAdmin(req) {
+        try {
+            const resp = await serviceInstance.sendDataToAdmin(true);
+            this.setStatus(constant_1.HTTP_CODES.OK);
+            return { message: "updated" };
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+    async tokenIsValid(data) {
+        try {
+            const token = await tokenService.tokenIsValid(data.token);
+            const code = token ? constant_1.HTTP_CODES.OK : constant_1.HTTP_CODES.UNAUTHORIZED;
+            this.setStatus(code);
+            return {
+                code,
+                data: token
+            };
+        }
+        catch (error) {
+            this.setStatus(constant_1.HTTP_CODES.UNAUTHORIZED);
+            return {
+                code: constant_1.HTTP_CODES.UNAUTHORIZED,
+                message: "Token is expired or invalid"
+            };
+        }
     }
 };
+exports.AuthController = AuthController;
 __decorate([
     (0, tsoa_1.Security)(constant_1.SECURITY_NAME.all),
     (0, tsoa_1.Post)("/auth"),
@@ -236,11 +214,10 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "tokenIsValid", null);
-AuthController = __decorate([
+exports.AuthController = AuthController = __decorate([
     (0, tsoa_1.Route)("/api/v1"),
     (0, tsoa_1.Tags)("Auth"),
     __metadata("design:paramtypes", [])
 ], AuthController);
-exports.AuthController = AuthController;
 exports.default = new AuthController();
 //# sourceMappingURL=auth.controller.js.map

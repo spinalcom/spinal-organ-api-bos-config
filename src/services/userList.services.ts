@@ -48,15 +48,16 @@ import {
   IUserInfo,
   IUserToken,
 } from '../interfaces';
-import {configServiceInstance} from './configFile.service';
-import {Model} from 'spinal-core-connectorjs_type';
+import { configServiceInstance } from './configFile.service';
+import { Model } from 'spinal-core-connectorjs_type';
 import * as bcrypt from 'bcrypt';
 import * as fileLog from 'log-to-file';
 import * as path from 'path';
-import {TokenService} from './token.service';
-import {AuthentificationService} from './authentification.service';
-import {UserProfileService} from './userProfile.service';
-import {AppService} from './apps.service';
+import { TokenService } from './token.service';
+import { AuthentificationService } from './authentification.service';
+import { UserProfileService } from './userProfile.service';
+import { AppService } from './apps.service';
+import { searchById } from '../utils/findNodeBySearchKey';
 
 export class UserListService {
   private static instance: UserListService;
@@ -93,7 +94,7 @@ export class UserListService {
 
   public async authenticateUser(
     user: IUserCredential
-  ): Promise<{code: number; data: string | IUserToken}> {
+  ): Promise<{ code: number; data: string | IUserToken }> {
     let data: any = await this.authAdmin(user);
     let isAdmin = true;
     if (data.code === HTTP_CODES.INTERNAL_ERROR) {
@@ -151,15 +152,16 @@ export class UserListService {
       try {
         const hasAccess =
           await UserProfileService.getInstance().profileHasAccessToApp(
+            searchById,
             userProfileId,
             appId
           );
         if (!hasAccess)
-          throw {code: HTTP_CODES.UNAUTHORIZED, message: 'unauthorized'};
+          throw { code: HTTP_CODES.UNAUTHORIZED, message: 'unauthorized' };
 
         const [user, app] = await Promise.all([
           this.getUser(userId),
-          AppService.getInstance().getApps(appId),
+          AppService.getInstance().getApps(searchById, appId),
         ]);
         if (!user)
           throw {
@@ -193,15 +195,16 @@ export class UserListService {
       try {
         const hasAccess =
           await UserProfileService.getInstance().profileHasAccessToApp(
+            searchById,
             userProfileId,
             appId
           );
         if (!hasAccess)
-          throw {code: HTTP_CODES.UNAUTHORIZED, message: 'unauthorized'};
+          throw { code: HTTP_CODES.UNAUTHORIZED, message: 'unauthorized' };
 
         const [user, app] = await Promise.all([
           this.getUser(userId),
-          AppService.getInstance().getApps(appId),
+          AppService.getInstance().getApps(searchById, appId),
         ]);
         if (!user)
           throw {
@@ -239,7 +242,7 @@ export class UserListService {
     const password =
       (userInfo && userInfo.password) || this._generateString(16);
     fileLog(
-      JSON.stringify({userName, password}),
+      JSON.stringify({ userName, password }),
       path.resolve(__dirname, '../../.admin.log')
     );
 
@@ -250,7 +253,7 @@ export class UserListService {
         type: USER_TYPES.ADMIN,
         userType: USER_TYPES.ADMIN,
       },
-      new Model({userName, password: await this._hashPassword(password)}),
+      new Model({ userName, password: await this._hashPassword(password) }),
       true
     );
   }
@@ -264,7 +267,7 @@ export class UserListService {
 
   public async authAdmin(
     user: IUserCredential
-  ): Promise<{code: number; data: any | string}> {
+  ): Promise<{ code: number; data: any | string }> {
     const node = await this.getAdminUser(user.userName);
     if (!node)
       return {
@@ -286,12 +289,12 @@ export class UserListService {
     // await this._deleteUserToken(node);
     const res = await TokenService.getInstance().getAdminPlayLoad(node);
 
-    return {code: HTTP_CODES.OK, data: res};
+    return { code: HTTP_CODES.OK, data: res };
   }
 
   public async authUserViaAuthPlateform(
     user: IUserCredential
-  ): Promise<{code: HTTP_CODES; data: any}> {
+  ): Promise<{ code: HTTP_CODES; data: any }> {
     const adminCredential = await this._getAuthPlateformInfo();
 
     const url = `${adminCredential.urlAdmin}/users/login`;
@@ -325,7 +328,7 @@ export class UserListService {
   //////////////////////////////////////////////////
 
   private async _addUserToContext(
-    info: {[key: string]: any},
+    info: { [key: string]: any },
     element?: spinal.Model,
     isAdmin: boolean = false
   ): Promise<SpinalNode> {

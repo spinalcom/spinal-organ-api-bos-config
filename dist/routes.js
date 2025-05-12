@@ -1,15 +1,6 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.RegisterRoutes = void 0;
+exports.RegisterRoutes = RegisterRoutes;
 /* tslint:disable */
 /* eslint-disable */
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -49,7 +40,25 @@ const models = {
         "additionalProperties": { "dataType": "string" },
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "IApp": {
+    "ISubApp": {
+        "dataType": "refObject",
+        "properties": {
+            "id": { "dataType": "string" },
+            "type": { "dataType": "string" },
+            "name": { "dataType": "string", "required": true },
+            "icon": { "dataType": "string" },
+            "description": { "dataType": "string" },
+            "tags": { "dataType": "array", "array": { "dataType": "string" } },
+            "categoryName": { "dataType": "string" },
+            "groupName": { "dataType": "string" },
+            "hasViewer": { "dataType": "boolean" },
+            "documentationLink": { "dataType": "string" },
+            "appConfig": { "dataType": "any" },
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ISpinalApp": {
         "dataType": "refObject",
         "properties": {
             "name": { "dataType": "string", "required": true },
@@ -63,6 +72,7 @@ const models = {
             "packageName": { "dataType": "string" },
             "isExternalApp": { "dataType": "boolean" },
             "link": { "dataType": "string" },
+            "subApps": { "dataType": "array", "array": { "dataType": "refObject", "ref": "ISubApp" } },
         },
         "additionalProperties": { "dataType": "any" },
     },
@@ -70,7 +80,7 @@ const models = {
     "IProfileData": {
         "dataType": "refObject",
         "properties": {
-            "apps": { "dataType": "array", "array": { "dataType": "refObject", "ref": "IApp" } },
+            "apps": { "dataType": "array", "array": { "dataType": "refObject", "ref": "ISpinalApp" } },
             "apis": { "dataType": "array", "array": { "dataType": "refObject", "ref": "IApiRoute" } },
             "contexts": { "dataType": "nestedObjectLiteral", "nestedProperties": {}, "additionalProperties": { "dataType": "any" } },
         },
@@ -81,6 +91,7 @@ const models = {
         "dataType": "refObject",
         "properties": {
             "appsIds": { "dataType": "array", "array": { "dataType": "string" } },
+            "subAppsIds": { "dataType": "array", "array": { "dataType": "string" } },
             "apisIds": { "dataType": "array", "array": { "dataType": "string" } },
             "contextIds": { "dataType": "array", "array": { "dataType": "string" } },
             "name": { "dataType": "string", "required": true },
@@ -92,10 +103,12 @@ const models = {
         "dataType": "refObject",
         "properties": {
             "appsIds": { "dataType": "array", "array": { "dataType": "string" } },
+            "subAppsIds": { "dataType": "array", "array": { "dataType": "string" } },
             "apisIds": { "dataType": "array", "array": { "dataType": "string" } },
             "contextIds": { "dataType": "array", "array": { "dataType": "string" } },
             "name": { "dataType": "string" },
             "unauthorizeAppsIds": { "dataType": "array", "array": { "dataType": "string" } },
+            "unauthorizeSubAppsIds": { "dataType": "array", "array": { "dataType": "string" } },
             "unauthorizeApisIds": { "dataType": "array", "array": { "dataType": "string" } },
             "unauthorizeContextIds": { "dataType": "array", "array": { "dataType": "string" } },
         },
@@ -207,7 +220,7 @@ const models = {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "HTTP_CODES": {
         "dataType": "refEnum",
-        "enums": [200, 201, 202, 400, 401, 403, 404, 500],
+        "enums": [200, 201, 202, 400, 401, 403, 404, 409, 500],
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "WEBSOCKET_STATE": {
@@ -596,7 +609,7 @@ function RegisterRoutes(app) {
     app.post('/api/v1/create_admin_app', authenticateMiddleware([{ "bearerAuth": [] }]), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController)), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController.prototype.createAdminApp)), function AppsController_createAdminApp(request, response, next) {
         const args = {
             req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
-            appInfo: { "in": "body", "name": "appInfo", "required": true, "ref": "IApp" },
+            appInfo: { "in": "body", "name": "appInfo", "required": true, "ref": "ISpinalApp" },
         };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         let validatedArgs = [];
@@ -614,7 +627,7 @@ function RegisterRoutes(app) {
     app.post('/api/v1/create_building_app', authenticateMiddleware([{ "bearerAuth": [] }]), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController)), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController.prototype.createBuildingApp)), function AppsController_createBuildingApp(request, response, next) {
         const args = {
             req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
-            appInfo: { "in": "body", "name": "appInfo", "required": true, "ref": "IApp" },
+            appInfo: { "in": "body", "name": "appInfo", "required": true, "ref": "ISpinalApp" },
         };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         let validatedArgs = [];
@@ -622,6 +635,25 @@ function RegisterRoutes(app) {
             validatedArgs = getValidatedArgs(args, request, response);
             const controller = new apps_controller_1.AppsController();
             const promise = controller.createBuildingApp.apply(controller, validatedArgs);
+            promiseHandler(controller, promise, response, undefined, next);
+        }
+        catch (err) {
+            return next(err);
+        }
+    });
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    app.post('/api/v1/create_building_sub_app/:appId', authenticateMiddleware([{ "bearerAuth": [] }]), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController)), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController.prototype.createBuildingSubApp)), function AppsController_createBuildingSubApp(request, response, next) {
+        const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
+            appId: { "in": "path", "name": "appId", "required": true, "dataType": "string" },
+            appInfo: { "in": "body", "name": "appInfo", "required": true, "ref": "ISubApp" },
+        };
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        let validatedArgs = [];
+        try {
+            validatedArgs = getValidatedArgs(args, request, response);
+            const controller = new apps_controller_1.AppsController();
+            const promise = controller.createBuildingSubApp.apply(controller, validatedArgs);
             promiseHandler(controller, promise, response, undefined, next);
         }
         catch (err) {
@@ -663,10 +695,10 @@ function RegisterRoutes(app) {
         }
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    app.get('/api/v1/get_admin_app/:appId', authenticateMiddleware([{ "bearerAuth": [] }]), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController)), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController.prototype.getAdminApp)), function AppsController_getAdminApp(request, response, next) {
+    app.get('/api/v1/get_admin_app/:appNameOrId', authenticateMiddleware([{ "bearerAuth": [] }]), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController)), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController.prototype.getAdminApp)), function AppsController_getAdminApp(request, response, next) {
         const args = {
             req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
-            appId: { "in": "path", "name": "appId", "required": true, "dataType": "string" },
+            appNameOrId: { "in": "path", "name": "appNameOrId", "required": true, "dataType": "string" },
         };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         let validatedArgs = [];
@@ -681,10 +713,10 @@ function RegisterRoutes(app) {
         }
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    app.get('/api/v1/get_building_app/:appId', authenticateMiddleware([{ "bearerAuth": [] }]), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController)), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController.prototype.getBuildingApp)), function AppsController_getBuildingApp(request, response, next) {
+    app.get('/api/v1/get_building_app/:appNaneOrId', authenticateMiddleware([{ "bearerAuth": [] }]), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController)), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController.prototype.getBuildingApp)), function AppsController_getBuildingApp(request, response, next) {
         const args = {
             req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
-            appId: { "in": "path", "name": "appId", "required": true, "dataType": "string" },
+            appNaneOrId: { "in": "path", "name": "appNaneOrId", "required": true, "dataType": "string" },
         };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         let validatedArgs = [];
@@ -699,11 +731,30 @@ function RegisterRoutes(app) {
         }
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    app.get('/api/v1/get_building_sub_app/:appNameOrId/:subAppNameOrId', authenticateMiddleware([{ "bearerAuth": [] }]), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController)), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController.prototype.getBuildingSubApp)), function AppsController_getBuildingSubApp(request, response, next) {
+        const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
+            appNameOrId: { "in": "path", "name": "appNameOrId", "required": true, "dataType": "string" },
+            subAppNameOrId: { "in": "path", "name": "subAppNameOrId", "required": true, "dataType": "string" },
+        };
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        let validatedArgs = [];
+        try {
+            validatedArgs = getValidatedArgs(args, request, response);
+            const controller = new apps_controller_1.AppsController();
+            const promise = controller.getBuildingSubApp.apply(controller, validatedArgs);
+            promiseHandler(controller, promise, response, undefined, next);
+        }
+        catch (err) {
+            return next(err);
+        }
+    });
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.put('/api/v1/update_admin_app/:appId', authenticateMiddleware([{ "bearerAuth": [] }]), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController)), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController.prototype.updateAdminApp)), function AppsController_updateAdminApp(request, response, next) {
         const args = {
             req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
             appId: { "in": "path", "name": "appId", "required": true, "dataType": "string" },
-            newInfo: { "in": "body", "name": "newInfo", "required": true, "ref": "IApp" },
+            newInfo: { "in": "body", "name": "newInfo", "required": true, "ref": "ISpinalApp" },
         };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         let validatedArgs = [];
@@ -722,7 +773,7 @@ function RegisterRoutes(app) {
         const args = {
             req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
             appId: { "in": "path", "name": "appId", "required": true, "dataType": "string" },
-            newInfo: { "in": "body", "name": "newInfo", "required": true, "ref": "IApp" },
+            newInfo: { "in": "body", "name": "newInfo", "required": true, "ref": "ISpinalApp" },
         };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         let validatedArgs = [];
@@ -730,6 +781,26 @@ function RegisterRoutes(app) {
             validatedArgs = getValidatedArgs(args, request, response);
             const controller = new apps_controller_1.AppsController();
             const promise = controller.updateBuildingApp.apply(controller, validatedArgs);
+            promiseHandler(controller, promise, response, undefined, next);
+        }
+        catch (err) {
+            return next(err);
+        }
+    });
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    app.put('/api/v1/update_building_sub_app/:appId/:subAppId', authenticateMiddleware([{ "bearerAuth": [] }]), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController)), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController.prototype.updateBuildingSubApp)), function AppsController_updateBuildingSubApp(request, response, next) {
+        const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
+            appId: { "in": "path", "name": "appId", "required": true, "dataType": "string" },
+            subAppId: { "in": "path", "name": "subAppId", "required": true, "dataType": "string" },
+            newInfo: { "in": "body", "name": "newInfo", "required": true, "ref": "ISubApp" },
+        };
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        let validatedArgs = [];
+        try {
+            validatedArgs = getValidatedArgs(args, request, response);
+            const controller = new apps_controller_1.AppsController();
+            const promise = controller.updateBuildingSubApp.apply(controller, validatedArgs);
             promiseHandler(controller, promise, response, undefined, next);
         }
         catch (err) {
@@ -773,6 +844,25 @@ function RegisterRoutes(app) {
         }
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    app.delete('/api/v1/delete_building_sub_app/:appId/:subAppId', authenticateMiddleware([{ "bearerAuth": [] }]), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController)), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController.prototype.deleteBuildingSubApp)), function AppsController_deleteBuildingSubApp(request, response, next) {
+        const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
+            appId: { "in": "path", "name": "appId", "required": true, "dataType": "string" },
+            subAppId: { "in": "path", "name": "subAppId", "required": true, "dataType": "string" },
+        };
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        let validatedArgs = [];
+        try {
+            validatedArgs = getValidatedArgs(args, request, response);
+            const controller = new apps_controller_1.AppsController();
+            const promise = controller.deleteBuildingSubApp.apply(controller, validatedArgs);
+            promiseHandler(controller, promise, response, undefined, next);
+        }
+        catch (err) {
+            return next(err);
+        }
+    });
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.post('/api/v1/upload_admin_apps', authenticateMiddleware([{ "bearerAuth": [] }]), upload.single('file'), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController)), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController.prototype.uploadAdminApp)), function AppsController_uploadAdminApp(request, response, next) {
         const args = {
             req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
@@ -802,6 +892,24 @@ function RegisterRoutes(app) {
             validatedArgs = getValidatedArgs(args, request, response);
             const controller = new apps_controller_1.AppsController();
             const promise = controller.uploadBuildingApp.apply(controller, validatedArgs);
+            promiseHandler(controller, promise, response, undefined, next);
+        }
+        catch (err) {
+            return next(err);
+        }
+    });
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    app.post('/api/v1/upload_building_sub_apps', authenticateMiddleware([{ "bearerAuth": [] }]), upload.single('file'), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController)), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController.prototype.uploadBuildingSubApp)), function AppsController_uploadBuildingSubApp(request, response, next) {
+        const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
+            file: { "in": "formData", "name": "file", "required": true, "dataType": "file" },
+        };
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        let validatedArgs = [];
+        try {
+            validatedArgs = getValidatedArgs(args, request, response);
+            const controller = new apps_controller_1.AppsController();
+            const promise = controller.uploadBuildingSubApp.apply(controller, validatedArgs);
             promiseHandler(controller, promise, response, undefined, next);
         }
         catch (err) {
@@ -1454,6 +1562,26 @@ function RegisterRoutes(app) {
         }
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    app.get('/api/v1/user_profile/profile_has_access_to_sub_app/:profileId/:appNameOrId/:subAppNameOrId', authenticateMiddleware([{ "bearerAuth": [] }]), ...((0, runtime_1.fetchMiddlewares)(userProfile_controller_1.UserProfileController)), ...((0, runtime_1.fetchMiddlewares)(userProfile_controller_1.UserProfileController.prototype.profileHasAccessToSubApp)), function UserProfileController_profileHasAccessToSubApp(request, response, next) {
+        const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
+            profileId: { "in": "path", "name": "profileId", "required": true, "dataType": "string" },
+            appNameOrId: { "in": "path", "name": "appNameOrId", "required": true, "dataType": "string" },
+            subAppNameOrId: { "in": "path", "name": "subAppNameOrId", "required": true, "dataType": "string" },
+        };
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        let validatedArgs = [];
+        try {
+            validatedArgs = getValidatedArgs(args, request, response);
+            const controller = new userProfile_controller_1.UserProfileController();
+            const promise = controller.profileHasAccessToSubApp.apply(controller, validatedArgs);
+            promiseHandler(controller, promise, response, undefined, next);
+        }
+        catch (err) {
+            return next(err);
+        }
+    });
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     app.get('/api/v1/pam/websocket/get_websocket_state', authenticateMiddleware([{ "bearerAuth": [] }]), ...((0, runtime_1.fetchMiddlewares)(websocketLogs_controller_1.WebsocketLogsController)), ...((0, runtime_1.fetchMiddlewares)(websocketLogs_controller_1.WebsocketLogsController.prototype.getWebsocketState)), function WebsocketLogsController_getWebsocketState(request, response, next) {
         const args = {
             req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
@@ -1561,49 +1689,47 @@ function RegisterRoutes(app) {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     function authenticateMiddleware(security = []) {
-        return function runAuthenticationMiddleware(request, _response, next) {
-            return __awaiter(this, void 0, void 0, function* () {
-                // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-                // keep track of failed auth attempts so we can hand back the most
-                // recent one.  This behavior was previously existing so preserving it
-                // here
-                const failedAttempts = [];
-                const pushAndRethrow = (error) => {
-                    failedAttempts.push(error);
-                    throw error;
-                };
-                const secMethodOrPromises = [];
-                for (const secMethod of security) {
-                    if (Object.keys(secMethod).length > 1) {
-                        const secMethodAndPromises = [];
-                        for (const name in secMethod) {
-                            secMethodAndPromises.push((0, authentication_1.expressAuthentication)(request, name, secMethod[name])
-                                .catch(pushAndRethrow));
-                        }
-                        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-                        secMethodOrPromises.push(Promise.all(secMethodAndPromises)
-                            .then(users => { return users[0]; }));
+        return async function runAuthenticationMiddleware(request, _response, next) {
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+            // keep track of failed auth attempts so we can hand back the most
+            // recent one.  This behavior was previously existing so preserving it
+            // here
+            const failedAttempts = [];
+            const pushAndRethrow = (error) => {
+                failedAttempts.push(error);
+                throw error;
+            };
+            const secMethodOrPromises = [];
+            for (const secMethod of security) {
+                if (Object.keys(secMethod).length > 1) {
+                    const secMethodAndPromises = [];
+                    for (const name in secMethod) {
+                        secMethodAndPromises.push((0, authentication_1.expressAuthentication)(request, name, secMethod[name])
+                            .catch(pushAndRethrow));
                     }
-                    else {
-                        for (const name in secMethod) {
-                            secMethodOrPromises.push((0, authentication_1.expressAuthentication)(request, name, secMethod[name])
-                                .catch(pushAndRethrow));
-                        }
+                    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+                    secMethodOrPromises.push(Promise.all(secMethodAndPromises)
+                        .then(users => { return users[0]; }));
+                }
+                else {
+                    for (const name in secMethod) {
+                        secMethodOrPromises.push((0, authentication_1.expressAuthentication)(request, name, secMethod[name])
+                            .catch(pushAndRethrow));
                     }
                 }
-                // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-                try {
-                    request['user'] = yield promiseAny(secMethodOrPromises);
-                    next();
-                }
-                catch (err) {
-                    // Show most recent error as response
-                    const error = failedAttempts.pop();
-                    error.status = error.status || 401;
-                    next(error);
-                }
-                // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-            });
+            }
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+            try {
+                request['user'] = await promiseAny(secMethodOrPromises);
+                next();
+            }
+            catch (err) {
+                // Show most recent error as response
+                const error = failedAttempts.pop();
+                error.status = error.status || 401;
+                next(error);
+            }
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         };
     }
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -1688,6 +1814,5 @@ function RegisterRoutes(app) {
     }
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 }
-exports.RegisterRoutes = RegisterRoutes;
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 //# sourceMappingURL=routes.js.map
