@@ -431,7 +431,11 @@ export default class AuthorizationService {
       this.getAuthorizedSubApps(profile),
     ]);
     if (!subApp) return;
-    return findNodeBySearchKey(subAppsFromProfile, searchKeys, subAppId);
+    return findNodeBySearchKey(
+      subAppsFromProfile,
+      ['name'],
+      subApp.info.id.get()
+    );
   }
 
   public async profileHasAccessToApi(
