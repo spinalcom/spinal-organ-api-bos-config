@@ -433,7 +433,7 @@ export default class AuthorizationService {
     if (!subApp) return;
     return findNodeBySearchKey(
       subAppsFromProfile,
-      ['name'],
+      ['id'],
       subApp.info.id.get()
     );
   }
