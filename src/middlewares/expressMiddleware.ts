@@ -62,8 +62,11 @@ export function useHubProxy(app: express.Express) {
     },
   });
 
-  for (const routeToProxy of routesToProxy) {
-    app.use(routeToProxy, proxyHub);
+  for (const routeToProxy of routesToProxy.get) {
+    app.get(routeToProxy, proxyHub);
+  }
+  for (const routeToProxy of routesToProxy.post) {
+    app.post(routeToProxy, proxyHub);
   }
 }
 

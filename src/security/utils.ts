@@ -23,7 +23,6 @@
  */
 
 import * as express from "express";
-import { Request } from 'express'
 import { SpinalNode } from 'spinal-env-viewer-graph-service';
 import { AppProfileService } from "../services/appProfile.service";
 import { APIService } from "../services/apis.service";

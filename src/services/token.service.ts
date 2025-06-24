@@ -23,7 +23,13 @@
  */
 
 import { SpinalContext, SpinalNode } from 'spinal-env-viewer-graph-service';
-import { TOKEN_LIST_CONTEXT_TYPE, TOKEN_LIST_CONTEXT_NAME, TOKEN_TYPE, PTR_LST_TYPE, TOKEN_RELATION_NAME } from '../constant';
+import {
+  TOKEN_LIST_CONTEXT_TYPE,
+  TOKEN_LIST_CONTEXT_NAME,
+  TOKEN_TYPE,
+  PTR_LST_TYPE,
+  TOKEN_RELATION_NAME,
+} from '../constant';
 import { configServiceInstance } from './configFile.service';
 import { Model } from 'spinal-core-connectorjs_type';
 import { AdminProfileService } from './adminProfile.service';

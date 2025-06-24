@@ -1,6 +1,6 @@
-import { IProfile, IProfileAuthEdit, IProfileData } from "../interfaces";
-import { Controller } from "tsoa";
-import * as express from "express";
+import { IProfile, IProfileAuthEdit, IProfileData } from '../interfaces';
+import { Controller } from 'tsoa';
+import * as express from 'express';
 export declare class AppProfileController extends Controller {
     constructor();
     createAppProfile(req: express.Request, data: IProfile): Promise<IProfileData | {

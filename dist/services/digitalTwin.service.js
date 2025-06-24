@@ -22,15 +22,6 @@
  * with this file. If not, see
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DigitalTwinService = void 0;
 const spinal_env_viewer_graph_service_1 = require("spinal-env-viewer-graph-service");
@@ -48,99 +39,81 @@ class DigitalTwinService {
             this.instance = new DigitalTwinService();
         return this.instance;
     }
-    init() {
-        return __awaiter(this, void 0, void 0, function* () {
-            this.context = yield configFile_service_1.configServiceInstance.getContext(constant_1.DIGITALTWIN_CONTEXT_NAME);
-            if (!this.context)
-                this.context = yield configFile_service_1.configServiceInstance.addContext(constant_1.DIGITALTWIN_CONTEXT_NAME, constant_1.DIGITALTWIN_CONTEXT_TYPE);
-            return this.context;
-        });
+    async init() {
+        this.context = await configFile_service_1.configServiceInstance.getContext(constant_1.DIGITALTWIN_CONTEXT_NAME);
+        if (!this.context)
+            this.context = await configFile_service_1.configServiceInstance.addContext(constant_1.DIGITALTWIN_CONTEXT_NAME, constant_1.DIGITALTWIN_CONTEXT_TYPE);
+        return this.context;
     }
-    getDigitalTwinGraph(digitalTwin) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                return digitalTwin.getElement(true);
-            }
-            catch (error) { }
-        });
+    async getDigitalTwinGraph(digitalTwin) {
+        try {
+            return digitalTwin.getElement(true);
+        }
+        catch (error) { }
     }
-    getDigitalTwinContexts(digitalTwinId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const digitalTwin = yield (digitalTwinId ? this.getDigitalTwin(digitalTwinId) : this.getActualDigitalTwin());
-            if (!digitalTwin)
-                return [];
-            const graph = yield this.getDigitalTwinGraph(digitalTwin);
-            if (!graph)
-                return [];
-            return graph.getChildren("hasContext");
-        });
+    async getDigitalTwinContexts(digitalTwinId) {
+        const digitalTwin = await (digitalTwinId ? this.getDigitalTwin(digitalTwinId) : this.getActualDigitalTwin());
+        if (!digitalTwin)
+            return [];
+        const graph = await this.getDigitalTwinGraph(digitalTwin);
+        if (!graph)
+            return [];
+        return graph.getChildren("hasContext");
     }
-    findContextInDigitalTwin(digitalTwinId, contextId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const contexts = yield this.getDigitalTwinContexts(digitalTwinId);
-            return contexts.find(el => el.getId().get() === contextId);
-        });
+    async findContextInDigitalTwin(digitalTwinId, contextId) {
+        const contexts = await this.getDigitalTwinContexts(digitalTwinId);
+        return contexts.find(el => el.getId().get() === contextId);
     }
     createDigitalTwin(name, directoryPath, setAsDefault = false) {
         if (directoryPath[directoryPath.length - 1] != '/')
             directoryPath += "/";
         return this._getOrCreateDigitalTwin(name, directoryPath)
-            .then((graph) => __awaiter(this, void 0, void 0, function* () {
+            .then(async (graph) => {
             return this._createDigitalTwinNode(name, `${directoryPath}${name}`, graph, setAsDefault);
-        }));
-    }
-    getAllDigitalTwins() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const children = yield this.context.getChildren(constant_1.CONTEXT_TO_DIGITALTWIN_RELATION_NAME);
-            return children.map(el => el);
         });
     }
-    getDigitalTwin(digitaltwinId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const allDigitalTwins = yield this.getAllDigitalTwins();
-            return allDigitalTwins.find(el => el.getId().get() === digitaltwinId);
-        });
+    async getAllDigitalTwins() {
+        const children = await this.context.getChildren(constant_1.CONTEXT_TO_DIGITALTWIN_RELATION_NAME);
+        return children.map(el => el);
     }
-    editDigitalTwin(digitalTwinId, newData) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const node = yield this.getDigitalTwin(digitalTwinId);
-            if (node) {
-                for (const key in newData) {
-                    if (node.info[key]) {
-                        node.info[key].set(newData[key]);
-                    }
+    async getDigitalTwin(digitaltwinId) {
+        const allDigitalTwins = await this.getAllDigitalTwins();
+        return allDigitalTwins.find(el => el.getId().get() === digitaltwinId);
+    }
+    async editDigitalTwin(digitalTwinId, newData) {
+        const node = await this.getDigitalTwin(digitalTwinId);
+        if (node) {
+            for (const key in newData) {
+                if (node.info[key]) {
+                    node.info[key].set(newData[key]);
                 }
-                return node;
             }
-        });
+            return node;
+        }
     }
-    removeDigitalTwin(digitalTwinId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const node = yield this.getDigitalTwin(digitalTwinId);
-            if (node) {
-                yield node.removeFromGraph();
-                return true;
-            }
-            return false;
-        });
+    async removeDigitalTwin(digitalTwinId) {
+        const node = await this.getDigitalTwin(digitalTwinId);
+        if (node) {
+            await node.removeFromGraph();
+            return true;
+        }
+        return false;
     }
-    setActualDigitalTwin(digitalTwinId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const digitalTwinNode = yield this.getDigitalTwin(digitalTwinId);
-            if (digitalTwinNode) {
-                if (this.context.info[this.attrName]) {
-                    yield this.removeActualDigitaTwin();
-                }
-                digitalTwinNode.info.add_attr({ [this.attrName]: true });
-                this.context.info.add_attr({ [this.attrName]: new spinal_core_connectorjs_type_1.Ptr(digitalTwinNode) });
-                this._actualDigitalTwin = digitalTwinNode;
-                return digitalTwinNode;
+    async setActualDigitalTwin(digitalTwinId) {
+        const digitalTwinNode = await this.getDigitalTwin(digitalTwinId);
+        if (digitalTwinNode) {
+            if (this.context.info[this.attrName]) {
+                await this.removeActualDigitaTwin();
             }
-            return undefined;
-        });
+            digitalTwinNode.info.add_attr({ [this.attrName]: true });
+            this.context.info.add_attr({ [this.attrName]: new spinal_core_connectorjs_type_1.Ptr(digitalTwinNode) });
+            this._actualDigitalTwin = digitalTwinNode;
+            return digitalTwinNode;
+        }
+        return undefined;
     }
     getActualDigitalTwin(createIfNotExist = false) {
-        return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
+        return new Promise(async (resolve, reject) => {
             if (this._actualDigitalTwin instanceof spinal_env_viewer_graph_service_1.SpinalNode)
                 return resolve(this._actualDigitalTwin);
             if (!this.context.info[this.attrName]) {
@@ -148,8 +121,8 @@ class DigitalTwinService {
                     return resolve(undefined);
                 const defaultName = "Digital twin";
                 const defaultDirectory = "/__users__/admin/";
-                const graph = yield this._getOrCreateDigitalTwin(defaultName, defaultDirectory, createIfNotExist);
-                const node = yield this._createDigitalTwinNode(defaultName, `${defaultDirectory}${defaultName}`, graph, true);
+                const graph = await this._getOrCreateDigitalTwin(defaultName, defaultDirectory, createIfNotExist);
+                const node = await this._createDigitalTwinNode(defaultName, `${defaultDirectory}${defaultName}`, graph, true);
                 this._actualDigitalTwin = node;
                 return resolve(node);
             }
@@ -157,19 +130,17 @@ class DigitalTwinService {
                 this._actualDigitalTwin = node;
                 resolve(node);
             });
-        }));
-    }
-    removeActualDigitaTwin() {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (!this.context.info[this.attrName])
-                return false;
-            const defaultDigitalTwin = yield this.getActualDigitalTwin();
-            if (!defaultDigitalTwin)
-                return false;
-            defaultDigitalTwin.info.rem_attr(this.attrName);
-            this.context.info.rem_attr(this.attrName);
-            return true;
         });
+    }
+    async removeActualDigitaTwin() {
+        if (!this.context.info[this.attrName])
+            return false;
+        const defaultDigitalTwin = await this.getActualDigitalTwin();
+        if (!defaultDigitalTwin)
+            return false;
+        defaultDigitalTwin.info.rem_attr(this.attrName);
+        this.context.info.rem_attr(this.attrName);
+        return true;
     }
     /////////////////////////////////////////////////////////
     //                      PRIVATE                        //
@@ -204,19 +175,17 @@ class DigitalTwinService {
         directory.force_add_file(fileName, graph, { model_type: constant_1.DIGITALTWIN_TYPE, path: `${folderPath}/${fileName}`, icon: "" });
         return graph;
     }
-    _createDigitalTwinNode(name, directoryPath, graph, setAsDefault = false) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const node = new spinal_env_viewer_graph_service_1.SpinalNode(name, constant_1.DIGITALTWIN_TYPE, graph);
-            node.info.add_attr({
-                url: directoryPath
-            });
-            yield this.context.addChildInContext(node, constant_1.CONTEXT_TO_DIGITALTWIN_RELATION_NAME, constant_1.PTR_LST_TYPE, this.context);
-            if (setAsDefault) {
-                yield this.setActualDigitalTwin(node.getId().get());
-            }
-            yield adminProfile_service_1.AdminProfileService.getInstance().addDigitalTwinToAdminProfile(node);
-            return node;
+    async _createDigitalTwinNode(name, directoryPath, graph, setAsDefault = false) {
+        const node = new spinal_env_viewer_graph_service_1.SpinalNode(name, constant_1.DIGITALTWIN_TYPE, graph);
+        node.info.add_attr({
+            url: directoryPath
         });
+        await this.context.addChildInContext(node, constant_1.CONTEXT_TO_DIGITALTWIN_RELATION_NAME, constant_1.PTR_LST_TYPE, this.context);
+        if (setAsDefault) {
+            await this.setActualDigitalTwin(node.getId().get());
+        }
+        await adminProfile_service_1.AdminProfileService.getInstance().addDigitalTwinToAdminProfile(node);
+        return node;
     }
 }
 exports.DigitalTwinService = DigitalTwinService;

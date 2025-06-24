@@ -22,15 +22,6 @@
  * with this file. If not, see
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.authenticateRequest = exports._formatValidationError = exports.errorHandler = exports.useApiMiddleWare = exports.initSwagger = exports.useClientMiddleWare = exports.useHubProxy = void 0;
 const cors = require("cors");
@@ -68,8 +59,11 @@ function useHubProxy(app) {
             return req.originalUrl;
         },
     });
-    for (const routeToProxy of constant_1.routesToProxy) {
-        app.use(routeToProxy, proxyHub);
+    for (const routeToProxy of constant_1.routesToProxy.get) {
+        app.get(routeToProxy, proxyHub);
+    }
+    for (const routeToProxy of constant_1.routesToProxy.post) {
+        app.post(routeToProxy, proxyHub);
     }
 }
 exports.useHubProxy = useHubProxy;
@@ -93,9 +87,9 @@ function initSwagger(app) {
     // app.use("/admin_docs", swaggerUi.serve, async (req, res) => {
     // return res.send(swaggerUi.generateHTML(await import("../swagger/swagger.json"), swaggerOption))
     // });
-    app.use('/admin_docs', swaggerUi.serve, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
-        return swaggerUi.setup(yield Promise.resolve().then(() => require('../swagger/swagger.json')), swaggerOption)(req, res, next);
-    }));
+    app.use('/admin_docs', swaggerUi.serve, async (req, res, next) => {
+        return swaggerUi.setup(await Promise.resolve().then(() => require('../swagger/swagger.json')), swaggerOption)(req, res, next);
+    });
 }
 exports.initSwagger = initSwagger;
 function useApiMiddleWare(app) {
@@ -130,24 +124,24 @@ function _formatValidationError(err) {
     err;
     return {
         message: 'Validation Failed',
-        details: err === null || err === void 0 ? void 0 : err.fields,
+        details: err?.fields,
     };
 }
 exports._formatValidationError = _formatValidationError;
 function authenticateRequest(app) {
-    app.all(/\/api\/v1\/*/, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+    app.all(/\/api\/v1\/*/, async (req, res, next) => {
         let err;
         try {
             const isAdmin = isAdminRoute(req.url);
             if (isAdmin)
                 return next();
-            yield (0, authentication_1.checkBeforeRedirectToApi)(req, constant_1.SECURITY_NAME.profile);
+            await (0, authentication_1.checkBeforeRedirectToApi)(req, constant_1.SECURITY_NAME.profile);
         }
         catch (error) {
             err = error;
         }
         next(err);
-    }));
+    });
 }
 exports.authenticateRequest = authenticateRequest;
 function isAdminRoute(apiRoute) {

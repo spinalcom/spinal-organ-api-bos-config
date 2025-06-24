@@ -1,5 +1,6 @@
 import { SpinalGraph, SpinalContext, SpinalNode } from 'spinal-env-viewer-graph-service';
 import { IProfile, IProfileAuthEdit, IProfileAuthRes, IProfileRes } from '../interfaces';
+import { TAppSearch } from '../utils/findNodeBySearchKey';
 export declare class AppProfileService {
     private static instance;
     context: SpinalContext;
@@ -21,7 +22,7 @@ export declare class AppProfileService {
     unauthorizeProfileToAccessApps(appProfile: string | SpinalNode, appIds: string | string[]): Promise<SpinalNode[]>;
     unauthorizeProfileToAccessApis(appProfile: string | SpinalNode, apiIds: string | string[]): Promise<SpinalNode[]>;
     profileHasAccessToContext(appProfile: string | SpinalNode, contextId: string, digitalTwinId?: string): Promise<SpinalNode>;
-    profileHasAccessToApp(appProfile: string | SpinalNode, appId: string): Promise<SpinalNode>;
+    profileHasAccessToApp(searchKeys: TAppSearch, appProfile: string | SpinalNode, appId: string): Promise<SpinalNode>;
     profileHasAccessToApi(appProfile: string | SpinalNode, apiId: string): Promise<SpinalNode>;
     getAuthorizedContexts(appProfile: string | SpinalNode, digitalTwinId?: string): Promise<SpinalContext[]>;
     getAuthorizedApps(appProfile: string | SpinalNode): Promise<SpinalNode[]>;

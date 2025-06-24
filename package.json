@@ -7,7 +7,7 @@
 	"author": "",
 	"license": "ISC",
 	"scripts": {
-		"build": "npm run clean && tsc",
+		"build": "npm run clean && npm run prebuild && tsc",
 		"start": "npm run build && node dist/index.js",
 		"predev": "npm run swagger",
 		"prebuild": "npm run swagger",

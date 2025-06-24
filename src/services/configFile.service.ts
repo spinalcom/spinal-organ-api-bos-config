@@ -92,20 +92,20 @@ export default class ConfigFileService {
     return this.graph.addContext(context);
   }
 
-  private loadOrMakeConfigFile(
+  private async loadOrMakeConfigFile(
     connect: spinal.FileSystem
   ): Promise<SpinalGraph> {
-    return new Promise((resolve, reject) => {
-      spinalCore.load(
+    try {
+      const graph = await spinalCore.load<SpinalGraph>(
         connect,
-        path.resolve(`${directory_path}/${fileName}`),
-        (graph: SpinalGraph) => resolve(graph),
-        () =>
-          connect.load_or_make_dir(directory_path, (directory) => {
-            resolve(this._createFile(directory, fileName));
-          })
+        path.resolve(`${directory_path}/${fileName}`)
       );
-    });
+      return graph;
+    } catch (error) {
+      const dir = await connect.load_or_make_dir(directory_path);
+      const graph = this._createFile(dir, fileName);
+      return graph;
+    }
   }
 
   private _createFile(

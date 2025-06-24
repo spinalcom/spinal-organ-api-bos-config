@@ -24,25 +24,26 @@
 
 const path = require('path');
 
-require('dotenv').config({path: path.resolve(__dirname, '../.env')});
-import {spinalCore} from 'spinal-core-connectorjs_type';
-import {configServiceInstance} from './services/configFile.service';
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
+import { spinalCore } from 'spinal-core-connectorjs_type';
+import { configServiceInstance } from './services/configFile.service';
 import expressServer from './server';
-import {DigitalTwinService, WebsocketLogsService} from './services';
+import { DigitalTwinService, WebsocketLogsService } from './services';
 import SpinalAPIMiddleware from './middlewares/SpinalAPIMiddleware';
-import {runServerRest} from 'spinal-organ-api-server';
+import { runServerRest } from 'spinal-organ-api-server';
 import SpinalIOMiddleware from './middlewares/SpinalIOMiddleware';
-import ConfigFile from "spinal-lib-organ-monitoring";
+import ConfigFile from 'spinal-lib-organ-monitoring';
 
-
-const conn = spinalCore.connect(
-  `${process.env.HUB_PROTOCOL}://${process.env.USER_ID}:${process.env.USER_MDP}@${process.env.HUB_HOST}:${process.env.HUB_PORT}/`
-);
+const connect_opt = process.env.HUB_PORT
+  ? `${process.env.HUB_PROTOCOL}://${process.env.USER_ID}:${process.env.USER_MDP}@${process.env.HUB_HOST}:${process.env.HUB_PORT}/`
+  : `${process.env.HUB_PROTOCOL}://${process.env.USER_ID}:${process.env.USER_MDP}@${process.env.HUB_HOST}/`;
+const conn = spinalCore.connect(connect_opt);
+console.log(connect_opt);
 
 configServiceInstance
   .init(conn)
   .then(async () => {
-    const {app, server} = await expressServer(conn);
+    const { app, server } = await expressServer(conn);
     await DigitalTwinService.getInstance().getActualDigitalTwin(true);
 
     const spinalAPIMiddleware = SpinalAPIMiddleware.getInstance(conn);
@@ -50,7 +51,7 @@ configServiceInstance
 
     const log_body = Number(process.env.LOG_BODY) == 1 ? true : false;
 
-    const {io} = await runServerRest(
+    const { io } = await runServerRest(
       server,
       app,
       spinalAPIMiddleware,
@@ -59,7 +60,13 @@ configServiceInstance
     );
 
     WebsocketLogsService.getInstance().setIo(io);
-    await ConfigFile.init(conn, process.env.ORGAN_NAME, "BOS_CONFIG_API", process.env.HUB_HOST, parseInt(process.env.HUB_PORT));
+    await ConfigFile.init(
+      conn,
+      process.env.ORGAN_NAME,
+      'BOS_CONFIG_API',
+      process.env.HUB_HOST,
+      parseInt(process.env.HUB_PORT)
+    );
   })
   .catch((err: Error) => {
     console.error(err);

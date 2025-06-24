@@ -1,4 +1,4 @@
-import { SpinalContext, SpinalNode } from "spinal-env-viewer-graph-service";
+import { SpinalContext, SpinalNode } from 'spinal-env-viewer-graph-service';
 export declare class AdminProfileService {
     private static instance;
     private _adminNode;
@@ -8,6 +8,7 @@ export declare class AdminProfileService {
     init(context: SpinalContext): Promise<SpinalNode>;
     getAdminProfile(argContext?: SpinalContext): Promise<SpinalNode>;
     addAppToProfil(apps: SpinalNode | SpinalNode[]): Promise<SpinalNode[]>;
+    addSubAppToProfil(app: SpinalNode, subApp: SpinalNode): Promise<SpinalNode[]>;
     addAdminAppToProfil(apps: SpinalNode | SpinalNode[]): Promise<SpinalNode[]>;
     addApiToProfil(apis: SpinalNode | SpinalNode[]): Promise<SpinalNode[]>;
     addDigitalTwinToAdminProfile(digitalTwins: SpinalNode | SpinalNode[]): Promise<SpinalNode[]>;

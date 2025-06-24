@@ -53,6 +53,7 @@ import { TokenService } from './token.service';
 import { AuthentificationService } from './authentification.service';
 import { UserProfileService } from './userProfile.service';
 import { AppService } from './apps.service';
+import { searchById } from '../utils/findNodeBySearchKey';
 
 export class UserListService {
   private static instance: UserListService;
@@ -147,6 +148,7 @@ export class UserListService {
       try {
         const hasAccess =
           await UserProfileService.getInstance().profileHasAccessToApp(
+            searchById,
             userProfileId,
             appId
           );
@@ -155,7 +157,7 @@ export class UserListService {
 
         const [user, app] = await Promise.all([
           this.getUser(userId),
-          AppService.getInstance().getApps(appId),
+          AppService.getInstance().getApps(searchById, appId),
         ]);
         if (!user)
           throw {
@@ -189,6 +191,7 @@ export class UserListService {
       try {
         const hasAccess =
           await UserProfileService.getInstance().profileHasAccessToApp(
+            searchById,
             userProfileId,
             appId
           );
@@ -197,7 +200,7 @@ export class UserListService {
 
         const [user, app] = await Promise.all([
           this.getUser(userId),
-          AppService.getInstance().getApps(appId),
+          AppService.getInstance().getApps(searchById, appId),
         ]);
         if (!user)
           throw {
@@ -256,7 +259,9 @@ export class UserListService {
     return children.find((el) => el.info.userName.get() === userName);
   }
 
-  public async authAdmin(user: IUserCredential): Promise<{ code: number; data: any | string }> {
+  public async authAdmin(
+    user: IUserCredential
+  ): Promise<{ code: number; data: any | string }> {
     const node = await this.getAdminUser(user.userName);
     if (!node)
       return {
@@ -281,7 +286,9 @@ export class UserListService {
     return { code: HTTP_CODES.OK, data: res };
   }
 
-  public async authUserViaAuthPlateform(user: IUserCredential): Promise<{ code: HTTP_CODES; data: any }> {
+  public async authUserViaAuthPlateform(
+    user: IUserCredential
+  ): Promise<{ code: HTTP_CODES; data: any }> {
     const adminCredential = await this._getAuthPlateformInfo();
 
     const url = `${adminCredential.urlAdmin}/users/login`;

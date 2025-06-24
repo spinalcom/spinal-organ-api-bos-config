@@ -71,6 +71,7 @@ export declare const BUILDING_APPS_GROUP_TYPE = "BuildingAppsGroup";
 export declare const ADMIN_APP_TYPE = "AdminApp";
 export declare const PORTOFOLIO_APP_TYPE = "PortofolioApp";
 export declare const BUILDING_APP_TYPE = "BuildingApp";
+export declare const BUILDING_SUB_APP_TYPE = "BuildingSubApp";
 export declare const TOKEN_TYPE = "token";
 export declare const BUILDING_API_GROUP_TYPE = "BuildingApis";
 export declare const PORTOFOLIO_API_GROUP_TYPE = "PortofolioApis";
@@ -89,6 +90,7 @@ export declare const CONTEXT_TO_AUTHORIZED_APIS_RELATION_NAME = "profileHasApis"
 export declare const TOKEN_RELATION_NAME = "hasToken";
 export declare const APP_RELATION_NAME = "hasApps";
 export declare const BUILDING_RELATION_NAME = "hasBuilding";
+export declare const SUB_APP_RELATION_NAME = "hasSubApps";
 export declare const PROFILE_TO_AUTHORIZED_PORTOFOLIO_RELATION = "hasAccessToPortofolio";
 export declare const PROFILE_TO_AUTHORIZED_BOS_RELATION = "hasAccessToBos";
 export declare const PROFILE_TO_AUTHORIZED_DIGITAL_TWIN_RELATION_NAME = "hasAccessToDigitalTwin";
@@ -96,6 +98,7 @@ export declare const USER_TO_FAVORITE_APP_RELATION = "hasFavoriteApp";
 export declare const PTR_LST_TYPE = "PtrLst";
 export declare const LST_PTR_TYPE = "LstPtr";
 export declare const REF_TYPE = "Ref";
+export declare const PROFILE_TO_AUTHORIZED_SUB_APP = "hasAccessToSubApps";
 export declare const PROFILE_TO_AUTHORIZED_APP = "hasAccessToApps";
 export declare const PROFILE_TO_AUTHORIZED_ADMIN_APP = "hasAccessToAdminApp";
 export declare const PROFILE_TO_AUTHORIZED_API = "hasAccessToApis";
@@ -106,7 +109,10 @@ export declare const ROLE_METHODS: {
 export declare const USER_BASE_EMPTY = "User Base Empty";
 export declare const USER_NOT_FOUND = "User Not Found";
 export declare const CANNOT_CREATE_INTERNAL_ERROR: string;
-export declare const routesToProxy: string[];
+export declare const routesToProxy: {
+    get: string[];
+    post: string[];
+};
 export declare const BOS_BASE_URI = "/api/v1";
 export declare const BOS_CONFIG_BASE_URI = "/api/v1";
 export declare enum HTTP_CODES {
@@ -117,6 +123,7 @@ export declare enum HTTP_CODES {
     UNAUTHORIZED = 401,
     FORBIDDEN = 403,
     NOT_FOUND = 404,
+    CONFLICT = 409,
     INTERNAL_ERROR = 500,
     REDIRECT = 302
 }

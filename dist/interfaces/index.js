@@ -1,11 +1,11 @@
 "use strict";
 /*
- * Copyright 2022 SpinalCom - www.spinalcom.com
+ * Copyright 2025 SpinalCom - www.spinalcom.com
  *
  * This file is part of SpinalCore.
  *
  * Please read all of the following terms and conditions
- * of the Free Software license Agreement ("Agreement")
+ * of the Software license Agreement ("Agreement")
  * carefully.
  *
  * This Agreement is a legally binding contract between
@@ -48,4 +48,5 @@ __exportStar(require("./IPortofolioDetails"), exports);
 __exportStar(require("./IAuthToken"), exports);
 __exportStar(require("./IProfileData"), exports);
 __exportStar(require("./IUserInfo"), exports);
+__exportStar(require("./ISubApp"), exports);
 //# sourceMappingURL=index.js.map

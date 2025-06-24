@@ -22,15 +22,6 @@
  * with this file. If not, see
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.APIService = void 0;
 const constant_1 = require("../constant");
@@ -45,100 +36,84 @@ class APIService {
             this.instance = new APIService();
         return this.instance;
     }
-    init() {
-        return __awaiter(this, void 0, void 0, function* () {
-            this.context = yield configFile_service_1.configServiceInstance.getContext(constant_1.API_ROUTES_CONTEXT_NAME);
-            if (!this.context)
-                this.context = yield configFile_service_1.configServiceInstance.addContext(constant_1.API_ROUTES_CONTEXT_NAME, constant_1.API_ROUTES_CONTEXT_TYPE);
-            return this.context;
-        });
+    async init() {
+        this.context = await configFile_service_1.configServiceInstance.getContext(constant_1.API_ROUTES_CONTEXT_NAME);
+        if (!this.context)
+            this.context = await configFile_service_1.configServiceInstance.addContext(constant_1.API_ROUTES_CONTEXT_NAME, constant_1.API_ROUTES_CONTEXT_TYPE);
+        return this.context;
     }
-    createApiRoute(routeInfo) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const apiExist = yield this.getApiRouteByRoute(routeInfo);
-            if (apiExist) {
-                console.log('log exists');
-                return apiExist;
+    async createApiRoute(routeInfo) {
+        const apiExist = await this.getApiRouteByRoute(routeInfo);
+        if (apiExist) {
+            console.log('log exists');
+            return apiExist;
+        }
+        delete routeInfo.id;
+        routeInfo.type = constant_1.API_ROUTE_TYPE;
+        routeInfo.name = routeInfo.route;
+        const routeId = spinal_env_viewer_graph_service_1.SpinalGraphService.createNode(routeInfo, undefined);
+        const node = spinal_env_viewer_graph_service_1.SpinalGraphService.getRealNode(routeId);
+        await adminProfile_service_1.AdminProfileService.getInstance().addApiToProfil(node);
+        return this.context.addChildInContext(node, constant_1.API_RELATION_NAME, constant_1.PTR_LST_TYPE, this.context);
+    }
+    async updateApiRoute(routeId, newValue) {
+        delete newValue.id;
+        delete newValue.type;
+        const route = await this.getApiRouteById(routeId);
+        if (!route)
+            throw new Error(`no api route Found for ${routeId}`);
+        for (const key in newValue) {
+            if (Object.prototype.hasOwnProperty.call(newValue, key) &&
+                route.info[key]) {
+                const element = newValue[key];
+                route.info[key].set(element);
             }
-            delete routeInfo.id;
-            routeInfo.type = constant_1.API_ROUTE_TYPE;
-            routeInfo.name = routeInfo.route;
-            const routeId = spinal_env_viewer_graph_service_1.SpinalGraphService.createNode(routeInfo, undefined);
-            const node = spinal_env_viewer_graph_service_1.SpinalGraphService.getRealNode(routeId);
-            yield adminProfile_service_1.AdminProfileService.getInstance().addApiToProfil(node);
-            return this.context.addChildInContext(node, constant_1.API_RELATION_NAME, constant_1.PTR_LST_TYPE, this.context);
-        });
+        }
+        return route;
     }
-    updateApiRoute(routeId, newValue) {
-        return __awaiter(this, void 0, void 0, function* () {
-            delete newValue.id;
-            delete newValue.type;
-            const route = yield this.getApiRouteById(routeId);
-            if (!route)
-                throw new Error(`no api route Found for ${routeId}`);
-            for (const key in newValue) {
-                if (Object.prototype.hasOwnProperty.call(newValue, key) &&
-                    route.info[key]) {
-                    const element = newValue[key];
-                    route.info[key].set(element);
-                }
+    async getApiRouteById(routeId) {
+        const children = await this.context.getChildrenInContext(this.context);
+        return children.find((el) => el.getId().get() === routeId);
+    }
+    async getApiRouteByRoute(apiRoute) {
+        const children = await this.context.getChildrenInContext(this.context);
+        if (apiRoute.route.includes('?'))
+            apiRoute.route = apiRoute.route.substring(0, apiRoute.route.indexOf('?'));
+        return children.find((el) => {
+            const { route, method } = el.info.get();
+            if (route &&
+                method &&
+                method.toLowerCase() === apiRoute.method.toLowerCase()) {
+                const routeFormatted = this._formatRoute(route);
+                // return routeFormatted.toLowerCase() === apiRoute.route.toLowerCase() || apiRoute.route.match(routeFormatted);
+                return apiRoute.route.match(routeFormatted);
             }
-            return route;
+            return false;
         });
     }
-    getApiRouteById(routeId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const children = yield this.context.getChildrenInContext(this.context);
-            return children.find((el) => el.getId().get() === routeId);
-        });
+    async getAllApiRoute() {
+        return this.context.getChildrenInContext(this.context);
     }
-    getApiRouteByRoute(apiRoute) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const children = yield this.context.getChildrenInContext(this.context);
-            if (apiRoute.route.includes('?'))
-                apiRoute.route = apiRoute.route.substring(0, apiRoute.route.indexOf('?'));
-            return children.find((el) => {
-                const { route, method } = el.info.get();
-                if (route &&
-                    method &&
-                    method.toLowerCase() === apiRoute.method.toLowerCase()) {
-                    const routeFormatted = this._formatRoute(route);
-                    // return routeFormatted.toLowerCase() === apiRoute.route.toLowerCase() || apiRoute.route.match(routeFormatted);
-                    return apiRoute.route.match(routeFormatted);
-                }
-                return false;
-            });
-        });
+    async deleteApiRoute(routeId) {
+        const route = await this.getApiRouteById(routeId);
+        if (!route)
+            throw new Error(`no api route Found for ${routeId}`);
+        await (0, utils_1.removeNodeReferences)(route);
+        await route.removeFromGraph();
+        return routeId;
     }
-    getAllApiRoute() {
-        return __awaiter(this, void 0, void 0, function* () {
-            return this.context.getChildrenInContext(this.context);
-        });
-    }
-    deleteApiRoute(routeId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const route = yield this.getApiRouteById(routeId);
-            if (!route)
-                throw new Error(`no api route Found for ${routeId}`);
-            yield (0, utils_1.removeNodeReferences)(route);
-            yield route.removeFromGraph();
-            return routeId;
-        });
-    }
-    uploadSwaggerFile(buffer) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const swaggerData = yield this._readBuffer(buffer);
-            const routes = yield this._formatSwaggerFile(swaggerData);
-            return routes.reduce((prom, route) => __awaiter(this, void 0, void 0, function* () {
-                const list = yield prom;
-                try {
-                    const r = yield this.createApiRoute(route);
-                    list.push(r);
-                }
-                catch (error) { }
-                return list;
-            }), Promise.resolve([]));
-        });
+    async uploadSwaggerFile(buffer) {
+        const swaggerData = await this._readBuffer(buffer);
+        const routes = await this._formatSwaggerFile(swaggerData);
+        return routes.reduce(async (prom, route) => {
+            const list = await prom;
+            try {
+                const r = await this.createApiRoute(route);
+                list.push(r);
+            }
+            catch (error) { }
+            return list;
+        }, Promise.resolve([]));
     }
     //////////////////////////////////////////////
     //                  PRIVATE                 //

@@ -22,19 +22,26 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
-export * from './IApp';
-export * from './IAppProfile';
-export * from './IGroup';
-export * from './IRole';
-export * from './IUser';
-export * from './IProfile';
-export * from './IBuilding';
-export * from './IApiRoute';
-export * from './IDigitalTwin';
-export * from './ISwaggerFile';
-export * from './IAdmin';
-export * from './IPortofolioDetails';
-export * from './IAuthToken';
-export * from './IProfileData';
-export * from './IUserInfo';
-export * from './ISubApp';
+export interface ISubApp {
+  id?: string;
+  type?: string;
+  name: string;
+  icon?: string;
+  description?: string;
+  tags?: string[];
+  categoryName?: string;
+  groupName?: string;
+  hasViewer?: boolean;
+  documentationLink?: string;
+  appConfig?: any; // JSON object
+}
+
+export interface ISubAppExel extends Partial<ISubApp> {
+  name: string;
+  /**
+   * @type {string} can be appId or appName
+   * @memberof ISubAppExel
+   */
+  parentApp: string;
+  appConfig: any; // JSON object
+}
