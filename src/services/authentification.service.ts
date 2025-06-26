@@ -22,7 +22,7 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
-import { IAdmin, IAdminAppProfile, IAdminCredential, IAdminOrgan, IAdminUserProfile, IPamCredential, IJsonData, IPamInfo, IUserCredential, IAppCredential, IApplicationToken, IUserToken, IOAuth2Credential } from "../interfaces";
+import { IAdmin, IAdminAppProfile, IAdminCredential, IAdminOrgan, IAdminUserProfile, IBosCredential, IJsonData, IUserCredential, IAppCredential, IApplicationToken, IUserToken, IOAuth2Credential } from "../interfaces";
 import axios from "axios";
 import { SpinalContext } from "spinal-env-viewer-graph-service";
 import { configServiceInstance } from "./configFile.service";
@@ -50,39 +50,26 @@ export class AuthentificationService {
         return this.instance;
     }
 
-    async init() {
-        // let urlAdmin = process.env.AUTH_SERVER_URL;
-        // const clientId = process.env.AUTH_CLIENT_ID;
-        // const clientSecret = process.env.AUTH_CLIENT_SECRET;
-        // if (!urlAdmin || !clientId || !clientSecret) {
-        //     console.info("There is not all the information needed to connect an auth platform in the .env file, so you can only login as admin");
-        //     this.authPlatformIsConnected = false;
-        //     return;
-        // }
-        // return this.registerToAdmin(urlAdmin, clientId, clientSecret)
-        //     .then(async () => {
-        //         console.info("Connected to the auth platform");
-        //         await this.sendDataToAdmin();
-        //         this.authPlatformIsConnected = true;
-        //     }).catch((e) => {
-        //         console.error("Impossible to connect to the auth platform, please check the information in the .env file");
-        //         console.error("error message", e.message);
-        //         this.authPlatformIsConnected = false;
-        //     })
-    }
+    async init() { }
 
     public async authenticate(info: IUserCredential | IAppCredential | IOAuth2Credential): Promise<{ code: number; data: string | IApplicationToken | IUserToken }> {
         const isUser = "userName" in info && "password" in info ? true : false;
 
         if (!isUser) return { code: HTTP_CODES.BAD_REQUEST, data: "Invalid userName and/or password" };
         return UserListService.getInstance().authenticateUser(<IUserCredential>info);
-
-        // const appInfo: any = this._formatInfo(<any>info);
-        // return AppListService.getInstance().authenticateApplication(appInfo);
     }
 
 
-    public registerToAdmin(urlAdmin: string, clientId: string, clientSecret: string): Promise<IPamCredential> {
+    /**
+     * Registers the client to the admin authentication server.
+     *
+     * @param urlAdmin - The URL of the admin authentication server. Must start with "http://" or "https://".
+     * @param clientId - The client ID used for registration.
+     * @param clientSecret - The client secret used for registration.
+     * @returns A promise that resolves to the registered BOS credentials.
+     * @throws {Error} If any of the parameters are invalid or if the registration request fails.
+     */
+    public registerToAdmin(urlAdmin: string, clientId: string, clientSecret: string): Promise<IBosCredential> {
 
         if (!urlAdmin || !(/^https?:\/\//.test(urlAdmin))) throw new Error("AUTH_SERVER_URL is not valid!");
         if (!clientId) throw new Error("AUTH_CLIENT_ID is not valid!");
@@ -100,35 +87,42 @@ export class AuthentificationService {
             result.data.url = urlAdmin;
             result.data.clientId = clientId;
             this.authPlatformIsConnected = true;
-            return this._editPamCredential(result.data)
+            return this._editBosCredential(result.data)
         }).catch((e) => {
             this.authPlatformIsConnected = false;
             throw new Error(e.message);
         })
     }
 
-    // // PAM Credential
-    // public registerToAdmin(pamInfo: IPamInfo, adminInfo: IAdmin): Promise<IPamCredential> {
-    //     if (adminInfo.urlAdmin[adminInfo.urlAdmin.length - 1] === "/") {
-    //         adminInfo.urlAdmin = adminInfo.urlAdmin.substring(0, adminInfo.urlAdmin.lastIndexOf('/'))
-    //     }
-    //     return axios.post(`${adminInfo.urlAdmin}/register`, {
-    //         platformCreationParms: pamInfo,
-    //         registerKey: adminInfo.registerKey
-    //     }).then((result) => {
-    //         result.data.url = adminInfo.urlAdmin;
-    //         result.data.registerKey = adminInfo.registerKey;
-    //         return this._editPamCredential(result.data)
-    //     })
-    // }
 
-    public async getPamToAdminCredential(): Promise<IPamCredential> {
+    /**
+     * Retrieves the BOS to Admin credentials from the configuration context.
+     *
+     * This method asynchronously obtains the context associated with the
+     * `BOS_CREDENTIAL_CONTEXT_NAME` using the `configServiceInstance`. If the context
+     * is not found, the method returns `undefined`. Otherwise, it retrieves and returns
+     * the credential information from the context.
+     *
+     * @returns A promise that resolves to an `IBosCredential` object containing the credentials,
+     *          or `undefined` if the context is not available.
+     */
+    public async getBosToAdminCredential(): Promise<IBosCredential> {
         let context = await configServiceInstance.getContext(BOS_CREDENTIAL_CONTEXT_NAME);
         if (!context) return;
 
         return context.info.get();
     }
 
+    /**
+     * Deletes the BOS and admin credential contexts from the configuration graph.
+     *
+     * This method attempts to retrieve and remove the BOS credential context and the admin credential context
+     * from the configuration graph. If the BOS credential context exists, it is removed. If the admin credential
+     * context does not exist, it attempts to remove it as well (note: this may be a logic error).
+     *
+     * @returns An object indicating that the credentials have been removed.
+     * @async
+     */
     public async deleteCredentials() {
         let context = await configServiceInstance.getContext(BOS_CREDENTIAL_CONTEXT_NAME);
         if (context) await context.removeFromGraph();
@@ -141,6 +135,12 @@ export class AuthentificationService {
 
     // Admin credential
 
+    /**
+     * Creates a new set of admin credentials by generating a unique client ID and a JWT token.
+     * The generated credentials are then saved or updated using the `editAdminCredential` method.
+     *
+     * @returns A promise that resolves to the newly created admin credential object.
+     */
     public createAdminCredential(): Promise<IAdminCredential> {
         const clientId = uuidv4();
         const token = jwt.sign({ clientId, type: 'ADMIN SERVER' }, tokenKey);
@@ -151,6 +151,7 @@ export class AuthentificationService {
         })
     }
 
+
     public async editAdminCredential(admin: IAdminCredential): Promise<IAdminCredential> {
         const context = await this._getOrCreateContext(ADMIN_CREDENTIAL_CONTEXT_NAME, ADMIN_CREDENTIAL_CONTEXT_TYPE);
         context.info.mod_attr("idPlatformOfAdmin", admin.idPlatformOfAdmin);
@@ -158,6 +159,14 @@ export class AuthentificationService {
         return admin;
     }
 
+    /**
+     * Retrieves the admin credentials from the configuration context.
+     *
+     * @returns A promise that resolves to the admin credentials (`IAdminCredential`) if the context exists,
+     *          or `undefined` if the context is not found.
+     *
+     * @throws This method does not throw, but may return `undefined` if the admin credential context is missing.
+     */
     public async getAdminCredential(): Promise<IAdminCredential> {
         let context = await configServiceInstance.getContext(ADMIN_CREDENTIAL_CONTEXT_NAME);
         if (!context) return;
@@ -165,11 +174,21 @@ export class AuthentificationService {
         return context.info.get();
     }
 
+
+    /**
+     * Sends data to the admin endpoint for registration or update.
+     *
+     * This method retrieves the necessary credentials and constructs the request body
+     * before sending a PUT request to the admin's registration endpoint.
+     *
+     * @param update - If `true`, updates the admin data; if `false`, registers a new admin.
+     * @returns A promise resolving to the Axios response of the PUT request.
+     * @throws Error if no admin is registered.
+     */
     public async sendDataToAdmin(update: boolean = false) {
-        const bosCredential = await this.getPamToAdminCredential();
+        const bosCredential = await this.getBosToAdminCredential();
         if (!bosCredential) throw new Error("No admin registered, register an admin and retry !");
 
-        // const endpoint = update ? "update" : "register";
         const endpoint = "register";
 
         const adminCredential: any = !update ? await this._getOrCreateAdminCredential(true) : {};
@@ -184,29 +203,36 @@ export class AuthentificationService {
         })
     }
 
-
-
-    // public async updateToken(oldToken: string) {
-    //     const adminInfo = await this.getAdminCredential();
-    //     const decodeToken = jwt.verify(oldToken, tokenKey);
-    //     if (oldToken === adminInfo.TokenAdminBos && decodeToken.clienId === adminInfo.idPlatformOfAdmin) {
-    //         const newToken = jwt
-    //     } 
-    // }
-
-
-
     //////////////////////////////////////////////////
     //                      PRIVATE                 //
     //////////////////////////////////////////////////
 
 
+    /**
+     * Retrieves the admin credentials if they exist, or optionally creates them if they do not.
+     *
+     * @param createIfNotExist - If `true`, creates the admin credentials if they do not already exist. Defaults to `false`.
+     * @returns A promise that resolves to the admin credentials (`IAdminCredential`).
+     */
     private async _getOrCreateAdminCredential(createIfNotExist: boolean = false): Promise<IAdminCredential> {
         const credentials = await this.getAdminCredential();
         if (credentials) return credentials;
         if (createIfNotExist) return this.createAdminCredential();
     }
 
+
+    /**
+     * Asynchronously retrieves and formats JSON data required for authentication.
+     *
+     * @returns {Promise<IJsonData>} A promise that resolves to an object containing:
+     * - `userProfileList`: The formatted list of user profiles.
+     * - `appProfileList`: The formatted list of application profiles.
+     * - `organList`: An empty array (reserved for future use).
+     *
+     * @remarks
+     * The method currently does not include the application list (`appList`), 
+     * but this can be enabled by uncommenting the relevant line.
+     */
     private async getJsonData(): Promise<IJsonData> {
         return {
             userProfileList: await this._formatUserProfiles(),
@@ -216,7 +242,7 @@ export class AuthentificationService {
         }
     }
 
-    private async _getRequestBody(update: boolean, bosCredential: IPamCredential, adminCredential: IAdminCredential) {
+    private async _getRequestBody(update: boolean, bosCredential: IBosCredential, adminCredential: IAdminCredential) {
         return JSON.stringify({
             TokenBosAdmin: bosCredential.tokenPamToAdmin,
             platformId: bosCredential.idPlateform,
@@ -229,7 +255,7 @@ export class AuthentificationService {
         })
     }
 
-    private async _editPamCredential(bosCredential: any): Promise<IPamCredential> {
+    private async _editBosCredential(bosCredential: any): Promise<IBosCredential> {
         const context = await this._getOrCreateContext(BOS_CREDENTIAL_CONTEXT_NAME, BOS_CREDENTIAL_CONTEXT_TYPE);
         const contextInfo = context.info;
 

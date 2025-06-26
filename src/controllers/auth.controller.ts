@@ -26,7 +26,7 @@ import { AuthentificationService, TokenService } from "../services";
 import * as express from "express";
 import { HTTP_CODES, SECURITY_MESSAGES, SECURITY_NAME } from "../constant";
 import { Body, Route, Tags, Controller, Post, Get, Put, Delete, Security, Request } from "tsoa";
-import { IAdmin, IAdminCredential, IAppCredential, IApplicationToken, IOAuth2Credential, IPamCredential, IPamInfo, IUserCredential, IUserToken } from "../interfaces";
+import { IAdmin, IAdminCredential, IAppCredential, IApplicationToken, IOAuth2Credential, IBosCredential, IUserCredential, IUserToken } from "../interfaces";
 import { AuthError } from "../security/AuthError";
 import { checkIfItIsAdmin } from "../security/authentication";
 
@@ -57,7 +57,7 @@ export class AuthController extends Controller {
 
     @Security(SECURITY_NAME.bearerAuth)
     @Post("/register_admin")
-    public async registerToAdmin(@Request() req: express.Request, @Body() data: IAdmin): Promise<IPamCredential | { message: string }> {
+    public async registerToAdmin(@Request() req: express.Request, @Body() data: IAdmin): Promise<IBosCredential | { message: string }> {
         try {
             const isAdmin = await checkIfItIsAdmin(req);
             if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
@@ -73,31 +73,14 @@ export class AuthController extends Controller {
     }
 
 
-    // @Security(SECURITY_NAME.bearerAuth)
-    // @Post("/register_admin")
-    // public async registerToAdmin(@Request() req: express.Request, @Body() data: { pamInfo: IPamInfo, adminInfo: IAdmin }): Promise<IPamCredential | { message: string }> {
-    //     try {
-    //         const isAdmin = await checkIfItIsAdmin(req);
-    //         if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
-
-    //         const registeredData = await serviceInstance.registerToAdmin(data.pamInfo, data.adminInfo);
-    //         await serviceInstance.sendDataToAdmin();
-    //         this.setStatus(HTTP_CODES.OK)
-    //         return registeredData;
-    //     } catch (error) {
-    //         this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
-    //         return { message: error.message };
-    //     }
-    // }
-
     @Security(SECURITY_NAME.bearerAuth)
     @Get("/get_bos_to_auth_credential")
-    public async getBosToAdminCredential(@Request() req: express.Request,): Promise<IPamCredential | { message: string }> {
+    public async getBosToAdminCredential(@Request() req: express.Request,): Promise<IBosCredential | { message: string }> {
         try {
             const isAdmin = await checkIfItIsAdmin(req);
             if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
-            const bosCredential = await serviceInstance.getPamToAdminCredential();
+            const bosCredential = await serviceInstance.getBosToAdminCredential();
             if (bosCredential) {
                 this.setStatus(HTTP_CODES.OK)
                 return bosCredential;

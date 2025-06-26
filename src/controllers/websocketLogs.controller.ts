@@ -21,15 +21,15 @@
  * with this file. If not, see
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
-import {Route, Get, Controller, Tags, Path, Security, Request} from 'tsoa';
-import {HTTP_CODES, SECURITY_MESSAGES, SECURITY_NAME} from '../constant';
-import {WebsocketLogsService} from '../services/webSocketLogs.service';
+import { Route, Get, Controller, Tags, Path, Security, Request } from 'tsoa';
+import { HTTP_CODES, SECURITY_MESSAGES, SECURITY_NAME } from '../constant';
+import { WebsocketLogsService } from '../services/webSocketLogs.service';
 import * as express from 'express';
-import {checkIfItIsAdmin} from '../security/authentication';
-import {AuthError} from '../security/AuthError';
-import {SpinalServiceLog} from 'spinal-service-pubsub-logs';
+import { checkIfItIsAdmin } from '../security/authentication';
+import { AuthError } from '../security/AuthError';
+import { SpinalServiceLog } from 'spinal-service-pubsub-logs';
 
-@Route('/api/v1/pam')
+@Route('/api/v1')
 @Tags('Websocket Logs')
 export class WebsocketLogsController extends Controller {
   private _websocketLogService: WebsocketLogsService =
@@ -50,7 +50,7 @@ export class WebsocketLogsController extends Controller {
       return this._websocketLogService.getWebsocketState();
     } catch (error) {
       this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
-      return {message: error.message};
+      return { message: error.message };
     }
   }
 
@@ -65,7 +65,7 @@ export class WebsocketLogsController extends Controller {
       return this._websocketLogService.getClientConnected();
     } catch (error) {
       this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
-      return {message: error.message};
+      return { message: error.message };
     }
   }
 
@@ -86,7 +86,7 @@ export class WebsocketLogsController extends Controller {
       return t;
     } catch (error) {
       this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
-      return {message: error.message};
+      return { message: error.message };
     }
   }
 
@@ -97,12 +97,12 @@ export class WebsocketLogsController extends Controller {
       const isAdmin = await checkIfItIsAdmin(req);
       if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
-      const {end, start} =
+      const { end, start } =
         SpinalServiceLog.getInstance().getDateFromLastDays(7);
       return this._websocketLogService.getFromIntervalTime(start, end);
     } catch (error) {
       this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
-      return {message: error.message};
+      return { message: error.message };
     }
   }
 
@@ -113,12 +113,12 @@ export class WebsocketLogsController extends Controller {
       const isAdmin = await checkIfItIsAdmin(req);
       if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
-      const {end, start} =
+      const { end, start } =
         SpinalServiceLog.getInstance().getDateFromLastDays(365);
       return this._websocketLogService.getFromIntervalTime(start, end);
     } catch (error) {
       this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
-      return {message: error.message};
+      return { message: error.message };
     }
   }
 
@@ -133,7 +133,7 @@ export class WebsocketLogsController extends Controller {
       return await this._websocketLogService.getDataFromLast24Hours();
     } catch (error) {
       this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
-      return {message: error.message};
+      return { message: error.message };
     }
   }
 

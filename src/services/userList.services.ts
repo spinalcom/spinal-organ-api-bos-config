@@ -22,38 +22,19 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
-import axios from 'axios';
-import { SpinalContext, SpinalGraphService, SpinalNode } from 'spinal-env-viewer-graph-service';
-import {
-  USER_LIST_CONTEXT_TYPE,
-  USER_LIST_CONTEXT_NAME,
-  ADMIN_USERNAME,
-  ADMIN_USER_TYPE,
-  PTR_LST_TYPE,
-  CONTEXT_TO_ADMIN_USER_RELATION,
-  HTTP_CODES,
-  TOKEN_TYPE,
-  TOKEN_RELATION_NAME,
-  CONTEXT_TO_USER_RELATION_NAME,
-  USER_TYPES,
-  USER_TO_FAVORITE_APP_RELATION,
-} from '../constant';
-import {
-  IPamCredential,
-  IUserCredential,
-  IUserInfo,
-  IUserToken,
-} from '../interfaces';
-import { configServiceInstance } from './configFile.service';
-import { Model } from 'spinal-core-connectorjs_type';
-import * as bcrypt from 'bcrypt';
-import * as fileLog from 'log-to-file';
-import * as path from 'path';
-import { TokenService } from './token.service';
-import { AuthentificationService } from './authentification.service';
-import { UserProfileService } from './userProfile.service';
-import { AppService } from './apps.service';
-import { searchById } from '../utils/findNodeBySearchKey';
+import axios from "axios";
+import { SpinalContext, SpinalNode } from "spinal-env-viewer-graph-service";
+import { USER_LIST_CONTEXT_TYPE, USER_LIST_CONTEXT_NAME, ADMIN_USERNAME, PTR_LST_TYPE, CONTEXT_TO_ADMIN_USER_RELATION, HTTP_CODES, TOKEN_RELATION_NAME, CONTEXT_TO_USER_RELATION_NAME, USER_TYPES, USER_TO_FAVORITE_APP_RELATION } from "../constant";
+import { IUserCredential, IUserInfo, IUserToken } from "../interfaces";
+import { configServiceInstance } from "./configFile.service";
+import { Model } from "spinal-core-connectorjs_type";
+import * as fileLog from "log-to-file";
+import * as path from "path";
+import { TokenService } from "./token.service";
+import { UserProfileService } from "./userProfile.service";
+import { AppService } from "./apps.service";
+import { searchById } from "../utils/findNodeBySearchKey";
+import { _comparePassword, _addUserToContext, _generateString, _getAuthPlateformInfo, _getUserInfo, _getUserProfileInfo, _hashPassword, getUserInfoByToken } from "../utils/UserAuthUtils";
 
 export class UserListService {
   private static instance: UserListService;
@@ -67,352 +48,286 @@ export class UserListService {
   }
 
   public async init(): Promise<SpinalContext> {
-    this.context = await configServiceInstance.getContext(
-      USER_LIST_CONTEXT_NAME
-    );
+    this.context = await configServiceInstance.getContext(USER_LIST_CONTEXT_NAME);
     if (!this.context) {
-      this.context = await configServiceInstance.addContext(
-        USER_LIST_CONTEXT_NAME,
-        USER_LIST_CONTEXT_TYPE
-      );
+      this.context = await configServiceInstance.addContext(USER_LIST_CONTEXT_NAME, USER_LIST_CONTEXT_TYPE);
     }
 
-    const info = {
-      name: 'admin',
-      userName: 'admin',
-      password: this._generateString(15),
-    };
+    // const info = { name: "admin", userName: "admin", password: this._generateString(15), };
 
-    await this.createAdminUser(info);
+    await this.createAdminUser();
 
     return this.context;
   }
 
-  public async authenticateUser(
-    user: IUserCredential
-  ): Promise<{ code: number; data: string | IUserToken }> {
-    let data: any = await this.authAdmin(user);
+  /**
+   * Authenticates a user using admin credentials.
+   * If authentication is successful, adds the user to the context and stores the token.
+   * Removes password from user info before returning.
+   * @param user - User credentials (username and password)
+   * @returns An object with code and data (token or error message)
+   */
+  public async authenticateUser(user: IUserCredential): Promise<{ code: number; data: string | IUserToken }> {
+    let response: any = await this.authenticateAdmin(user);
     let isAdmin = true;
     // if (data.code === HTTP_CODES.INTERNAL_ERROR) {
-    //   data = await this.authUserViaAuthPlateform(user);
+    //   data = await this.authenticateUserViaAuthPlateform(user);
     //   isAdmin = false;
     // }
 
-    if (data.code === HTTP_CODES.OK) {
-      const type = isAdmin ? USER_TYPES.ADMIN : USER_TYPES.USER;
-      const info = {
-        name: user.userName,
-        userName: user.userName,
-        type,
-        userType: type,
-        userId: data.data.userId,
-      };
-      const playload = data.data;
-      const token = data.data.token;
-      const node = await this._addUserToContext(info);
-      delete data.data.userInfo.password;
-      await TokenService.getInstance().addUserToken(node, token, playload);
-    }
+    if (response.code !== HTTP_CODES.OK) return response;
 
-    return data;
+    const responseData = response.data;
+
+    const type = isAdmin ? USER_TYPES.ADMIN : USER_TYPES.USER;
+    const info = { name: user.userName, userName: user.userName, type, userType: type, userId: responseData.userId };
+
+    delete responseData.userInfo.password; // Remove password from user info
+
+    const token = responseData.token;
+    const node = await _addUserToContext(this.context, info);
+
+    await TokenService.getInstance().addUserToken(node, token, responseData);
+
+    return response;
   }
 
+
+  /**
+   * Retrieves a user node from the context by matching the provided username.
+   *
+   * This method searches through the children of the context node using the specified
+   * relations (`CONTEXT_TO_ADMIN_USER_RELATION` and `CONTEXT_TO_USER_RELATION_NAME`).
+   * It returns the first user node whose `userName` or `userId` matches the given username.
+   *
+   * @param username - The username or user ID to search for.
+   * @returns A promise that resolves to the matching `SpinalNode`, or `undefined` if no match is found.
+   */
   public async getUser(username: string): Promise<SpinalNode> {
-    const users = await this.context.getChildren([
-      CONTEXT_TO_ADMIN_USER_RELATION,
-      CONTEXT_TO_USER_RELATION_NAME,
-    ]);
-    return users.find(
-      (el) =>
-        el.info.userName?.get() === username ||
-        el.info.userId?.get() === username
-    );
+    const users = await this.context.getChildren([CONTEXT_TO_ADMIN_USER_RELATION, CONTEXT_TO_USER_RELATION_NAME]);
+    return users.find((el) => el.info.userName?.get() === username || el.info.userId?.get() === username);
   }
 
+  /**
+   * Retrieves the list of favorite applications for a given user.
+   *
+   * @param userId - The unique identifier of the user whose favorite apps are to be fetched.
+   * @returns A promise that resolves to an array of `SpinalNode` instances representing the user's favorite applications.
+   *          If the user does not exist, an empty array is returned.
+   */
   public async getFavoriteApps(userId: string): Promise<SpinalNode[]> {
     const user = await this.getUser(userId);
     if (!user) return [];
     return user.getChildren(USER_TO_FAVORITE_APP_RELATION);
   }
 
-  public async addFavoriteApp(
-    userId: string,
-    userProfileId: string,
-    appIds: string | string[]
-  ): Promise<SpinalNode[]> {
-    if (!Array.isArray(appIds)) appIds = [appIds];
+  /**
+   * Adds a single application to the user's list of favorite applications.
+   *
+   * Checks if the user's profile has access to the specified app before adding.
+   * Throws an error if the user or app is not found, or if access is unauthorized.
+   *
+   * @param userId - The unique identifier of the user.
+   * @param userProfileId - The unique identifier of the user's profile.
+   * @param appId - The unique identifier of the application to add as favorite.
+   * @returns A promise that resolves to the added `SpinalNode` representing the app.
+   */
+  public async addOneAppToFavorite(userId: string, userProfileId: string, appId: string): Promise<SpinalNode> {
+    const hasAccess = await UserProfileService.getInstance().profileHasAccessToApp(searchById, userProfileId, appId);
+    if (!hasAccess) throw { code: HTTP_CODES.UNAUTHORIZED, message: "unauthorized" };
+    const promises = [this.getUser(userId), AppService.getInstance().getApps(searchById, appId)];
 
-    return appIds.reduce(async (prom, appId) => {
-      const list = await prom;
-
-      try {
-        const hasAccess =
-          await UserProfileService.getInstance().profileHasAccessToApp(
-            searchById,
-            userProfileId,
-            appId
-          );
-        if (!hasAccess)
-          throw { code: HTTP_CODES.UNAUTHORIZED, message: 'unauthorized' };
-
-        const [user, app] = await Promise.all([
-          this.getUser(userId),
-          AppService.getInstance().getApps(searchById, appId),
-        ]);
-        if (!user)
-          throw {
-            code: HTTP_CODES.BAD_REQUEST,
-            message: `No user found for ${userId}`,
-          };
-        if (!app)
-          throw {
-            code: HTTP_CODES.BAD_REQUEST,
-            message: `No app found for ${appId}`,
-          };
-
-        await user.addChild(app, USER_TO_FAVORITE_APP_RELATION, PTR_LST_TYPE);
-        list.push(app);
-      } catch (error) { }
-
-      return list;
-    }, Promise.resolve([]));
+    return Promise.all(promises).then(async ([user, app]) => {
+      if (!user) throw { code: HTTP_CODES.BAD_REQUEST, message: `No user found for ${userId}`, };
+      if (!app) throw { code: HTTP_CODES.BAD_REQUEST, message: `No app found for ${appId}` };
+      return user.addChild(app, USER_TO_FAVORITE_APP_RELATION, PTR_LST_TYPE);
+    })
   }
 
-  public async removeFavoriteApp(
-    userId: string,
-    userProfileId: string,
-    appIds: string | string[]
-  ): Promise<SpinalNode[]> {
+  /**
+   * Adds one or more applications to the user's list of favorite applications.
+   *
+   * Iterates over the provided app IDs and attempts to add each as a favorite for the user.
+   * If an app cannot be added (e.g., due to lack of access or not found), it is silently skipped.
+   *
+   * @param userId - The unique identifier of the user.
+   * @param userProfileId - The unique identifier of the user's profile.
+   * @param appIds - A single app ID or an array of app IDs to add as favorites.
+   * @returns A promise that resolves to an array of successfully added `SpinalNode` instances.
+   */
+  public async addFavoriteApp(userId: string, userProfileId: string, appIds: string | string[]): Promise<SpinalNode[]> {
     if (!Array.isArray(appIds)) appIds = [appIds];
 
-    return appIds.reduce(async (prom, appId) => {
-      const list = await prom;
+    const promises = appIds.map(async (appId) => this.addOneAppToFavorite(userId, userProfileId, appId).catch((error) => { }));
 
-      try {
-        const hasAccess =
-          await UserProfileService.getInstance().profileHasAccessToApp(
-            searchById,
-            userProfileId,
-            appId
-          );
-        if (!hasAccess)
-          throw { code: HTTP_CODES.UNAUTHORIZED, message: 'unauthorized' };
+    return Promise.all(promises).then((results) => results.filter((el) => el instanceof SpinalNode) as SpinalNode[]);
+  }
 
-        const [user, app] = await Promise.all([
-          this.getUser(userId),
-          AppService.getInstance().getApps(searchById, appId),
-        ]);
-        if (!user)
-          throw {
-            code: HTTP_CODES.BAD_REQUEST,
-            message: `No user found for ${userId}`,
-          };
-        if (!app)
-          throw {
-            code: HTTP_CODES.BAD_REQUEST,
-            message: `No app found for ${appId}`,
-          };
 
-        await user.removeChild(
-          app,
-          USER_TO_FAVORITE_APP_RELATION,
-          PTR_LST_TYPE
-        );
-        list.push(app);
-      } catch (error) { }
+  /**
+   * Removes a single application from the user's list of favorite applications.
+   *
+   * Checks if the user's profile has access to the specified app before removing.
+   * Throws an error if the user or app is not found, or if access is unauthorized.
+   *
+   * @param userId - The unique identifier of the user.
+   * @param userProfileId - The unique identifier of the user's profile.
+   * @param appId - The unique identifier of the application to remove from favorites.
+   * @returns A promise that resolves to the removed `SpinalNode` representing the app.
+   */
+  public async removeOneAppFromFavorite(userId: string, userProfileId: string, appId: string): Promise<SpinalNode> {
+    const hasAccess = await UserProfileService.getInstance().profileHasAccessToApp(searchById, userProfileId, appId);
+    if (!hasAccess) throw { code: HTTP_CODES.UNAUTHORIZED, message: "unauthorized" };
+    const promises = [this.getUser(userId), AppService.getInstance().getApps(searchById, appId)];
 
-      return list;
-    }, Promise.resolve([]));
+    return Promise.all(promises).then(async ([user, app]) => {
+      if (!user) throw { code: HTTP_CODES.BAD_REQUEST, message: `No user found for ${userId}` };
+      if (!app) throw { code: HTTP_CODES.BAD_REQUEST, message: `No app found for ${appId}`, };
+
+      await user.removeChild(app, USER_TO_FAVORITE_APP_RELATION, PTR_LST_TYPE);
+      return app;
+    })
+  }
+
+
+  /**
+   * Removes one or more applications from the user's list of favorite applications.
+   *
+   * Iterates over the provided app IDs and attempts to remove each from the user's favorites.
+   * If an app cannot be removed (e.g., due to lack of access or not found), it is silently skipped.
+   *
+   * @param userId - The unique identifier of the user.
+   * @param userProfileId - The unique identifier of the user's profile.
+   * @param appIds - A single app ID or an array of app IDs to remove from favorites.
+   * @returns A promise that resolves to an array of successfully removed `SpinalNode` instances.
+   */
+  public async removeFavoriteApp(userId: string, userProfileId: string, appIds: string | string[]): Promise<SpinalNode[]> {
+    if (!Array.isArray(appIds)) appIds = [appIds];
+
+    const promises = appIds.map(async (appId) => this.removeOneAppFromFavorite(userId, userProfileId, appId).catch((error) => { }));
+    return Promise.all(promises).then((results) => results.filter((el) => el instanceof SpinalNode) as SpinalNode[]);
   }
 
   /////////////////////////////////////////////
   //                  ADMIN                  //
   /////////////////////////////////////////////
 
+  /**
+   * Creates an admin user if one does not already exist.
+   *
+   * If a userInfo object is provided, uses its userName and password; otherwise, uses defaults.
+   * Logs the admin credentials to a file for recovery.
+   * Hashes the password before storing.
+   *
+   * @param userInfo - Optional user information for the admin user.
+   * @returns A promise that resolves to the created SpinalNode, or undefined if the user already exists.
+   */
   public async createAdminUser(userInfo?: IUserInfo): Promise<SpinalNode> {
     const userName = (userInfo && userInfo.userName) || ADMIN_USERNAME;
 
     const userExist = await this.getAdminUser(userName);
     if (userExist) return;
 
-    const password =
-      (userInfo && userInfo.password) || this._generateString(16);
-    fileLog(
-      JSON.stringify({ userName, password }),
-      path.resolve(__dirname, '../../.admin.log')
-    );
+    const password = (userInfo && userInfo.password) || _generateString(16);
 
-    return this._addUserToContext(
-      {
-        name: userName,
-        userName,
-        type: USER_TYPES.ADMIN,
-        userType: USER_TYPES.ADMIN,
-      },
-      new Model({ userName, password: await this._hashPassword(password) }),
-      true
-    );
+    const isAdmin = true;
+    const userInfoFormatted = { name: userName, userName, type: USER_TYPES.ADMIN, userType: USER_TYPES.ADMIN, }
+    const element = new Model({ userName, password: await _hashPassword(password) });
+
+    return _addUserToContext(this.context, userInfoFormatted, element, isAdmin).then((result) => {
+      // Log the admin credentials to a file for recovery
+      fileLog(JSON.stringify({ userName, password }), path.resolve(__dirname, "../../.admin.log"));
+
+      return result;
+    })
   }
 
+  /**
+   * Retrieves an admin user node by its username.
+   *
+   * @param userName - The username of the admin user to retrieve.
+   * @returns A promise that resolves to the corresponding `SpinalNode` if found, otherwise `undefined`.
+   */
   public async getAdminUser(userName: string): Promise<SpinalNode> {
     const children = await this.context.getChildren(CONTEXT_TO_ADMIN_USER_RELATION);
     return children.find((el) => el.info.userName.get() === userName);
   }
 
-  public async authAdmin(
-    user: IUserCredential
-  ): Promise<{ code: number; data: any | string }> {
-    const node = await this.getAdminUser(user.userName);
-    if (!node)
-      return {
-        code: HTTP_CODES.INTERNAL_ERROR,
-        data: 'bad username and/or password',
-      };
 
-    const element = await node.getElement(true);
-    const success = await this._comparePassword(
-      user.password,
-      element.password.get()
-    );
-    if (!success)
-      return {
-        code: HTTP_CODES.UNAUTHORIZED,
-        data: 'bad username and/or password',
-      };
+  /**
+   * Authenticates an admin user by verifying the provided credentials.
+   *
+   * Checks if the admin user exists and if the password matches.
+   * If authentication is successful, returns a payload with user data and token.
+   * Otherwise, returns an unauthorized error.
+   *
+   * @param user - The admin user's credentials (username and password).
+   * @returns An object containing the HTTP code and either the user data or an error message.
+   */
+  public async authenticateAdmin(user: IUserCredential): Promise<{ code: number; data: any | string }> {
+    const adminNodeFound = await this.getAdminUser(user.userName);
+
+    if (!adminNodeFound) return { code: HTTP_CODES.UNAUTHORIZED, data: "bad username and/or password" };
+
+    const nodeElement = await adminNodeFound.getElement(true);
+
+    const passwordMatch = await _comparePassword(user.password, nodeElement.password.get());
+
+    if (!passwordMatch) return { code: HTTP_CODES.UNAUTHORIZED, data: "bad username and/or password" };
 
     // await this._deleteUserToken(node);
-    const res = await TokenService.getInstance().getAdminPlayLoad(node);
+    const playLoad = await TokenService.getInstance().getAdminPlayLoad(adminNodeFound);
 
-    return { code: HTTP_CODES.OK, data: res };
+    return { code: HTTP_CODES.OK, data: playLoad };
   }
 
-  public async authUserViaAuthPlateform(
-    user: IUserCredential
-  ): Promise<{ code: HTTP_CODES; data: any }> {
-    const adminCredential = await this._getAuthPlateformInfo();
+  /**
+   * Authenticates a user via the external authentication platform.
+   *
+   * Sends a login request to the external platform using the provided credentials.
+   * On success, formats and returns the user data; on failure, returns an unauthorized error.
+   *
+   * @param credentials - The user's login credentials.
+   * @returns A promise resolving to an object with HTTP code and user data or error message.
+   */
+  public async authenticateUserViaAuthPlateform(credentials: IUserCredential): Promise<{ code: HTTP_CODES; data: any }> {
+    const authPlateformCredential = await _getAuthPlateformInfo();
 
-    const url = `${adminCredential.urlAdmin}/users/login`;
-    return axios
-      .post(url, user)
-      .then(async (result) => {
-        const data = this.getUserDataFormatted(result.data, adminCredential);
+    const url = `${authPlateformCredential.urlAdmin}/users/login`;
 
-        return {
-          code: HTTP_CODES.OK,
-          data,
-        };
-      })
-      .catch((err) => {
-        console.error(err);
-        return {
-          code: HTTP_CODES.UNAUTHORIZED,
-          data: 'bad credential',
-        };
+    return axios.post(url, credentials)
+      .then(async (response) => {
+        const payload = this.getUserDataFormatted(response.data, authPlateformCredential);
+        return { code: HTTP_CODES.OK, data: payload };
+      }).catch((err) => {
+        return { code: HTTP_CODES.UNAUTHORIZED, data: "bad credential", };
       });
   }
 
-  public async getUserDataFormatted(data: any, adminCredential?: any) {
-    adminCredential = adminCredential || await this._getAuthPlateformInfo();
-    data.profile = await this._getProfileInfo(data.token, adminCredential);
-    data.userInfo = await this._getUserInfo(data.userId, adminCredential, data.token);
+
+  /**
+   * Retrieves and formats user data by enriching the provided data object with user profile and user information.
+   *
+   * @param data - The initial user data object, expected to contain at least a `token` and `userId` property.
+   * @param adminCredential - (Optional) Administrative credentials to use for fetching user information. If not provided, credentials are obtained internally.
+   * @returns A promise that resolves to the enriched user data object, including `profile` and `userInfo` properties.
+   */
+  /**
+    * Retrieves user data and formats it by adding profile and user info.
+    * @param data - The user data to format.
+    * @param adminCredential - Optional admin credentials for fetching user info.
+    * @param useToken - Whether to use the token for fetching user info.
+    * @returns A promise resolving to the formatted user data.
+    */
+  public async getUserDataFormatted(data: any, adminCredential?: any, useToken: boolean = false) {
+    adminCredential = adminCredential || await _getAuthPlateformInfo();
+
+    data.profile = await _getUserProfileInfo(data.token, adminCredential);
+    data.userInfo = await (useToken ? getUserInfoByToken(adminCredential, data.token) : _getUserInfo(data.userId, adminCredential, data.token));
+
     return data;
   }
 
-  //////////////////////////////////////////////////
-  //                    PRIVATE                   //
-  //////////////////////////////////////////////////
 
-  private async _addUserToContext(
-    info: { [key: string]: any },
-    element?: spinal.Model,
-    isAdmin: boolean = false
-  ): Promise<SpinalNode> {
-    const users = await this.context.getChildrenInContext();
 
-    const found = users.find((el) => el.info.userName?.get() === info.userName);
-    if (found) return found;
-
-    const nodeId = SpinalGraphService.createNode(info, element);
-    const node = SpinalGraphService.getRealNode(nodeId);
-    const relationName = isAdmin
-      ? CONTEXT_TO_ADMIN_USER_RELATION
-      : CONTEXT_TO_USER_RELATION_NAME;
-    return this.context.addChildInContext(
-      node,
-      relationName,
-      PTR_LST_TYPE,
-      this.context
-    );
-  }
-
-  private _hashPassword(
-    password: string,
-    saltRounds: number = 10
-  ): Promise<string> {
-    return bcrypt.hashSync(password, saltRounds);
-  }
-
-  private _comparePassword(password: string, hash: string): Promise<boolean> {
-    return bcrypt.compare(password, hash);
-  }
-
-  private _generateString(length = 10): string {
-    const charset =
-      'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789*/-_@#&';
-    let text = '';
-    for (var i = 0, n = charset.length; i < length; ++i) {
-      text += charset.charAt(Math.floor(Math.random() * n));
-    }
-    return text;
-  }
-
-  private async _deleteUserToken(userNode: SpinalNode) {
-    const tokens = await userNode.getChildren(TOKEN_RELATION_NAME);
-    const promises = tokens.map((token) =>
-      TokenService.getInstance().deleteToken(token)
-    );
-    return Promise.all(promises);
-  }
-
-  public _getProfileInfo(userToken: string, adminCredential: IPamCredential, isUser: boolean = true) {
-    let urlAdmin = adminCredential.urlAdmin;
-    let endpoint = '/tokens/getUserProfileByToken';
-    return axios
-      .post(urlAdmin + endpoint, {
-        platformId: adminCredential.idPlateform,
-        token: userToken,
-      })
-      .then((result) => {
-        if (!result.data) return;
-        const data = result.data;
-        delete data.password;
-        return data;
-      })
-      .catch((err) => {
-        return {};
-      });
-  }
-
-  public _getUserInfo(userId: string, adminCredential: IPamCredential, userToken: string) {
-    const config = {
-      headers: {
-        'Content-Type': 'application/json',
-        // "x-access-token": adminCredential.tokenBosAdmin
-        'x-access-token': userToken,
-      },
-    };
-    return axios.get(`${adminCredential.urlAdmin}/users/${userId}`, config).then((result) => {
-      return result.data;
-    }).catch((err) => {
-      console.error(err);
-    });
-  }
-
-  private async _getAuthPlateformInfo() {
-    const adminCredential =
-      await AuthentificationService.getInstance().getPamToAdminCredential();
-    if (!adminCredential)
-      throw new Error('No authentication platform is registered');
-    return adminCredential;
-  }
 }

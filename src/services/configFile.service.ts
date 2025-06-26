@@ -22,36 +22,18 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
-import * as path from 'path';
-import { spinalCore } from 'spinal-core-connectorjs_type';
-import { SpinalGraph, SpinalContext } from 'spinal-model-graph';
-import {
-  CONFIG_DEFAULT_NAME,
-  CONFIG_FILE_MODEl_TYPE,
-  CONFIG_DEFAULT_DIRECTORY_PATH,
-} from '../constant';
+import * as path from "path";
+import { spinalCore } from "spinal-core-connectorjs_type";
+import { SpinalGraph, SpinalContext } from "spinal-model-graph";
+import { CONFIG_DEFAULT_NAME, CONFIG_FILE_MODEl_TYPE, CONFIG_DEFAULT_DIRECTORY_PATH } from "../constant";
 
-import {
-  APIService,
-  AppProfileService,
-  AppService,
-  OrganListService,
-  UserProfileService,
-  DigitalTwinService,
-  TokenService,
-  UserListService,
-  AppListService,
-  LogService,
-  WebsocketLogsService,
-  AuthentificationService,
-} from '.';
+import { APIService, AppProfileService, AppService, OrganListService, UserProfileService, DigitalTwinService, TokenService, UserListService, AppListService, LogService, WebsocketLogsService, AuthentificationService } from ".";
 
-import { createDefaultAdminApps } from '../defaultApps/adminApps';
+import { createDefaultAdminApps } from "../defaultApps/adminApps";
 
 // const { config: { directory_path, fileName } } = require("../../config");
 
-const directory_path =
-  process.env.CONFIG_DIRECTORY_PATH || CONFIG_DEFAULT_DIRECTORY_PATH;
+const directory_path = process.env.CONFIG_DIRECTORY_PATH || CONFIG_DEFAULT_DIRECTORY_PATH;
 const fileName = process.env.CONFIG_FILE_NAME || CONFIG_DEFAULT_NAME;
 
 export default class ConfigFileService {
@@ -84,22 +66,14 @@ export default class ConfigFileService {
     return this.graph.getContext(contextName);
   }
 
-  public addContext(
-    contextName: string,
-    contextType?: string
-  ): Promise<SpinalContext> {
+  public addContext(contextName: string, contextType?: string): Promise<SpinalContext> {
     const context = new SpinalContext(contextName, contextType);
     return this.graph.addContext(context);
   }
 
-  private async loadOrMakeConfigFile(
-    connect: spinal.FileSystem
-  ): Promise<SpinalGraph> {
+  private async loadOrMakeConfigFile(connect: spinal.FileSystem): Promise<SpinalGraph> {
     try {
-      const graph = await spinalCore.load<SpinalGraph>(
-        connect,
-        path.resolve(`${directory_path}/${fileName}`)
-      );
+      const graph = await spinalCore.load<SpinalGraph>(connect, path.resolve(`${directory_path}/${fileName}`));
       return graph;
     } catch (error) {
       const dir = await connect.load_or_make_dir(directory_path);
@@ -108,10 +82,7 @@ export default class ConfigFileService {
     }
   }
 
-  private _createFile(
-    directory: spinal.Directory,
-    fileName: string = CONFIG_DEFAULT_NAME
-  ): SpinalGraph {
+  private _createFile(directory: spinal.Directory, fileName: string = CONFIG_DEFAULT_NAME): SpinalGraph {
     const graph = new SpinalGraph(CONFIG_DEFAULT_NAME);
     directory.force_add_file(fileName, graph, {
       model_type: CONFIG_FILE_MODEl_TYPE,
@@ -120,25 +91,12 @@ export default class ConfigFileService {
   }
 
   private _initServices() {
-    const services = [
-      APIService,
-      AppProfileService,
-      AppService,
-      OrganListService,
-      UserProfileService,
-      UserListService,
-      AppListService,
-      DigitalTwinService,
-      TokenService,
-      LogService,
-      WebsocketLogsService,
-      AuthentificationService
-    ];
+    const services = [APIService, AppProfileService, AppService, OrganListService, UserProfileService, UserListService, AppListService, DigitalTwinService, TokenService, LogService, WebsocketLogsService, AuthentificationService];
 
     const promises = services.map((service) => {
       try {
         const instance = service.getInstance();
-        if (typeof instance.init === 'function') return instance.init();
+        if (typeof instance.init === "function") return instance.init();
       } catch (error) {
         console.error(error);
       }

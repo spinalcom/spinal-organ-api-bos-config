@@ -31,10 +31,11 @@ const login_1 = require("./proxy/login");
 async function initExpress(conn) {
     var app = express();
     app.use(morgan('dev'));
+    (0, expressMiddleware_1.useApiMiddleWare)(app);
     (0, expressMiddleware_1.useHubProxy)(app);
+    (0, login_1.useLoginProxy)(app);
     (0, expressMiddleware_1.useClientMiddleWare)(app);
     (0, expressMiddleware_1.initSwagger)(app);
-    (0, expressMiddleware_1.useApiMiddleWare)(app);
     (0, login_1.useLoginProxy)(app);
     (0, expressMiddleware_1.authenticateRequest)(app);
     (0, routes_1.RegisterRoutes)(app);

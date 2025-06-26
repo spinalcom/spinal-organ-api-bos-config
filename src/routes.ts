@@ -173,7 +173,7 @@ const models: TsoaRoute.Models = {
         "additionalProperties": {"dataType":"string"},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "IPamCredential": {
+    "IBosCredential": {
         "dataType": "refObject",
         "properties": {
             "id": {"dataType":"string","required":true},
@@ -2237,7 +2237,7 @@ export function RegisterRoutes(app: express.Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.get('/api/v1/pam/websocket/get_websocket_state',
+        app.get('/api/v1/websocket/get_websocket_state',
             authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(WebsocketLogsController)),
             ...(fetchMiddlewares<RequestHandler>(WebsocketLogsController.prototype.getWebsocketState)),
@@ -2263,7 +2263,7 @@ export function RegisterRoutes(app: express.Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.get('/api/v1/pam/websocket/get_client_connected_count',
+        app.get('/api/v1/websocket/get_client_connected_count',
             authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(WebsocketLogsController)),
             ...(fetchMiddlewares<RequestHandler>(WebsocketLogsController.prototype.getNbClientConnected)),
@@ -2289,7 +2289,7 @@ export function RegisterRoutes(app: express.Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.get('/api/v1/pam/websocket_log/read/:begin/:end',
+        app.get('/api/v1/websocket_log/read/:begin/:end',
             authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(WebsocketLogsController)),
             ...(fetchMiddlewares<RequestHandler>(WebsocketLogsController.prototype.readWebsocketLogs)),
@@ -2317,7 +2317,7 @@ export function RegisterRoutes(app: express.Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.get('/api/v1/pam/websocket_log/read_current_week',
+        app.get('/api/v1/websocket_log/read_current_week',
             authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(WebsocketLogsController)),
             ...(fetchMiddlewares<RequestHandler>(WebsocketLogsController.prototype.readCurrentWeekLogs)),
@@ -2343,7 +2343,7 @@ export function RegisterRoutes(app: express.Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.get('/api/v1/pam/websocket_log/read_current_year',
+        app.get('/api/v1/websocket_log/read_current_year',
             authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(WebsocketLogsController)),
             ...(fetchMiddlewares<RequestHandler>(WebsocketLogsController.prototype.readCurrentYearLogs)),
@@ -2369,7 +2369,7 @@ export function RegisterRoutes(app: express.Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.get('/api/v1/pam/websocket_log/read_from_last_24h',
+        app.get('/api/v1/websocket_log/read_from_last_24h',
             authenticateMiddleware([{"bearerAuth":[]}]),
             ...(fetchMiddlewares<RequestHandler>(WebsocketLogsController)),
             ...(fetchMiddlewares<RequestHandler>(WebsocketLogsController.prototype.readLast24hLogs)),

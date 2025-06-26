@@ -172,7 +172,7 @@ const models = {
         "additionalProperties": { "dataType": "string" },
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "IPamCredential": {
+    "IBosCredential": {
         "dataType": "refObject",
         "properties": {
             "id": { "dataType": "string", "required": true },
@@ -1573,7 +1573,7 @@ function RegisterRoutes(app) {
         }
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    app.get('/api/v1/pam/websocket/get_websocket_state', authenticateMiddleware([{ "bearerAuth": [] }]), ...((0, runtime_1.fetchMiddlewares)(websocketLogs_controller_1.WebsocketLogsController)), ...((0, runtime_1.fetchMiddlewares)(websocketLogs_controller_1.WebsocketLogsController.prototype.getWebsocketState)), function WebsocketLogsController_getWebsocketState(request, response, next) {
+    app.get('/api/v1/websocket/get_websocket_state', authenticateMiddleware([{ "bearerAuth": [] }]), ...((0, runtime_1.fetchMiddlewares)(websocketLogs_controller_1.WebsocketLogsController)), ...((0, runtime_1.fetchMiddlewares)(websocketLogs_controller_1.WebsocketLogsController.prototype.getWebsocketState)), function WebsocketLogsController_getWebsocketState(request, response, next) {
         const args = {
             req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
         };
@@ -1590,7 +1590,7 @@ function RegisterRoutes(app) {
         }
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    app.get('/api/v1/pam/websocket/get_client_connected_count', authenticateMiddleware([{ "bearerAuth": [] }]), ...((0, runtime_1.fetchMiddlewares)(websocketLogs_controller_1.WebsocketLogsController)), ...((0, runtime_1.fetchMiddlewares)(websocketLogs_controller_1.WebsocketLogsController.prototype.getNbClientConnected)), function WebsocketLogsController_getNbClientConnected(request, response, next) {
+    app.get('/api/v1/websocket/get_client_connected_count', authenticateMiddleware([{ "bearerAuth": [] }]), ...((0, runtime_1.fetchMiddlewares)(websocketLogs_controller_1.WebsocketLogsController)), ...((0, runtime_1.fetchMiddlewares)(websocketLogs_controller_1.WebsocketLogsController.prototype.getNbClientConnected)), function WebsocketLogsController_getNbClientConnected(request, response, next) {
         const args = {
             req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
         };
@@ -1607,7 +1607,7 @@ function RegisterRoutes(app) {
         }
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    app.get('/api/v1/pam/websocket_log/read/:begin/:end', authenticateMiddleware([{ "bearerAuth": [] }]), ...((0, runtime_1.fetchMiddlewares)(websocketLogs_controller_1.WebsocketLogsController)), ...((0, runtime_1.fetchMiddlewares)(websocketLogs_controller_1.WebsocketLogsController.prototype.readWebsocketLogs)), function WebsocketLogsController_readWebsocketLogs(request, response, next) {
+    app.get('/api/v1/websocket_log/read/:begin/:end', authenticateMiddleware([{ "bearerAuth": [] }]), ...((0, runtime_1.fetchMiddlewares)(websocketLogs_controller_1.WebsocketLogsController)), ...((0, runtime_1.fetchMiddlewares)(websocketLogs_controller_1.WebsocketLogsController.prototype.readWebsocketLogs)), function WebsocketLogsController_readWebsocketLogs(request, response, next) {
         const args = {
             req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
             begin: { "in": "path", "name": "begin", "required": true, "dataType": "union", "subSchemas": [{ "dataType": "string" }, { "dataType": "double" }] },
@@ -1626,7 +1626,7 @@ function RegisterRoutes(app) {
         }
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    app.get('/api/v1/pam/websocket_log/read_current_week', authenticateMiddleware([{ "bearerAuth": [] }]), ...((0, runtime_1.fetchMiddlewares)(websocketLogs_controller_1.WebsocketLogsController)), ...((0, runtime_1.fetchMiddlewares)(websocketLogs_controller_1.WebsocketLogsController.prototype.readCurrentWeekLogs)), function WebsocketLogsController_readCurrentWeekLogs(request, response, next) {
+    app.get('/api/v1/websocket_log/read_current_week', authenticateMiddleware([{ "bearerAuth": [] }]), ...((0, runtime_1.fetchMiddlewares)(websocketLogs_controller_1.WebsocketLogsController)), ...((0, runtime_1.fetchMiddlewares)(websocketLogs_controller_1.WebsocketLogsController.prototype.readCurrentWeekLogs)), function WebsocketLogsController_readCurrentWeekLogs(request, response, next) {
         const args = {
             req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
         };
@@ -1643,7 +1643,7 @@ function RegisterRoutes(app) {
         }
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    app.get('/api/v1/pam/websocket_log/read_current_year', authenticateMiddleware([{ "bearerAuth": [] }]), ...((0, runtime_1.fetchMiddlewares)(websocketLogs_controller_1.WebsocketLogsController)), ...((0, runtime_1.fetchMiddlewares)(websocketLogs_controller_1.WebsocketLogsController.prototype.readCurrentYearLogs)), function WebsocketLogsController_readCurrentYearLogs(request, response, next) {
+    app.get('/api/v1/websocket_log/read_current_year', authenticateMiddleware([{ "bearerAuth": [] }]), ...((0, runtime_1.fetchMiddlewares)(websocketLogs_controller_1.WebsocketLogsController)), ...((0, runtime_1.fetchMiddlewares)(websocketLogs_controller_1.WebsocketLogsController.prototype.readCurrentYearLogs)), function WebsocketLogsController_readCurrentYearLogs(request, response, next) {
         const args = {
             req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
         };
@@ -1660,7 +1660,7 @@ function RegisterRoutes(app) {
         }
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    app.get('/api/v1/pam/websocket_log/read_from_last_24h', authenticateMiddleware([{ "bearerAuth": [] }]), ...((0, runtime_1.fetchMiddlewares)(websocketLogs_controller_1.WebsocketLogsController)), ...((0, runtime_1.fetchMiddlewares)(websocketLogs_controller_1.WebsocketLogsController.prototype.readLast24hLogs)), function WebsocketLogsController_readLast24hLogs(request, response, next) {
+    app.get('/api/v1/websocket_log/read_from_last_24h', authenticateMiddleware([{ "bearerAuth": [] }]), ...((0, runtime_1.fetchMiddlewares)(websocketLogs_controller_1.WebsocketLogsController)), ...((0, runtime_1.fetchMiddlewares)(websocketLogs_controller_1.WebsocketLogsController.prototype.readLast24hLogs)), function WebsocketLogsController_readLast24hLogs(request, response, next) {
         const args = {
             req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
         };

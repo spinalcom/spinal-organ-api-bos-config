@@ -50,7 +50,7 @@ class AuthorizationService {
         if (!digitalTwinId) {
             digitalTwinId = await this._getActualDigitalTwinId();
             if (!digitalTwinId)
-                throw 'No digital twin is setup';
+                throw "No digital twin is setup";
         }
         const node = await this.getAuthorizedDigitalTwinNode(profile, digitalTwinId, true);
         if (!node)
@@ -149,7 +149,7 @@ class AuthorizationService {
         const graph = await digitalTwin.getElement(true);
         if (!graph)
             return [];
-        return graph.getChildren('hasContext');
+        return graph.getChildren("hasContext");
     }
     async getAuthorizedApps(profile) {
         return profile.getChildren(constant_1.PROFILE_TO_AUTHORIZED_APP);
@@ -168,8 +168,7 @@ class AuthorizationService {
             digitalTwinId = await this._getActualDigitalTwinId();
         }
         const digitalTwins = await profile.getChildren(constant_1.PROFILE_TO_AUTHORIZED_DIGITAL_TWIN_RELATION_NAME);
-        const found = digitalTwins.find((el) => el.getId().get() === digitalTwinId ||
-            el.info.refId?.get() === digitalTwinId);
+        const found = digitalTwins.find((el) => el.getId().get() === digitalTwinId || el.info.refId?.get() === digitalTwinId);
         if (found)
             return found;
         if (createIfNotExist) {
@@ -189,7 +188,7 @@ class AuthorizationService {
         if (!digitalTwinId) {
             digitalTwinId = await this._getActualDigitalTwinId();
             if (!digitalTwinId)
-                throw 'No digital twin is setup';
+                throw "No digital twin is setup";
         }
         const node = await this.getAuthorizedDigitalTwinNode(profile, digitalTwinId, true);
         if (!node)
@@ -200,7 +199,7 @@ class AuthorizationService {
             const context = await digitalTwin_service_1.DigitalTwinService.getInstance().findContextInDigitalTwin(digitalTwinId, contextId);
             if (context) {
                 try {
-                    await graph.removeChild(context, 'hasContext', constant_1.REF_TYPE);
+                    await graph.removeChild(context, "hasContext", constant_1.REF_TYPE);
                     liste.push(context);
                 }
                 catch (error) { }
@@ -265,14 +264,8 @@ class AuthorizationService {
         return contexts.find((el) => el.getId().get() === contextId);
     }
     async profileHasAccessToApp(searchKeys, profile, appNameId) {
-        const contexts = await Promise.all([
-            this.getAuthorizedApps(profile),
-            this.getAuthorizedSubApps(profile),
-            this.getAuthorizedAdminApps(profile),
-        ]);
-        return contexts
-            .flat()
-            .find(findNodeBySearchKey_1.isNodeMatchSearchKey.bind(null, searchKeys, appNameId));
+        const contexts = await Promise.all([this.getAuthorizedApps(profile), this.getAuthorizedSubApps(profile), this.getAuthorizedAdminApps(profile)]);
+        return contexts.flat().find(findNodeBySearchKey_1.isNodeMatchSearchKey.bind(null, searchKeys, appNameId));
     }
     async profileHasAccessToSubApp(searchKeys, profile, appId, subAppId) {
         const [subApp, subAppsFromProfile] = await Promise.all([
@@ -283,7 +276,7 @@ class AuthorizationService {
         ]);
         if (!subApp)
             return;
-        return (0, findNodeBySearchKey_1.findNodeBySearchKey)(subAppsFromProfile, ['id'], subApp.info.id.get());
+        return (0, findNodeBySearchKey_1.findNodeBySearchKey)(subAppsFromProfile, ["id"], subApp.info.id.get());
     }
     async profileHasAccessToApi(profile, apiId) {
         const contexts = await this.getAuthorizedApis(profile);

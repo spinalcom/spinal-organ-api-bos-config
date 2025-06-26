@@ -27,7 +27,7 @@ import axios from 'axios';
 export class HubSessionService {
   private static instance: HubSessionService;
 
-  private constructor() {}
+  private constructor() { }
 
   public static getInstance(): HubSessionService {
     if (!this.instance) this.instance = new HubSessionService();
@@ -42,7 +42,7 @@ export class HubSessionService {
 
     return axios
       .post(`${hubUrl}/sceen/_`, `U ${hubId} ${hubPwd} S 1 E `, {
-        headers: {'Content-Type': 'text/plain'},
+        headers: { 'Content-Type': 'text/plain' },
       })
       .then((result) => {
         const rep = result.data;

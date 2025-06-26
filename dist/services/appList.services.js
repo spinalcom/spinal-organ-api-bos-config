@@ -24,12 +24,10 @@
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AppListService = void 0;
-const axios_1 = require("axios");
-const spinal_env_viewer_graph_service_1 = require("spinal-env-viewer-graph-service");
 const constant_1 = require("../constant");
 const configFile_service_1 = require("./configFile.service");
-const token_service_1 = require("./token.service");
 const authentification_service_1 = require("./authentification.service");
+const ApplicationAuthUtils_1 = require("../utils/ApplicationAuthUtils");
 class AppListService {
     constructor() { }
     static getInstance() {
@@ -44,83 +42,25 @@ class AppListService {
         }
         return this.context;
     }
+    /**
+     * Authenticate an application using the admin platform.
+     *
+     * @param {(IAppCredential | IOAuth2Credential)} application
+     * @return {*}  {(Promise<{ code: number; data: string | IApplicationToken }>)}
+     * @memberof AppListService
+     */
     async authenticateApplication(application) {
         const adminCredential = await this._getAuthPlateformInfo();
-        const url = `${adminCredential.urlAdmin}/applications/login`;
-        return axios_1.default
-            .post(url, application)
-            .then(async (result) => {
-            const data = result.data;
-            data.profile = await this._getProfileInfo(data.token, adminCredential);
-            data.userInfo = await this._getApplicationInfo(data.applicationId, adminCredential, data.token);
-            const type = constant_1.USER_TYPES.APP;
-            const info = { clientId: application.clientId, type, userType: type };
-            const node = await this._addUserToContext(info);
-            await token_service_1.TokenService.getInstance().addUserToken(node, data.token, data);
-            return {
-                code: constant_1.HTTP_CODES.OK,
-                data,
-            };
-        })
-            .catch((err) => {
-            return {
-                code: constant_1.HTTP_CODES.UNAUTHORIZED,
-                data: 'bad credential',
-            };
-        });
+        console.warn("this mode is deprecated, please use the new authentication service");
+        return (0, ApplicationAuthUtils_1.authenticateApplication)(adminCredential.urlAdmin, adminCredential.idPlateform, application, this.context);
     }
     //////////////////////////////////////////////////
     //                    PRIVATE                   //
     //////////////////////////////////////////////////
-    async _addUserToContext(info, element) {
-        const users = await this.context.getChildrenInContext();
-        const found = users.find((el) => el.info.clientId?.get() === info.clientId);
-        if (found)
-            return found;
-        const nodeId = spinal_env_viewer_graph_service_1.SpinalGraphService.createNode(info, element);
-        const node = spinal_env_viewer_graph_service_1.SpinalGraphService.getRealNode(nodeId);
-        return this.context.addChildInContext(node, constant_1.CONTEXT_TO_APP_RELATION_NAME, constant_1.PTR_LST_TYPE, this.context);
-    }
-    _getProfileInfo(userToken, adminCredential) {
-        let urlAdmin = adminCredential.urlAdmin;
-        let endpoint = '/tokens/getAppProfileByToken';
-        return axios_1.default
-            .post(urlAdmin + endpoint, {
-            platformId: adminCredential.idPlateform,
-            token: userToken,
-        })
-            .then((result) => {
-            if (!result.data)
-                return;
-            const data = result.data;
-            delete data.password;
-            return data;
-        })
-            .catch((err) => {
-            return {};
-        });
-    }
-    _getApplicationInfo(applicationId, adminCredential, userToken) {
-        const config = {
-            headers: {
-                'Content-Type': 'application/json',
-                // "x-access-token": adminCredential.tokenBosAdmin
-                'x-access-token': userToken,
-            },
-        };
-        return axios_1.default
-            .get(`${adminCredential.urlAdmin}/applications/${applicationId}`, config)
-            .then((result) => {
-            return result.data;
-        })
-            .catch((err) => {
-            console.error(err);
-        });
-    }
     async _getAuthPlateformInfo() {
-        const adminCredential = await authentification_service_1.AuthentificationService.getInstance().getPamToAdminCredential();
+        const adminCredential = await authentification_service_1.AuthentificationService.getInstance().getBosToAdminCredential();
         if (!adminCredential)
-            throw new Error('No authentication platform is registered');
+            throw new Error("No authentication platform is registered");
         return adminCredential;
     }
 }

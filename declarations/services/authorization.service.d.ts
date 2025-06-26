@@ -1,5 +1,5 @@
-import { SpinalContext, SpinalNode } from 'spinal-env-viewer-graph-service';
-import { TAppSearch } from '../utils/findNodeBySearchKey';
+import { SpinalContext, SpinalNode } from "spinal-env-viewer-graph-service";
+import { TAppSearch } from "../utils/findNodeBySearchKey";
 export default class AuthorizationService {
     private static instance;
     private constructor();

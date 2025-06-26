@@ -32,14 +32,14 @@ export interface IAdmin {
 
 }
 
-export interface IPamInfo {
+export interface IBosInfo {
     name: string;
     url: string;
     address?: string;
     statusPlatform?: "online" | "fail" | 'stop';
 }
 
-export interface IPamCredential {
+export interface IBosCredential {
     id: string;
     type: string;
     name: string;

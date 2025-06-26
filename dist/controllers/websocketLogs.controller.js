@@ -180,7 +180,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], WebsocketLogsController.prototype, "readLast24hLogs", null);
 WebsocketLogsController = __decorate([
-    (0, tsoa_1.Route)('/api/v1/pam'),
+    (0, tsoa_1.Route)('/api/v1'),
     (0, tsoa_1.Tags)('Websocket Logs'),
     __metadata("design:paramtypes", [])
 ], WebsocketLogsController);

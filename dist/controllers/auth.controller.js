@@ -74,27 +74,12 @@ let AuthController = class AuthController extends tsoa_1.Controller {
             return { message: error.message };
         }
     }
-    // @Security(SECURITY_NAME.bearerAuth)
-    // @Post("/register_admin")
-    // public async registerToAdmin(@Request() req: express.Request, @Body() data: { pamInfo: IPamInfo, adminInfo: IAdmin }): Promise<IPamCredential | { message: string }> {
-    //     try {
-    //         const isAdmin = await checkIfItIsAdmin(req);
-    //         if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
-    //         const registeredData = await serviceInstance.registerToAdmin(data.pamInfo, data.adminInfo);
-    //         await serviceInstance.sendDataToAdmin();
-    //         this.setStatus(HTTP_CODES.OK)
-    //         return registeredData;
-    //     } catch (error) {
-    //         this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
-    //         return { message: error.message };
-    //     }
-    // }
     async getBosToAdminCredential(req) {
         try {
             const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
             if (!isAdmin)
                 throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-            const bosCredential = await serviceInstance.getPamToAdminCredential();
+            const bosCredential = await serviceInstance.getBosToAdminCredential();
             if (bosCredential) {
                 this.setStatus(constant_1.HTTP_CODES.OK);
                 return bosCredential;

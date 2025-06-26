@@ -374,7 +374,7 @@
 					"type": "string"
 				}
 			},
-			"IPamCredential": {
+			"IBosCredential": {
 				"properties": {
 					"id": {
 						"type": "string"
@@ -2841,7 +2841,7 @@
 								"schema": {
 									"anyOf": [
 										{
-											"$ref": "#/components/schemas/IPamCredential"
+											"$ref": "#/components/schemas/IBosCredential"
 										},
 										{
 											"properties": {
@@ -2892,7 +2892,7 @@
 								"schema": {
 									"anyOf": [
 										{
-											"$ref": "#/components/schemas/IPamCredential"
+											"$ref": "#/components/schemas/IBosCredential"
 										},
 										{
 											"properties": {
@@ -4509,7 +4509,7 @@
 				]
 			}
 		},
-		"/api/v1/pam/websocket/get_websocket_state": {
+		"/api/v1/websocket/get_websocket_state": {
 			"get": {
 				"operationId": "GetWebsocketState",
 				"responses": {
@@ -4561,7 +4561,7 @@
 				"parameters": []
 			}
 		},
-		"/api/v1/pam/websocket/get_client_connected_count": {
+		"/api/v1/websocket/get_client_connected_count": {
 			"get": {
 				"operationId": "GetNbClientConnected",
 				"responses": {
@@ -4606,7 +4606,7 @@
 				"parameters": []
 			}
 		},
-		"/api/v1/pam/websocket_log/read/{begin}/{end}": {
+		"/api/v1/websocket_log/read/{begin}/{end}": {
 			"get": {
 				"operationId": "ReadWebsocketLogs",
 				"responses": {
@@ -4661,7 +4661,7 @@
 				]
 			}
 		},
-		"/api/v1/pam/websocket_log/read_current_week": {
+		"/api/v1/websocket_log/read_current_week": {
 			"get": {
 				"operationId": "ReadCurrentWeekLogs",
 				"responses": {
@@ -4703,7 +4703,7 @@
 				"parameters": []
 			}
 		},
-		"/api/v1/pam/websocket_log/read_current_year": {
+		"/api/v1/websocket_log/read_current_year": {
 			"get": {
 				"operationId": "ReadCurrentYearLogs",
 				"responses": {
@@ -4745,7 +4745,7 @@
 				"parameters": []
 			}
 		},
-		"/api/v1/pam/websocket_log/read_from_last_24h": {
+		"/api/v1/websocket_log/read_from_last_24h": {
 			"get": {
 				"operationId": "ReadLast24hLogs",
 				"responses": {
