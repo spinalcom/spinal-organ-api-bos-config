@@ -76,6 +76,8 @@ export const PORTOFOLIO_API_GROUP_NAME = 'Portofolio Apis Routes';
 export const ADMIN_PROFILE_NAME = 'AdminProfile';
 export const LOG_CONTEXT_NAME = 'Logs';
 export const WEBSOCKET_LOG_CONTEXT_NAME = 'WebsocletLogs';
+export const CODE_USED_LIST_CONTEXT_NAME = "CodeUsedList";
+
 
 //Contexts types
 export const USER_PROFILE_CONTEXT_TYPE = 'UserProfileList';
@@ -97,6 +99,8 @@ export const TOKEN_LIST_CONTEXT_TYPE = 'TokenList';
 export const AVAILABLE_APPLICATIONS_CONTEXT_TYPE = 'Applications';
 export const LOG_CONTEXT_TYPE = 'LogsContext';
 export const WEBSOCKET_LOG_CONTEXT_TYPE = 'WebsocketLogsContext';
+export const CODE_USED_LIST_CONTEXT_TYPE = "CodeUsedListContext";
+
 
 // types
 export const ROLE_TYPE = 'role';
@@ -159,6 +163,7 @@ export const PROFILE_TO_AUTHORIZED_BOS_RELATION = 'hasAccessToBos';
 export const PROFILE_TO_AUTHORIZED_DIGITAL_TWIN_RELATION_NAME =
   'hasAccessToDigitalTwin';
 export const USER_TO_FAVORITE_APP_RELATION = 'hasFavoriteApp';
+export const CONTEXT_TO_CODE_RELATION_NAME = "hasCodeUnique";
 
 // Relation Type
 export const PTR_LST_TYPE = SPINAL_RELATION_PTR_LST_TYPE;

@@ -36,6 +36,8 @@ import * as globalCache from 'global-cache';
 import { UserListService } from "./userList.services";
 import { TokenService } from "./token.service";
 import { AppListService } from "./appList.services";
+import { OtherError } from "../security/AuthError";
+import { SpinalCodeUniqueService } from "./codeUnique.service";
 const tokenKey = '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d';
 
 
@@ -51,6 +53,14 @@ export class AuthentificationService {
     }
 
     async init() { }
+
+    public consumeCodeUnique(code: string): Promise<any> {
+        try {
+            return SpinalCodeUniqueService.getInstance().consumeCode(code);
+        } catch (error) {
+            throw new OtherError(HTTP_CODES.BAD_REQUEST, "Code unique not valid");
+        }
+    }
 
     public async authenticate(info: IUserCredential | IAppCredential | IOAuth2Credential): Promise<{ code: number; data: string | IApplicationToken | IUserToken }> {
         const isUser = "userName" in info && "password" in info ? true : false;

@@ -5,6 +5,7 @@ export declare class AuthentificationService {
     private constructor();
     static getInstance(): AuthentificationService;
     init(): Promise<void>;
+    consumeCodeUnique(code: string): Promise<any>;
     authenticate(info: IUserCredential | IAppCredential | IOAuth2Credential): Promise<{
         code: number;
         data: string | IApplicationToken | IUserToken;
