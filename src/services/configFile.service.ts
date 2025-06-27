@@ -27,7 +27,7 @@ import { spinalCore } from "spinal-core-connectorjs_type";
 import { SpinalGraph, SpinalContext } from "spinal-model-graph";
 import { CONFIG_DEFAULT_NAME, CONFIG_FILE_MODEl_TYPE, CONFIG_DEFAULT_DIRECTORY_PATH } from "../constant";
 
-import { APIService, AppProfileService, AppService, OrganListService, UserProfileService, DigitalTwinService, TokenService, UserListService, AppListService, LogService, WebsocketLogsService, AuthentificationService } from ".";
+import { APIService, AppProfileService, AppService, OrganListService, UserProfileService, DigitalTwinService, TokenService, UserListService, AppListService, LogService, WebsocketLogsService, AuthentificationService, SpinalCodeUniqueService } from ".";
 
 import { createDefaultAdminApps } from "../defaultApps/adminApps";
 
@@ -91,7 +91,7 @@ export default class ConfigFileService {
   }
 
   private _initServices() {
-    const services = [APIService, AppProfileService, AppService, OrganListService, UserProfileService, UserListService, AppListService, DigitalTwinService, TokenService, LogService, WebsocketLogsService, AuthentificationService];
+    const services = [APIService, AppProfileService, AppService, OrganListService, UserProfileService, UserListService, AppListService, DigitalTwinService, TokenService, LogService, WebsocketLogsService, AuthentificationService, SpinalCodeUniqueService];
 
     const promises = services.map((service) => {
       try {
