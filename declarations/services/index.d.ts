@@ -11,3 +11,4 @@ export * from './appList.services';
 export * from './token.service';
 export * from './log.service';
 export * from './webSocketLogs.service';
+export * from './codeUnique.service';

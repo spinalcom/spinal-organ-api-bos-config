@@ -78,7 +78,7 @@ class ConfigFileService {
         return graph;
     }
     _initServices() {
-        const services = [_1.APIService, _1.AppProfileService, _1.AppService, _1.OrganListService, _1.UserProfileService, _1.UserListService, _1.AppListService, _1.DigitalTwinService, _1.TokenService, _1.LogService, _1.WebsocketLogsService, _1.AuthentificationService];
+        const services = [_1.APIService, _1.AppProfileService, _1.AppService, _1.OrganListService, _1.UserProfileService, _1.UserListService, _1.AppListService, _1.DigitalTwinService, _1.TokenService, _1.LogService, _1.WebsocketLogsService, _1.AuthentificationService, _1.SpinalCodeUniqueService];
         const promises = services.map((service) => {
             try {
                 const instance = service.getInstance();
