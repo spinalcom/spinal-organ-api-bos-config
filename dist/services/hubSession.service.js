@@ -26,6 +26,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.HubSessionService = void 0;
 const axios_1 = require("axios");
 class HubSessionService {
+    static instance;
     constructor() { }
     static getInstance() {
         if (!this.instance)

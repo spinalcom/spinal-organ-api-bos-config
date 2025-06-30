@@ -28,23 +28,25 @@ const spinal_env_viewer_graph_service_1 = require("spinal-env-viewer-graph-servi
 const constant_1 = require("../constant");
 const services_1 = require("../services");
 class SpinalIOMiddleware {
+    config = {
+        spinalConnector: {
+            protocol: process.env.HUB_PROTOCOL || 'http',
+            user: process.env.USER_ID,
+            password: process.env.USER_MDP,
+            host: process.env.HUB_HOST,
+            port: process.env.HUB_PORT,
+        },
+        api: {
+            port: process.env.SERVER_PORT,
+        },
+        file: {
+            path: process.env.CONFIG_DIRECTORY_PATH,
+        },
+    };
+    conn;
+    logService = services_1.WebsocketLogsService.getInstance();
+    static instance;
     constructor(conn) {
-        this.config = {
-            spinalConnector: {
-                protocol: process.env.HUB_PROTOCOL || 'http',
-                user: process.env.USER_ID,
-                password: process.env.USER_MDP,
-                host: process.env.HUB_HOST,
-                port: process.env.HUB_PORT,
-            },
-            api: {
-                port: process.env.SERVER_PORT,
-            },
-            file: {
-                path: process.env.CONFIG_DIRECTORY_PATH,
-            },
-        };
-        this.logService = services_1.WebsocketLogsService.getInstance();
         this.conn = conn;
     }
     static getInstance(conn) {

@@ -26,13 +26,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.OtherError = exports.AuthError = void 0;
 const constant_1 = require("../constant");
 class AuthError extends Error {
+    code = constant_1.HTTP_CODES.UNAUTHORIZED;
     constructor(message) {
         super(message);
-        this.code = constant_1.HTTP_CODES.UNAUTHORIZED;
     }
 }
 exports.AuthError = AuthError;
 class OtherError extends Error {
+    code;
     constructor(code, message) {
         super(message);
         this.code = code;

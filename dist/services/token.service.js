@@ -37,6 +37,8 @@ const axios_1 = require("axios");
 const ApplicationAuthUtils_1 = require("../utils/ApplicationAuthUtils");
 const UserAuthUtils_1 = require("../utils/UserAuthUtils");
 class TokenService {
+    static instance;
+    context;
     constructor() { }
     static getInstance() {
         if (!this.instance)

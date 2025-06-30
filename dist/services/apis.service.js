@@ -30,6 +30,8 @@ const configFile_service_1 = require("./configFile.service");
 const adminProfile_service_1 = require("./adminProfile.service");
 const apiUtils_1 = require("../utils/apiUtils");
 class APIService {
+    static instance;
+    context;
     constructor() { }
     static getInstance() {
         if (!this.instance)

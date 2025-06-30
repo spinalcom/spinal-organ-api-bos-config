@@ -1,11 +1,10 @@
-/// <reference types="node" />
 import { SpinalContext, SpinalNode } from "spinal-env-viewer-graph-service";
 import { ISpinalApp } from "../interfaces";
 import { ISubApp } from "../interfaces/ISubApp";
 import { TAppSearch } from "../utils/findNodeBySearchKey";
 export declare const AppsType: Readonly<{
-    admin: string;
-    building: string;
+    admin: "admin";
+    building: "building";
 }>;
 export declare class AppService {
     private static instance;

@@ -23,7 +23,11 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkBeforeRedirectToApi = exports.checkAndGetTokenInfo = exports.getProfileId = exports.checkIfItIsAdmin = exports.expressAuthentication = void 0;
+exports.expressAuthentication = expressAuthentication;
+exports.checkIfItIsAdmin = checkIfItIsAdmin;
+exports.getProfileId = getProfileId;
+exports.checkAndGetTokenInfo = checkAndGetTokenInfo;
+exports.checkBeforeRedirectToApi = checkBeforeRedirectToApi;
 const constant_1 = require("../constant");
 const services_1 = require("../services");
 const utils_1 = require("./utils");
@@ -37,12 +41,10 @@ async function expressAuthentication(request, securityName, scopes) {
         throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.INVALID_TOKEN);
     return token;
 }
-exports.expressAuthentication = expressAuthentication;
 async function checkIfItIsAdmin(request) {
     let profileId = await getProfileId(request);
     return adminProfile_service_1.AdminProfileService.getInstance().adminNode.getId().get() === profileId;
 }
-exports.checkIfItIsAdmin = checkIfItIsAdmin;
 async function getProfileId(request) {
     const tokenInfo = await checkAndGetTokenInfo(request);
     let profileId = tokenInfo.profile?.profileId || tokenInfo.profile?.userProfileBosConfigId || tokenInfo.profile?.appProfileBosConfigId;
@@ -50,7 +52,6 @@ async function getProfileId(request) {
         throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.NO_PROFILE_FOUND);
     return profileId;
 }
-exports.getProfileId = getProfileId;
 async function checkAndGetTokenInfo(request) {
     // check token validity
     const token = await expressAuthentication(request);
@@ -60,7 +61,6 @@ async function checkAndGetTokenInfo(request) {
         throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.INVALID_TOKEN);
     return tokenInfo;
 }
-exports.checkAndGetTokenInfo = checkAndGetTokenInfo;
 async function checkBeforeRedirectToApi(request, securityName, scopes) {
     const tokenInfo = await checkAndGetTokenInfo(request);
     // get profile Node
@@ -81,5 +81,4 @@ async function checkBeforeRedirectToApi(request, securityName, scopes) {
     request.profileId = profileId;
     return tokenInfo;
 }
-exports.checkBeforeRedirectToApi = checkBeforeRedirectToApi;
 //# sourceMappingURL=authentication.js.map

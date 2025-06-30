@@ -68,6 +68,7 @@ let HubSessionController = class HubSessionController extends tsoa_1.Controller 
         }
     }
 };
+exports.HubSessionController = HubSessionController;
 __decorate([
     (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Get)("/createSession"),
@@ -76,10 +77,9 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], HubSessionController.prototype, "createSession", null);
-HubSessionController = __decorate([
+exports.HubSessionController = HubSessionController = __decorate([
     (0, tsoa_1.Route)("/api/v1"),
     (0, tsoa_1.Tags)("Hub session"),
     __metadata("design:paramtypes", [])
 ], HubSessionController);
-exports.HubSessionController = HubSessionController;
 //# sourceMappingURL=hubSession.controller.js.map

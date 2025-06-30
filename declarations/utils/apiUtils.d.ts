@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import { IApiRoute, ISwaggerFile, ISwaggerPath, ISwaggerPathData } from "../interfaces";
 export declare function _formatSwaggerFile(swaggerFile: ISwaggerFile): Promise<IApiRoute[]>;
 export declare function _getMethod(path: ISwaggerPath): string[];

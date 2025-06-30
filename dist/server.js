@@ -23,6 +23,7 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = initExpress;
 const express = require("express");
 const morgan = require("morgan");
 const routes_1 = require("./routes");
@@ -47,5 +48,4 @@ async function initExpress(conn) {
     // await ws.init()
     return { server, app };
 }
-exports.default = initExpress;
 //# sourceMappingURL=server.js.map

@@ -32,6 +32,8 @@ const digitalTwin_service_1 = require("./digitalTwin.service");
 const apps_service_1 = require("./apps.service");
 const apis_service_1 = require("./apis.service");
 class AdminProfileService {
+    static instance;
+    _adminNode;
     constructor() { }
     static getInstance() {
         if (!this.instance) {

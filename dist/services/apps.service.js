@@ -36,6 +36,8 @@ exports.AppsType = Object.freeze({
     building: "building",
 });
 class AppService {
+    static instance;
+    context;
     constructor() { }
     static getInstance() {
         if (!this.instance) {

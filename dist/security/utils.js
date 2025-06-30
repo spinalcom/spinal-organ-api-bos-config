@@ -23,7 +23,8 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.profileHasAccessToApi = exports.getToken = void 0;
+exports.getToken = getToken;
+exports.profileHasAccessToApi = profileHasAccessToApi;
 const appProfile_service_1 = require("../services/appProfile.service");
 const apis_service_1 = require("../services/apis.service");
 function getToken(request) {
@@ -35,14 +36,12 @@ function getToken(request) {
     }
     return request.body?.token || request.query?.token || request.headers["x-access-token"];
 }
-exports.getToken = getToken;
 async function profileHasAccessToApi(profile, apiUrl, method) {
     const api = await apis_service_1.APIService.getInstance().getApiRouteByRoute({ route: apiUrl, method });
     if (!api)
         return;
     return appProfile_service_1.AppProfileService.getInstance().profileHasAccessToApi(profile, api.getId().get());
 }
-exports.profileHasAccessToApi = profileHasAccessToApi;
 // async function getProfileNode(profileId: string): Promise<SpinalNode> {
 //     let profile = await UserProfileService.getInstance().getUserProfile(profileId);
 //     if (profile) return profile.node;

@@ -30,6 +30,8 @@ const authorization_service_1 = require("./authorization.service");
 const configFile_service_1 = require("./configFile.service");
 const adminProfile_service_1 = require("./adminProfile.service");
 class UserProfileService {
+    static instance;
+    context;
     constructor() { }
     static getInstance() {
         if (!this.instance) {

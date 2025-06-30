@@ -30,25 +30,27 @@ const constant_1 = require("../constant");
 const services_1 = require("../services");
 const digitalTwinService = services_1.DigitalTwinService.getInstance();
 class SpinalAPIMiddleware {
+    config = {
+        spinalConnector: {
+            protocol: process.env.HUB_PROTOCOL || 'http',
+            user: process.env.USER_ID,
+            password: process.env.USER_MDP,
+            host: process.env.HUB_HOST,
+            port: process.env.HUB_PORT
+        },
+        api: {
+            port: process.env.SERVER_PORT
+        },
+        file: {
+            path: process.env.CONFIG_DIRECTORY_PATH
+        }
+    };
+    conn;
+    loadedPtr = new Map();
+    iteratorGraph = this._geneGraph();
+    profilesToGraph = new Map();
+    static instance;
     constructor(conn) {
-        this.config = {
-            spinalConnector: {
-                protocol: process.env.HUB_PROTOCOL || 'http',
-                user: process.env.USER_ID,
-                password: process.env.USER_MDP,
-                host: process.env.HUB_HOST,
-                port: process.env.HUB_PORT
-            },
-            api: {
-                port: process.env.SERVER_PORT
-            },
-            file: {
-                path: process.env.CONFIG_DIRECTORY_PATH
-            }
-        };
-        this.loadedPtr = new Map();
-        this.iteratorGraph = this._geneGraph();
-        this.profilesToGraph = new Map();
         this.conn = conn;
     }
     static getInstance(conn) {

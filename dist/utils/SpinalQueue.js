@@ -30,16 +30,17 @@ var Events;
 (function (Events) {
     Events["FINISH"] = "finish";
     Events["START"] = "start";
-})(Events = exports.Events || (exports.Events = {}));
+})(Events || (exports.Events = Events = {}));
 class SpinalQueue extends events_1.EventEmitter {
+    processed = [];
+    queueList = [];
+    isStopped = false;
+    percent = 0;
+    length;
+    isProcessing = false;
+    debounceStart = lodash.debounce(this.begin, 3000);
     constructor() {
         super();
-        this.processed = [];
-        this.queueList = [];
-        this.isStopped = false;
-        this.percent = 0;
-        this.isProcessing = false;
-        this.debounceStart = lodash.debounce(this.begin, 3000);
     }
     addToQueue(obj) {
         this.queueList.push(obj);

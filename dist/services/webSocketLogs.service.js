@@ -29,12 +29,16 @@ const SpinalQueue_1 = require("../utils/SpinalQueue");
 const _1 = require(".");
 const constant_1 = require("../constant");
 class WebsocketLogsService {
-    constructor() {
-        this._alertTime = parseInt(process.env.WEBSOCKET_ALERT_TIME) || 60 * 1000;
-        this.timeoutIds = {};
-        this._spinalQueue = new SpinalQueue_1.SpinalQueue();
-        this._logPromMap = new Map();
-    }
+    static _instance;
+    _alertTime = parseInt(process.env.WEBSOCKET_ALERT_TIME) || 60 * 1000;
+    timeoutIds = {};
+    _directory;
+    _spinalQueue = new SpinalQueue_1.SpinalQueue();
+    _logPromMap = new Map();
+    _lastSendTime;
+    _io;
+    context;
+    constructor() { }
     static getInstance() {
         if (!this._instance)
             this._instance = new WebsocketLogsService();

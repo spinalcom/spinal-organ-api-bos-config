@@ -32,6 +32,7 @@ const apps_service_1 = require("./apps.service");
 const apis_service_1 = require("./apis.service");
 const findNodeBySearchKey_1 = require("../utils/findNodeBySearchKey");
 class AuthorizationService {
+    static instance;
     constructor() { }
     static getInstance() {
         if (!this.instance)

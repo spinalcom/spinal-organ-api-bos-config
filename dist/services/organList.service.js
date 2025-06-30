@@ -27,6 +27,8 @@ exports.OrganListService = void 0;
 const constant_1 = require("../constant");
 const configFile_service_1 = require("./configFile.service");
 class OrganListService {
+    static instance;
+    context;
     constructor() { }
     static getInstance() {
         if (!this.instance)

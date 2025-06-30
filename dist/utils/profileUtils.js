@@ -23,7 +23,9 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports._getNodeListInfo = exports._formatAuthRes = exports._formatProfile = void 0;
+exports._formatProfile = _formatProfile;
+exports._formatAuthRes = _formatAuthRes;
+exports._getNodeListInfo = _getNodeListInfo;
 const services_1 = require("../services");
 async function _formatProfile(data) {
     return {
@@ -31,7 +33,6 @@ async function _formatProfile(data) {
         ...(await _formatAuthRes(data)),
     };
 }
-exports._formatProfile = _formatProfile;
 async function _formatAuthRes(data) {
     return {
         apps: await services_1.AppService.getInstance().formatAppsAndAddSubApps(data.apps, data.subApps),
@@ -40,9 +41,7 @@ async function _formatAuthRes(data) {
         ...(data.adminApps && { adminApps: _getNodeListInfo(data.adminApps) }),
     };
 }
-exports._formatAuthRes = _formatAuthRes;
 function _getNodeListInfo(nodes = []) {
     return nodes.map((el) => el.info.get());
 }
-exports._getNodeListInfo = _getNodeListInfo;
 //# sourceMappingURL=profileUtils.js.map

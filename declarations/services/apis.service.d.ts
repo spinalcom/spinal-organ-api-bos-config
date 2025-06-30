@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import { SpinalContext, SpinalNode } from "spinal-env-viewer-graph-service";
 import { IApiRoute } from "../interfaces";
 export declare class APIService {

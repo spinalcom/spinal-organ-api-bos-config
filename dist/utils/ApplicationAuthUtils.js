@@ -1,6 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports._addUserToContext = exports._getProfileInfo = exports.authenticateApplication = void 0;
+exports.authenticateApplication = authenticateApplication;
+exports._getProfileInfo = _getProfileInfo;
+exports._addUserToContext = _addUserToContext;
 const axios_1 = require("axios");
 const constant_1 = require("../constant");
 const services_1 = require("../services");
@@ -28,7 +30,6 @@ function authenticateApplication(urlAdmin, idPlateform, application, context) {
         };
     });
 }
-exports.authenticateApplication = authenticateApplication;
 function _getProfileInfo(userToken, urlAdmin, idPlateform) {
     let endpoint = "/tokens/getAppProfileByToken";
     return axios_1.default
@@ -47,7 +48,6 @@ function _getProfileInfo(userToken, urlAdmin, idPlateform) {
         return {};
     });
 }
-exports._getProfileInfo = _getProfileInfo;
 function _getApplicationInfo(applicationId, adminUrl, userToken) {
     const config = {
         headers: {
@@ -73,5 +73,4 @@ async function _addUserToContext(context, info, element) {
     const node = spinal_env_viewer_graph_service_1.SpinalGraphService.getRealNode(nodeId);
     return context.addChildInContext(node, constant_1.CONTEXT_TO_APP_RELATION_NAME, constant_1.PTR_LST_TYPE, context);
 }
-exports._addUserToContext = _addUserToContext;
 //# sourceMappingURL=ApplicationAuthUtils.js.map

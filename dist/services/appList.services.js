@@ -29,6 +29,8 @@ const configFile_service_1 = require("./configFile.service");
 const authentification_service_1 = require("./authentification.service");
 const ApplicationAuthUtils_1 = require("../utils/ApplicationAuthUtils");
 class AppListService {
+    static instance;
+    context;
     constructor() { }
     static getInstance() {
         if (!this.instance)

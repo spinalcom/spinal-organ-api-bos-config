@@ -9,6 +9,8 @@ const spinal_env_viewer_graph_service_1 = require("spinal-env-viewer-graph-servi
 const configFile_service_1 = require("./configFile.service");
 const token_service_1 = require("./token.service");
 class SpinalCodeUniqueService {
+    static instance;
+    context;
     constructor() { }
     static getInstance() {
         if (!this.instance)

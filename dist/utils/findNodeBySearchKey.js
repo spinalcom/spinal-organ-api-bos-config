@@ -23,7 +23,9 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.findNodeBySearchKey = exports.isNodeMatchSearchKey = exports.searchByNameOrId = exports.searchById = exports.searchByName = void 0;
+exports.searchByNameOrId = exports.searchById = exports.searchByName = void 0;
+exports.isNodeMatchSearchKey = isNodeMatchSearchKey;
+exports.findNodeBySearchKey = findNodeBySearchKey;
 const idKey = 'id';
 const nameKey = 'name';
 exports.searchByName = [nameKey];
@@ -37,7 +39,6 @@ function isNodeMatchSearchKey(searchKeys, searchValue, node) {
     }
     return false;
 }
-exports.isNodeMatchSearchKey = isNodeMatchSearchKey;
 function findNodeBySearchKey(nodes, searchKeys, searchValue) {
     for (const node of nodes) {
         if (isNodeMatchSearchKey(searchKeys, searchValue, node)) {
@@ -45,5 +46,4 @@ function findNodeBySearchKey(nodes, searchKeys, searchValue) {
         }
     }
 }
-exports.findNodeBySearchKey = findNodeBySearchKey;
 //# sourceMappingURL=findNodeBySearchKey.js.map

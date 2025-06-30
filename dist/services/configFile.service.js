@@ -34,6 +34,9 @@ const adminApps_1 = require("../defaultApps/adminApps");
 const directory_path = process.env.CONFIG_DIRECTORY_PATH || constant_1.CONFIG_DEFAULT_DIRECTORY_PATH;
 const fileName = process.env.CONFIG_FILE_NAME || constant_1.CONFIG_DEFAULT_NAME;
 class ConfigFileService {
+    static instance;
+    graph;
+    hubConnect;
     constructor() { }
     static getInstance() {
         if (!ConfigFileService.instance) {

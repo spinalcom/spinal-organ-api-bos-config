@@ -37,6 +37,8 @@ const apps_service_1 = require("./apps.service");
 const findNodeBySearchKey_1 = require("../utils/findNodeBySearchKey");
 const UserAuthUtils_1 = require("../utils/UserAuthUtils");
 class UserListService {
+    static instance;
+    context;
     constructor() { }
     static getInstance() {
         if (!this.instance)

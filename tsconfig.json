@@ -1,6 +1,8 @@
 {
   "compilerOptions": {
+    "target": "ES2022",
     "module": "CommonJS",
+    "moduleResolution": "node",
     "noImplicitAny": false,
     "noImplicitReturns": false,
     "noImplicitThis": true,
@@ -11,32 +13,20 @@
     "downlevelIteration": true,
     "baseUrl": "server",
     "outDir": "dist",
-    "target": "ES2020",
     "skipLibCheck": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "noEmitOnError": true
+    "noEmitOnError": true,
+    "lib": ["ES2022"]
   },
   "hooks": [
     "copy-files"
   ],
-  "experimentalDecorators": true,
+  "exclude": ["node_modules", "client"],
+  "include": ["./src/**/*"],
   "paths": {
-    "@/*": [
-      "src/*"
-    ],
-    "/@/*": [
-      "src/*"
-    ],
-    "/@/img/*": [
-      "src/assets/img/*"
-    ]
-  },
-  "exclude": [
-    "node_modules",
-    "client"
-  ],
-  "include": [
-    "./src/**/*"
-  ]
+    "@/*": ["src/*"],
+    "/@/*": ["src/*"],
+    "/@/img/*": ["src/assets/img/*"]
+  }
 }

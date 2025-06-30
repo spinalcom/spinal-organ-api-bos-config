@@ -31,9 +31,11 @@ const path = require("path");
 const constant_1 = require("../constant");
 const adminProfile_service_1 = require("./adminProfile.service");
 class DigitalTwinService {
-    constructor() {
-        this.attrName = "defaultDigitalTwin";
-    }
+    static instance;
+    _actualDigitalTwin;
+    attrName = "defaultDigitalTwin";
+    context;
+    constructor() { }
     static getInstance() {
         if (!this.instance)
             this.instance = new DigitalTwinService();
