@@ -1,17 +1,21 @@
-USER_ID="XXX"
-USER_MDP="XXXX"
+USER_ID="xxx"
+USER_MDP="xxx"
 
 HUB_PROTOCOL="http"
 HUB_HOST="127.0.0.1"
-HUB_PORT="10400"
+HUB_PORT="xxxx0"
+SERVER_PORT="xxxx7" # HUB PORT + 7 ideally
 
 CONFIG_DIRECTORY_PATH="/__users__/admin/"
 CONFIG_FILE_NAME="BOSConfig"
 
 WEBSOCKET_ALERT_TIME="60000" # en milliseconde
 
-SERVER_PORT=8065
 PATH_DIR_STATIC_HTML=".browser_organs"
 ORGAN_NAME="BOS_CONFIG"
 
-VUE_CLIENT_URI=""
+VUE_CLIENT_URI=""   # URL or the web portal that expects the token from auth plateform ( can be spinal-apps-portail-bos for exemple )
+
+
+
+RUN_STARTUP_TASK=0

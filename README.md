@@ -41,6 +41,36 @@ CONFIG_FILE_NAME="BOSConfig"
 WEBSOCKET_ALERT_TIME="60000"
 ORGAN_NAME="xxxxxxxxxx"                     # Name of the organ. Used by monitoring platform.
 VUE_CLIENT_URI="xxxxxxxxx"                  # URL or the web portal that expects the token from auth plateform ( spinal-apps-portail-bos )
+
+RUN_STARTUP_TASK="1"                        # or "0" to disable the startup task ( calling specific api routes)
+```
+
+If you want to use the startup task, you must also have a `startupRoutes.json` file at the root of the project with the following structure:
+
+```json
+[
+  {
+    "method": "GET",
+    "url": "/api/v1/some-endpoint",
+    "headers": {
+      "Custom-Header": "value"
+    },
+    "body": {}  
+  }
+]
+```
+Exemple of `startupRoutes.json` file:
+
+```json
+[
+    {
+      "method": "POST",
+      "url": "/api/v1/geographicContext/viewInfo",
+      "headers": {},
+      "body": {
+      }
+    }
+]
 ```
 
 ## Running the api bos config
