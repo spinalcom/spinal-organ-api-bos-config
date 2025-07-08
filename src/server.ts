@@ -26,7 +26,8 @@
 import * as express from 'express';
 import * as morgan from "morgan";
 import { RegisterRoutes } from './routes';
-
+import * as https from 'https';
+import * as fs from 'fs';
 import {
   useHubProxy,
   useClientMiddleWare,
@@ -60,8 +61,22 @@ export default async function initExpress(conn: spinal.FileSystem) {
 
   app.use(errorHandler);
 
-  const server_port = process.env.SERVER_PORT || 2022;
-  const server = app.listen(server_port, () => console.log(`api server listening on port ${server_port}!`));
+  const serverProtocol = process.env.SERVER_PROTOCOL || "http"; // Default to http if not set
+  const serverPort = process.env.SERVER_PORT || 2022;
+  let server;
+  // const server = app.listen(server_port, () => console.log(`api server listening on port ${server_port}!`));
+  if (serverProtocol === "https") {
+		// If using HTTPS, ensure SSL_KEY_PATH and SSL_CERT_PATH are set in the environment variables
+		const sslOptions = { key: fs.readFileSync(process.env.SSL_KEY_PATH), cert: fs.readFileSync(process.env.SSL_CERT_PATH) };
+		server = https.createServer(sslOptions, app).listen(serverPort, () => console.log(`app listening at https://localhost:${serverPort} ....`));
+	} else if (serverProtocol === "http") {
+		server = app.listen(serverPort, () => console.log(`app listening at http://localhost:${serverPort} ....`));
+	}
+
+
+
+
+
   // await WebsocketLogs.getInstance().init(conn)
   // const ws = new WebSocketServer(server);
 

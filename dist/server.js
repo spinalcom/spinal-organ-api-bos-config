@@ -27,6 +27,8 @@ exports.default = initExpress;
 const express = require("express");
 const morgan = require("morgan");
 const routes_1 = require("./routes");
+const https = require("https");
+const fs = require("fs");
 const expressMiddleware_1 = require("./middlewares/expressMiddleware");
 const login_1 = require("./proxy/login");
 async function initExpress(conn) {
@@ -41,8 +43,18 @@ async function initExpress(conn) {
     (0, expressMiddleware_1.authenticateRequest)(app);
     (0, routes_1.RegisterRoutes)(app);
     app.use(expressMiddleware_1.errorHandler);
-    const server_port = process.env.SERVER_PORT || 2022;
-    const server = app.listen(server_port, () => console.log(`api server listening on port ${server_port}!`));
+    const serverProtocol = process.env.SERVER_PROTOCOL || "http"; // Default to http if not set
+    const serverPort = process.env.SERVER_PORT || 2022;
+    let server;
+    // const server = app.listen(server_port, () => console.log(`api server listening on port ${server_port}!`));
+    if (serverProtocol === "https") {
+        // If using HTTPS, ensure SSL_KEY_PATH and SSL_CERT_PATH are set in the environment variables
+        const sslOptions = { key: fs.readFileSync(process.env.SSL_KEY_PATH), cert: fs.readFileSync(process.env.SSL_CERT_PATH) };
+        server = https.createServer(sslOptions, app).listen(serverPort, () => console.log(`app listening at https://localhost:${serverPort} ....`));
+    }
+    else if (serverProtocol === "http") {
+        server = app.listen(serverPort, () => console.log(`app listening at http://localhost:${serverPort} ....`));
+    }
     // await WebsocketLogs.getInstance().init(conn)
     // const ws = new WebSocketServer(server);
     // await ws.init()

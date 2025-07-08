@@ -16,6 +16,12 @@ ORGAN_NAME="BOS_CONFIG"
 
 VUE_CLIENT_URI=""   # URL or the web portal that expects the token from auth plateform ( can be spinal-apps-portail-bos for exemple )
 
+SERVER_PROTOCOL="http" # http or https
+
+# HTTPS CERTIFICAT PATHS
+SSL_CERT_PATH=""
+SSL_KEY_PATH=""
+NODE_TLS_REJECT_UNAUTHORIZED=0
 
 
 RUN_STARTUP_TASK=0
