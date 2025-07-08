@@ -1,4 +1,4 @@
-import { IAdminCredential, IBosCredential, IUserCredential, IAppCredential, IApplicationToken, IUserToken, IOAuth2Credential } from "../interfaces";
+import { IAdminCredential, IBosCredential, IUserCredential, IUserToken } from "../interfaces";
 export declare class AuthentificationService {
     private static instance;
     authPlatformIsConnected: boolean;
@@ -6,9 +6,9 @@ export declare class AuthentificationService {
     static getInstance(): AuthentificationService;
     init(): Promise<void>;
     consumeCodeUnique(code: string): Promise<any>;
-    authenticate(info: IUserCredential | IAppCredential | IOAuth2Credential): Promise<{
+    authenticate(info: IUserCredential): Promise<{
         code: number;
-        data: string | IApplicationToken | IUserToken;
+        data: string | IUserToken;
     }>;
     /**
      * Registers the client to the admin authentication server.

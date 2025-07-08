@@ -35,6 +35,7 @@ import { UserProfileService } from "./userProfile.service";
 import { AppService } from "./apps.service";
 import { searchById } from "../utils/findNodeBySearchKey";
 import { _comparePassword, _addUserToContext, _generateString, _getAuthPlateformInfo, _getUserInfo, _getUserProfileInfo, _hashPassword, getUserInfoByToken } from "../utils/UserAuthUtils";
+import { userInfo } from "os";
 
 export class UserListService {
   private static instance: UserListService;
@@ -68,28 +69,45 @@ export class UserListService {
    * @returns An object with code and data (token or error message)
    */
   public async authenticateUser(user: IUserCredential): Promise<{ code: number; data: string | IUserToken }> {
-    let response: any = await this.authenticateAdmin(user);
-    let isAdmin = true;
+    return this.authenticateAdmin(user);
+
+
+    /**
+    * If the user is not an admin, we will try to authenticate the user via the Auth platform.
+    * commented because user authentication is now handled by authentication platform
+    */
+
+    // let isAdmin = true;
     // if (data.code === HTTP_CODES.INTERNAL_ERROR) {
     //   data = await this.authenticateUserViaAuthPlateform(user);
     //   isAdmin = false;
     // }
 
-    if (response.code !== HTTP_CODES.OK) return response;
+    // if (response.code !== HTTP_CODES.OK) return response;
 
-    const responseData = response.data;
+    // const responseData = response.data;
 
-    const type = isAdmin ? USER_TYPES.ADMIN : USER_TYPES.USER;
-    const info = { name: user.userName, userName: user.userName, type, userType: type, userId: responseData.userId };
+    // // const type = isAdmin ? USER_TYPES.ADMIN : USER_TYPES.USER;
+    // const type = USER_TYPES.ADMIN;
 
-    delete responseData.userInfo.password; // Remove password from user info
+    // const info = {
+    // name: user.userName,
+    // userName: user.userName,
+    // type,
+    // userType: type,
+    // userId: responseData.userId
+    // };
 
-    const token = responseData.token;
-    const node = await _addUserToContext(this.context, info);
+    // const { password, ...userInfoWithoutPassword } = responseData.userInfo; // Destructure to remove password
 
-    await TokenService.getInstance().addUserToken(node, token, responseData);
+    // responseData.userInfo = userInfoWithoutPassword; // Update responseData to exclude password
 
-    return response;
+    // const token = responseData.token;
+    // const node = await _addUserToContext(this.context, info);
+
+    // await TokenService.getInstance().addUserToken(node, token, responseData);
+
+    // return response;
   }
 
 
@@ -272,13 +290,10 @@ export class UserListService {
     const nodeElement = await adminNodeFound.getElement(true);
 
     const passwordMatch = await _comparePassword(user.password, nodeElement.password.get());
-
     if (!passwordMatch) return { code: HTTP_CODES.UNAUTHORIZED, data: "bad username and/or password" };
 
-    // await this._deleteUserToken(node);
-    const playLoad = await TokenService.getInstance().getAdminPlayLoad(adminNodeFound);
-
-    return { code: HTTP_CODES.OK, data: playLoad };
+    const tokenPlayLoad = await TokenService.getInstance().generateTokenForAdmin(adminNodeFound);
+    return { code: HTTP_CODES.OK, data: tokenPlayLoad };
   }
 
   /**

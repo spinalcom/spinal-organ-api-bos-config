@@ -53,6 +53,7 @@ class AuthentificationService {
             throw new AuthError_1.OtherError(constant_1.HTTP_CODES.BAD_REQUEST, "Code unique not valid");
         }
     }
+    // public async authenticate(info: IUserCredential | IAppCredential | IOAuth2Credential): Promise<{ code: number; data: string | IApplicationToken | IUserToken }> {
     async authenticate(info) {
         const isUser = "userName" in info && "password" in info ? true : false;
         if (!isUser)

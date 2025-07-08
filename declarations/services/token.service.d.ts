@@ -7,89 +7,126 @@ export declare class TokenService {
     static getInstance(): TokenService;
     init(): Promise<SpinalContext>;
     /**
-     * Purges invalid or expired tokens from the context.
-     * Iterates over all tokens and checks their validity.
-     * If a token is expired, it will be deleted.
-     * @returns {Promise<(IUserToken | IApplicationToken)[]>} Array of token data for valid tokens.
+     * Purge invalid tokens from the context.
+     *
+     * @return {*}  {(Promise<(IUserToken | IApplicationToken)[]>)}
+     * @memberof TokenService
      */
     purgeToken(): Promise<(IUserToken | IApplicationToken)[]>;
     /**
-     * Associates a new token with a user node by creating a token node and adding it as a child
-     * to the specified user node using a predefined relation.
+     * Create a token for a user and add it to the context.
      *
-     * @param userNode - The user node to which the token will be associated.
-     * @param token - The token string to be added.
-     * @param playload - Additional payload data to be stored with the token.
-     * @returns A promise that resolves to the payload after the token has been added.
+     * @param {SpinalNode} userNode
+     * @param {string} token
+     * @param {*} playload
+     * @return {*}  {Promise<any>}
+     * @memberof TokenService
      */
-    addUserToken(userNode: SpinalNode, token: string, playload: any): Promise<any>;
+    createToken(userNode: SpinalNode, playload: any, isAdmin?: boolean): Promise<any>;
     /**
-     * Generates a payload object for an admin user, including a JWT token and additional metadata.
+     * Get or generate a token key for signing JWT tokens.
+     * If a secret is already set in the context, it will return that.
+     * Otherwise, it generates a new random string and sets it in the context.
      *
-     * @param userNode - The SpinalNode representing the user for whom the payload is generated.
-     * @param secret - (Optional) The secret key to sign the JWT token. If not provided, a random string is generated.
-     * @param durationInMin - (Optional) The token expiration duration in minutes. Defaults to 7 days if not specified.
-     * @returns A promise that resolves to an object containing user information, token details, and admin profile data.
+     * @return {*}  {string} - The token key.
+     * @memberof TokenService
      */
-    getAdminPlayLoad(userNode: SpinalNode, secret?: string, durationInMin?: number): Promise<any>;
+    getOrGenerateTokenKey(): string;
+    private _generateToken;
     /**
-     * Adds a new token node to the context with the provided token and associated data.
+     * Generate a token for admin a user.
      *
-     * @param token - The unique identifier for the token node.
-     * @param data - The data to associate with the token node, which will be used to create a new Model instance.
-     * @returns A promise that resolves to the created child SpinalNode within the context.
+     * @param {SpinalNode} userNode
+     * @param {string} [secret]
+     * @param {(number | string)} [durationInMin]
+     * @return {*}  {Promise<any>}
+     * @memberof TokenService
+     */
+    generateTokenForAdmin(userNode: SpinalNode): Promise<any>;
+    /**
+     * link a token to a context.
      *
-     * @remarks
-     * - The method creates a new `SpinalNode` using the given token and data.
-     * - The node is added as a child in the context using a predefined relation name and type.
-     * - The token data is also cached globally using the token as the key.
+     * @param {string} token
+     * @param {*} data
+     * @return {*}  {Promise<SpinalNode>}
+     * @memberof TokenService
      */
     addTokenToContext(token: string, data: any): Promise<SpinalNode>;
     /**
-     * Retrieves token data from the cache or context.
+     * Get the token data from the cache or from the context.
      *
-     * This method first attempts to retrieve the token data from a global cache.
-     * If the data is not present in the cache, it fetches the children nodes from the context
-     * using the specified relation name and searches for a node whose name matches the provided token.
-     * If such a node is found, it retrieves its element, caches the result, and returns the element's data.
-     * If the token is not found among the children, it delegates the check to the `_checkTokenNearAuthPlateform` method.
-     *
-     * @param token - The token string to retrieve data for.
-     * @returns A promise that resolves to the token data if found, or the result of `_checkTokenNearAuthPlateform` if not.
+     * @param {string} token
+     * @return {*}  {Promise<any>}
+     * @memberof TokenService
      */
     getTokenData(token: string): Promise<any>;
     /**
-     * Deletes a token node from the context.
+     * Get a token node by its name.
      *
-     * If the provided `token` is a `SpinalNode`, it will be used directly.
-     * If the provided `token` is a string, it will search for a child node with a matching name.
-     * If the token is not found, the method returns `true`.
-     * Otherwise, it removes the token node from all its parent nodes using the specified relation and type.
+     * @param {string} token
+     * @return {*}  {Promise<SpinalNode>}
+     * @memberof TokenService
+     */
+    getTokenNode(token: string): Promise<SpinalNode>;
+    /**
+     * remove a token.
      *
-     * @param token - The token to delete, either as a `SpinalNode` instance or a string representing the token name.
-     * @returns A promise that resolves to `true` if the token was successfully deleted or not found, or `false` if an error occurred during deletion.
+     * @param {(SpinalNode | string)} token
+     * @return {*}  {Promise<boolean>}
+     * @memberof TokenService
      */
     deleteToken(token: SpinalNode | string): Promise<boolean>;
     /**
-     * Checks if a token is valid and optionally deletes it if expired.
+     * Check if a token is valid.
      *
-     * @param token - The token string to validate.
-     * @param deleteIfExpired - If true, deletes the token if it is expired. Defaults to false.
-     * @returns A promise that resolves to the token data if valid, or undefined if expired and deleted.
+     * @param {string} token
+     * @param {boolean} [deleteIfExpired=false]
+     * @return {*}  {(Promise<IUserToken | IApplicationToken>)}
+     * @memberof TokenService
      */
     tokenIsValid(token: string, deleteIfExpired?: boolean): Promise<IUserToken | IApplicationToken>;
     /**
-     * Verifies the validity of a given token for a specified actor type.
+     * Get the profile ID associated with a token.
      *
-     * @param token - The token string to be verified.
-     * @param actor - The type of actor associated with the token, either "user" or "app". Defaults to "user".
-     * @returns A promise that resolves with the verification result data from the authentication service.
+     * @param {string} token
+     * @return {*}  {Promise<string>}
+     * @memberof TokenService
      */
-    verifyToken(token: string, actor?: "user" | "app"): Promise<any>;
-    private _checkTokenNearAuthPlateform;
-    private _checkRequest;
+    getProfileIdByToken(token: string): Promise<string>;
+    /**
+     * Verify a token in the authentication platform.
+     *
+     * @param {string} token - The JWT token to verify.
+     * @param {"user" | "app"} [actor="user"] - The actor type, either "user" or "app".
+     * @return {*}  {Promise<any>} - Resolves with the verification result.
+     * @memberof TokenService
+     */
+    verifyTokenInAuthPlatform(token: string, actor?: "user" | "app"): Promise<any>;
+    /**
+     * Verify a token using the admin secret key.
+     *
+     * @param {string} token - The JWT token to verify.
+     * @return {*}  {Promise<any>} - Resolves with the decoded token if valid, rejects if invalid.
+     * @memberof TokenService
+     */
+    verifyTokenForAdmin(token: string): Promise<any>;
+    /**
+     * Check if the token is an application token.
+     *
+     * @param {*} tokenInfo
+     * @return {*}  {boolean}
+     * @memberof TokenService
+     */
+    isAppToken(tokenInfo: any): boolean;
+    /**
+     * Check if the token is an user token.
+     *
+     * @param {*} tokenInfo
+     * @return {*}  {boolean}
+     * @memberof TokenService
+     */
+    isUserToken(tokenInfo: any): boolean;
     private _generateString;
     private _getAllTokens;
     private _scheduleTokenPurge;
-    private _getAuthPlateformInfo;
 }

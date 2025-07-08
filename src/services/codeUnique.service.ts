@@ -45,7 +45,7 @@ export class SpinalCodeUniqueService {
                 const info = { name: data.userInfo?.name || code, applicationId: data.userInfo?.applicationId, userId: data.userInfo?.userId, type, userType: type }
 
                 const node = await this._addUserToContext(info);
-                await TokenService.getInstance().addUserToken(node, data.token, data);
+                await TokenService.getInstance().addTokenToContext(data.token, data);
 
                 return data;
             })
