@@ -3,34 +3,39 @@ import { IAppCredential, IApplicationToken, IOAuth2Credential } from '../interfa
 import { CONTEXT_TO_APP_RELATION_NAME, HTTP_CODES, PTR_LST_TYPE, USER_TYPES } from '../constant';
 import { TokenService } from '../services';
 import { SpinalContext, SpinalGraphService, SpinalNode } from 'spinal-env-viewer-graph-service';
+import { AuthError } from '../security/AuthError';
 
 
 export function authenticateApplication(urlAdmin: string, idPlateform: string, application: IAppCredential | IOAuth2Credential, context: SpinalContext): Promise<{ code: number; data: string | IApplicationToken }> {
-    const url = `${urlAdmin}/applications/login`;
 
-    return axios.post(url, application)
-        .then(async (result) => {
-            const data = result.data;
-            data.profile = await _getProfileInfo(data.token, urlAdmin, idPlateform);
-            data.userInfo = await _getApplicationInfo(data.applicationId, urlAdmin, data.token);
+    throw new AuthError(`This authentication method is deprecated. Please use the new authentication method.`);
 
-            const type = USER_TYPES.APP;
-            const info = { clientId: application.clientId, type, userType: type };
 
-            const node = await _addUserToContext(context, info);
-            await TokenService.getInstance().addUserToken(node, data.token, data);
+    // const url = `${urlAdmin}/applications/login`;
 
-            return {
-                code: HTTP_CODES.OK,
-                data,
-            };
-        })
-        .catch((err) => {
-            return {
-                code: HTTP_CODES.UNAUTHORIZED,
-                data: "bad credential",
-            };
-        });
+    // return axios.post(url, application)
+    //     .then(async (result) => {
+    //         const data = result.data;
+    //         data.profile = await _getProfileInfo(data.token, urlAdmin, idPlateform);
+    //         data.userInfo = await _getApplicationInfo(data.applicationId, urlAdmin, data.token);
+
+    //         const type = USER_TYPES.APP;
+    //         const info = { clientId: application.clientId, type, userType: type };
+
+    //         const node = await _addUserToContext(context, info);
+    //         await TokenService.getInstance().(node, data.token, data);
+
+    //         return {
+    //             code: HTTP_CODES.OK,
+    //             data,
+    //         };
+    //     })
+    //     .catch((err) => {
+    //         return {
+    //             code: HTTP_CODES.UNAUTHORIZED,
+    //             data: "bad credential",
+    //         };
+    //     });
 }
 
 export function _getProfileInfo(userToken: string, urlAdmin: string, idPlateform: string) {

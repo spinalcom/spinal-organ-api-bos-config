@@ -36,7 +36,7 @@ class SpinalCodeUniqueService {
             const type = "code";
             const info = { name: data.userInfo?.name || code, applicationId: data.userInfo?.applicationId, userId: data.userInfo?.userId, type, userType: type };
             const node = await this._addUserToContext(info);
-            await token_service_1.TokenService.getInstance().addUserToken(node, data.token, data);
+            await token_service_1.TokenService.getInstance().addTokenToContext(data.token, data);
             return data;
         });
     }

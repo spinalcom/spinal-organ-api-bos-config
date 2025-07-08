@@ -5,30 +5,31 @@ exports._getProfileInfo = _getProfileInfo;
 exports._addUserToContext = _addUserToContext;
 const axios_1 = require("axios");
 const constant_1 = require("../constant");
-const services_1 = require("../services");
 const spinal_env_viewer_graph_service_1 = require("spinal-env-viewer-graph-service");
+const AuthError_1 = require("../security/AuthError");
 function authenticateApplication(urlAdmin, idPlateform, application, context) {
-    const url = `${urlAdmin}/applications/login`;
-    return axios_1.default.post(url, application)
-        .then(async (result) => {
-        const data = result.data;
-        data.profile = await _getProfileInfo(data.token, urlAdmin, idPlateform);
-        data.userInfo = await _getApplicationInfo(data.applicationId, urlAdmin, data.token);
-        const type = constant_1.USER_TYPES.APP;
-        const info = { clientId: application.clientId, type, userType: type };
-        const node = await _addUserToContext(context, info);
-        await services_1.TokenService.getInstance().addUserToken(node, data.token, data);
-        return {
-            code: constant_1.HTTP_CODES.OK,
-            data,
-        };
-    })
-        .catch((err) => {
-        return {
-            code: constant_1.HTTP_CODES.UNAUTHORIZED,
-            data: "bad credential",
-        };
-    });
+    throw new AuthError_1.AuthError(`This authentication method is deprecated. Please use the new authentication method.`);
+    // const url = `${urlAdmin}/applications/login`;
+    // return axios.post(url, application)
+    //     .then(async (result) => {
+    //         const data = result.data;
+    //         data.profile = await _getProfileInfo(data.token, urlAdmin, idPlateform);
+    //         data.userInfo = await _getApplicationInfo(data.applicationId, urlAdmin, data.token);
+    //         const type = USER_TYPES.APP;
+    //         const info = { clientId: application.clientId, type, userType: type };
+    //         const node = await _addUserToContext(context, info);
+    //         await TokenService.getInstance().(node, data.token, data);
+    //         return {
+    //             code: HTTP_CODES.OK,
+    //             data,
+    //         };
+    //     })
+    //     .catch((err) => {
+    //         return {
+    //             code: HTTP_CODES.UNAUTHORIZED,
+    //             data: "bad credential",
+    //         };
+    //     });
 }
 function _getProfileInfo(userToken, urlAdmin, idPlateform) {
     let endpoint = "/tokens/getAppProfileByToken";

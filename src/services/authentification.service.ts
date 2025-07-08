@@ -62,7 +62,8 @@ export class AuthentificationService {
         }
     }
 
-    public async authenticate(info: IUserCredential | IAppCredential | IOAuth2Credential): Promise<{ code: number; data: string | IApplicationToken | IUserToken }> {
+    // public async authenticate(info: IUserCredential | IAppCredential | IOAuth2Credential): Promise<{ code: number; data: string | IApplicationToken | IUserToken }> {
+    public async authenticate(info: IUserCredential): Promise<{ code: number; data: string | IUserToken }> {
         const isUser = "userName" in info && "password" in info ? true : false;
 
         if (!isUser) return { code: HTTP_CODES.BAD_REQUEST, data: "Invalid userName and/or password" };
