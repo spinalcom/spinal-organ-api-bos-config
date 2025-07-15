@@ -40,6 +40,7 @@ async function runStartupTask() {
     const url = `http://localhost:${process.env.SERVER_PORT}`;
     const authResponse = await axios_1.default.post(`${url}/api/v1/auth`, credentials);
     const token = authResponse.data.token;
+    console.log('Authentication successful, token:', token);
     const configPath = path.resolve(__dirname, '../startupRoutes.json');
     const routes = JSON.parse(fs.readFileSync(configPath, 'utf8'));
     for (const route of routes) {
