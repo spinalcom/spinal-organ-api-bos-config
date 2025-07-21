@@ -82,9 +82,13 @@ export default class AuthorizationService {
 
       if (app) {
         try {
-          await profile.addChild(app, PROFILE_TO_AUTHORIZED_APP, PTR_LST_TYPE);
+          const childrenIds = profile.getChildrenIds();
+          const alreadyLinked = childrenIds.includes(app.getId().get())
+          if (!alreadyLinked) await profile.addChild(app, PROFILE_TO_AUTHORIZED_APP, PTR_LST_TYPE);
           liste.push(app);
+
         } catch (error) { }
+
         return liste;
       }
     }, Promise.resolve([]));
@@ -106,7 +110,7 @@ export default class AuthorizationService {
         );
       }
     }
-    return Promise.all(promises);
+    return Promise.all(promises)
   }
 
   public async authorizeProfileToAccessAdminApps(profile: SpinalNode, appIds: string | string[]): Promise<SpinalNode[]> {
@@ -243,13 +247,14 @@ export default class AuthorizationService {
 
   public async unauthorizeProfileToAccessSubApps(profile: SpinalNode, subAppIds: string | string[]): Promise<SpinalNode[]> {
     if (!Array.isArray(subAppIds)) subAppIds = [subAppIds];
+
     const result: SpinalNode[] = [];
     const apps = await AppService.getInstance().getAllBuildingAppsAndSubApp();
     for (const subAppId of subAppIds) {
       const subApp = apps.find((app) => app.info.id.get() === subAppId);
       if (subApp) {
         try {
-          await profile.removeChild(subApp, PROFILE_TO_AUTHORIZED_APP, PTR_LST_TYPE);
+          await profile.removeChild(subApp, PROFILE_TO_AUTHORIZED_SUB_APP, PTR_LST_TYPE);
           result.push(subApp);
         } catch (error) { }
       }

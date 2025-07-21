@@ -289,9 +289,10 @@ export class AppService {
    * @returns {Promise<ISpinalApp[]>} A promise that resolves to an array of formatted applications.
    */
   public async formatAppsAndAddSubApps(appsNodes: SpinalNode[], subAppsNodes?: SpinalNode[]): Promise<ISpinalApp[]> {
-    const proms = appsNodes.map((el) => {
+    const proms = (appsNodes || []).map((el) => {
       return this.formatAppAndAddSubApps(el, subAppsNodes);
     });
+
     const items = await Promise.all(proms);
     return items.filter((el) => el !== undefined) as ISpinalApp[];
   }

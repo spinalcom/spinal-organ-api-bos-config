@@ -271,7 +271,7 @@ class AppService {
      * @returns {Promise<ISpinalApp[]>} A promise that resolves to an array of formatted applications.
      */
     async formatAppsAndAddSubApps(appsNodes, subAppsNodes) {
-        const proms = appsNodes.map((el) => {
+        const proms = (appsNodes || []).map((el) => {
             return this.formatAppAndAddSubApps(el, subAppsNodes);
         });
         const items = await Promise.all(proms);

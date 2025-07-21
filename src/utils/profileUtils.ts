@@ -35,10 +35,7 @@ export async function _formatProfile(data: IProfileRes): Promise<IProfileData> {
 
 export async function _formatAuthRes(data: IProfileRes) {
   return {
-    apps: await AppService.getInstance().formatAppsAndAddSubApps(
-      data.apps,
-      data.subApps
-    ),
+    apps: await AppService.getInstance().formatAppsAndAddSubApps(data.apps, data.subApps),
     apis: _getNodeListInfo(data.apis),
     contexts: _getNodeListInfo(data.contexts),
     ...(data.adminApps && { adminApps: _getNodeListInfo(data.adminApps) }),

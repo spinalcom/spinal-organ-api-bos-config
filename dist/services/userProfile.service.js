@@ -110,10 +110,10 @@ class UserProfileService {
         this._renameProfile(profileNode, userProfile.name);
         if (userProfile.unauthorizeApisIds)
             await this.unauthorizeProfileToAccessApis(profileNode, userProfile.unauthorizeApisIds);
-        if (userProfile.unauthorizeAppsIds)
-            await this.unauthorizeProfileToAccessApps(profileNode, userProfile.unauthorizeAppsIds);
         if (userProfile.unauthorizeSubAppsIds)
             await this.unauthorizeProfileToAccessSubApps(profileNode, userProfile.unauthorizeSubAppsIds);
+        if (userProfile.unauthorizeAppsIds)
+            await this.unauthorizeProfileToAccessApps(profileNode, userProfile.unauthorizeAppsIds);
         if (userProfile.unauthorizeContextIds)
             await this.unauthorizeProfileToAccessContext(profileNode, userProfile.unauthorizeContextIds);
         if (userProfile.apisIds)

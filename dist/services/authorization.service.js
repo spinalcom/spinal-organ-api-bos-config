@@ -78,7 +78,10 @@ class AuthorizationService {
             const app = await apps_service_1.AppService.getInstance().getBuildingApp(findNodeBySearchKey_1.searchById, appId);
             if (app) {
                 try {
-                    await profile.addChild(app, constant_1.PROFILE_TO_AUTHORIZED_APP, constant_1.PTR_LST_TYPE);
+                    const childrenIds = profile.getChildrenIds();
+                    const alreadyLinked = childrenIds.includes(app.getId().get());
+                    if (!alreadyLinked)
+                        await profile.addChild(app, constant_1.PROFILE_TO_AUTHORIZED_APP, constant_1.PTR_LST_TYPE);
                     liste.push(app);
                 }
                 catch (error) { }
@@ -233,7 +236,7 @@ class AuthorizationService {
             const subApp = apps.find((app) => app.info.id.get() === subAppId);
             if (subApp) {
                 try {
-                    await profile.removeChild(subApp, constant_1.PROFILE_TO_AUTHORIZED_APP, constant_1.PTR_LST_TYPE);
+                    await profile.removeChild(subApp, constant_1.PROFILE_TO_AUTHORIZED_SUB_APP, constant_1.PTR_LST_TYPE);
                     result.push(subApp);
                 }
                 catch (error) { }
