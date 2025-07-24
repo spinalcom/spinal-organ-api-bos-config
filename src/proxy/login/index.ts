@@ -67,7 +67,10 @@ export async function useLoginProxy(app: express.Application) {
             const cookiesId = uuidv4();
             globalCache.set(cookiesId, { uri: vue_client_uri, profileId, token, user }, 30 * 1000); //store data for 30seconds
 
-            return res.redirect(`${vue_client_uri}/login?ref=${cookiesId}`);
+
+            let endpoint = vue_client_uri!.endsWith("/") ? "login" : "/login";
+
+            return res.redirect(`${vue_client_uri + endpoint}?ref=${cookiesId}`);
 
             /**
              * found a way to send cookies with a redirect, but it doesn't work in all browsers
