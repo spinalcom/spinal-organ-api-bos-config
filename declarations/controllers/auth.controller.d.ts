@@ -15,6 +15,12 @@ export declare class AuthController extends Controller {
     registerToAdmin(req: express.Request, data: IAdmin): Promise<IBosCredential | {
         message: string;
     }>;
+    updateBosTokenInAuthPlatform(req: express.Request): Promise<{
+        token: string;
+        code: number;
+    } | {
+        message: string;
+    }>;
     getBosToAdminCredential(req: express.Request): Promise<IBosCredential | {
         message: string;
     }>;

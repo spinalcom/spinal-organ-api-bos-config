@@ -28,7 +28,7 @@ import { HTTP_CODES, SECURITY_MESSAGES, SECURITY_NAME } from "../constant";
 import { Body, Route, Tags, Controller, Post, Get, Put, Delete, Security, Request } from "tsoa";
 import { IAdmin, IAdminCredential, IAppCredential, IApplicationToken, IOAuth2Credential, IBosCredential, IUserCredential, IUserToken } from "../interfaces";
 import { AuthError } from "../security/AuthError";
-import { checkIfItIsAdmin } from "../security/authentication";
+import { checkIfItIsAdmin, checkIfItIsAuthPlateform } from "../security/authentication";
 
 const serviceInstance = AuthentificationService.getInstance();
 const tokenService = TokenService.getInstance();
@@ -76,9 +76,26 @@ export class AuthController extends Controller {
             if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
             const registeredData = await serviceInstance.registerToAdmin(data.urlAdmin, data.clientId, data.clientSecret);
-            await serviceInstance.sendDataToAdmin();
+            await serviceInstance.sendBosInfoToAuth();
             this.setStatus(HTTP_CODES.OK)
             return registeredData;
+        } catch (error) {
+            this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+
+    @Security(SECURITY_NAME.bearerAuth)
+    @Post("/update_platform_token")
+    public async updateBosTokenInAuthPlatform(@Request() req: express.Request): Promise<{ token: string; code: number } | { message: string }> {
+        try {
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+
+            const data = await serviceInstance.updateBosTokenInAuthPlatform();
+
+            this.setStatus(HTTP_CODES.OK)
+            return data;
         } catch (error) {
             this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
@@ -114,7 +131,7 @@ export class AuthController extends Controller {
             const isAdmin = await checkIfItIsAdmin(req);
             if (!isAdmin) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
-            const deleted = await serviceInstance.deleteCredentials();
+            const deleted = await serviceInstance.disconnectBosFromAuth();
             const status = deleted ? HTTP_CODES.OK : HTTP_CODES.BAD_REQUEST;
             const message = deleted ? "deleted with success" : "something went wrong, please check your input data";
             this.setStatus(status);
@@ -151,7 +168,12 @@ export class AuthController extends Controller {
     @Put("/update_data")
     public async syncDataToAdmin(@Request() req: express.Request,): Promise<{ message: string }> {
         try {
-            const resp = await serviceInstance.sendDataToAdmin(true);
+            const isAdmin = await checkIfItIsAdmin(req);
+            if (!isAdmin) {
+                const isAuthPlatform = await checkIfItIsAuthPlateform(req);
+                if (!isAuthPlatform) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED)
+            };
+            const resp = await serviceInstance.sendBosInfoToAuth(true);
             this.setStatus(HTTP_CODES.OK)
             return { message: "updated" };
         } catch (error) {

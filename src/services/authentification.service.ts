@@ -22,7 +22,7 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
-import { IAdmin, IAdminAppProfile, IAdminCredential, IAdminOrgan, IAdminUserProfile, IBosCredential, IJsonData, IUserCredential, IAppCredential, IApplicationToken, IUserToken, IOAuth2Credential } from "../interfaces";
+import { IAdminAppProfile, IAdminCredential, IAdminUserProfile, IBosCredential, IJsonData, IUserCredential, IAppCredential, IUserToken, IOAuth2Credential } from "../interfaces";
 import axios from "axios";
 import { SpinalContext } from "spinal-env-viewer-graph-service";
 import { configServiceInstance } from "./configFile.service";
@@ -32,10 +32,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { UserProfileService } from "./userProfile.service";
 import { AppProfileService } from "./appProfile.service";
 
-import * as globalCache from 'global-cache';
 import { UserListService } from "./userList.services";
-import { TokenService } from "./token.service";
-import { AppListService } from "./appList.services";
 import { OtherError } from "../security/AuthError";
 import { SpinalCodeUniqueService } from "./codeUnique.service";
 const tokenKey = '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d';
@@ -134,7 +131,7 @@ export class AuthentificationService {
      * @returns An object indicating that the credentials have been removed.
      * @async
      */
-    public async deleteCredentials() {
+    public async disconnectBosFromAuth() {
         let context = await configServiceInstance.getContext(BOS_CREDENTIAL_CONTEXT_NAME);
         if (context) await context.removeFromGraph();
 
@@ -143,6 +140,61 @@ export class AuthentificationService {
 
         return { removed: true }
     }
+
+
+    /**
+    * Updates the BOS token in the authentication platform.
+    * @returns A promise that resolves to the updated token data.
+    * @memberof AuthentificationService
+    */
+    public async updateBosTokenInAuthPlatform(): Promise<{ token: string; code: number }> {
+        let pamCredentials = await this.getBosToAdminCredential();
+
+        if (!pamCredentials) throw new Error("No admin registered, register an admin and retry !");
+
+        const { urlAdmin, clientId, tokenPamToAdmin } = pamCredentials;
+
+        return axios.post(`${urlAdmin}/platforms/updatePlatformToken`, { clientId, token: tokenPamToAdmin }, {
+            headers: { 'Content-Type': 'application/json' },
+        }).then(async (result) => {
+            if (result.data.error) throw new Error(result.data.error);
+
+            await this._saveOrEditBosCredentials({ token: result.data.token });
+            return result.data;
+        })
+    }
+
+    /**
+    * Saves or edits PAM credentials in the graph.
+    *
+    * @private
+    * @param {*} bosCredential
+    * @return {*}  {Promise<IPamCredential>}
+    * @memberof AuthentificationService
+    */
+    private async _saveOrEditBosCredentials(bosCredential: any): Promise<IBosCredential> {
+        const context = await this._getOrCreateContext(BOS_CREDENTIAL_CONTEXT_NAME, BOS_CREDENTIAL_CONTEXT_TYPE);
+
+        // Map the keys of bosCredential to the keys used in the graph context
+        const keysUsedInGraph = {
+            token: "tokenBosToAdmin",
+            TokenBosAdmin: "tokenBosToAdmin",
+            name: "BosName",
+            id: "idPlateform",
+            url: "urlAdmin",
+            clientId: "clientId"
+        } as const;
+
+        for (const key in bosCredential) {
+            if (bosCredential.hasOwnProperty(key)) {
+                const mappedKey = keysUsedInGraph[key];
+                if (mappedKey && bosCredential[key] !== undefined) context.info.mod_attr(mappedKey, bosCredential[key]);
+            }
+        }
+
+        return context.info.get();
+    }
+
 
     // Admin credential
 
@@ -196,21 +248,30 @@ export class AuthentificationService {
      * @returns A promise resolving to the Axios response of the PUT request.
      * @throws Error if no admin is registered.
      */
-    public async sendDataToAdmin(update: boolean = false) {
+    public async sendBosInfoToAuth(update: boolean = false) {
         const bosCredential = await this.getBosToAdminCredential();
         if (!bosCredential) throw new Error("No admin registered, register an admin and retry !");
 
-        const endpoint = "register";
+        const adminCredential: any = await this._getOrCreateAdminCredential(true);
+        if (!adminCredential) throw new Error("No admin registered, register an admin and retry !");
 
-        const adminCredential: any = !update ? await this._getOrCreateAdminCredential(true) : {};
-
+        // const endpoint = "register";
 
         const data = await this._getRequestBody(update, bosCredential, adminCredential);
+        if (bosCredential.urlAdmin.endsWith("/"))
+            bosCredential.urlAdmin = bosCredential.urlAdmin.replace(/\/$/, "");
 
-        return axios.put(`${bosCredential.urlAdmin}/${endpoint}`, data, {
+        return axios.put(`${bosCredential.urlAdmin}/register`, data, {
             headers: {
                 'Content-Type': 'application/json',
             },
+        }).catch(async (err) => {
+            if (err.response?.status === HTTP_CODES.UNAUTHORIZED) {
+                await this.updateBosTokenInAuthPlatform();
+                return this.sendBosInfoToAuth(update);
+            }
+
+            throw err;
         })
     }
 

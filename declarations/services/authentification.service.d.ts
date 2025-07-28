@@ -42,9 +42,27 @@ export declare class AuthentificationService {
      * @returns An object indicating that the credentials have been removed.
      * @async
      */
-    deleteCredentials(): Promise<{
+    disconnectBosFromAuth(): Promise<{
         removed: boolean;
     }>;
+    /**
+    * Updates the BOS token in the authentication platform.
+    * @returns A promise that resolves to the updated token data.
+    * @memberof AuthentificationService
+    */
+    updateBosTokenInAuthPlatform(): Promise<{
+        token: string;
+        code: number;
+    }>;
+    /**
+    * Saves or edits PAM credentials in the graph.
+    *
+    * @private
+    * @param {*} bosCredential
+    * @return {*}  {Promise<IPamCredential>}
+    * @memberof AuthentificationService
+    */
+    private _saveOrEditBosCredentials;
     /**
      * Creates a new set of admin credentials by generating a unique client ID and a JWT token.
      * The generated credentials are then saved or updated using the `editAdminCredential` method.
@@ -72,7 +90,7 @@ export declare class AuthentificationService {
      * @returns A promise resolving to the Axios response of the PUT request.
      * @throws Error if no admin is registered.
      */
-    sendDataToAdmin(update?: boolean): Promise<import("axios").AxiosResponse<any, any>>;
+    sendBosInfoToAuth(update?: boolean): any;
     /**
      * Retrieves the admin credentials if they exist, or optionally creates them if they do not.
      *

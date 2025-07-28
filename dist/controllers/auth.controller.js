@@ -76,9 +76,23 @@ let AuthController = class AuthController extends tsoa_1.Controller {
             if (!isAdmin)
                 throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
             const registeredData = await serviceInstance.registerToAdmin(data.urlAdmin, data.clientId, data.clientSecret);
-            await serviceInstance.sendDataToAdmin();
+            await serviceInstance.sendBosInfoToAuth();
             this.setStatus(constant_1.HTTP_CODES.OK);
             return registeredData;
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+    async updateBosTokenInAuthPlatform(req) {
+        try {
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const data = await serviceInstance.updateBosTokenInAuthPlatform();
+            this.setStatus(constant_1.HTTP_CODES.OK);
+            return data;
         }
         catch (error) {
             this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
@@ -108,7 +122,7 @@ let AuthController = class AuthController extends tsoa_1.Controller {
             const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
             if (!isAdmin)
                 throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-            const deleted = await serviceInstance.deleteCredentials();
+            const deleted = await serviceInstance.disconnectBosFromAuth();
             const status = deleted ? constant_1.HTTP_CODES.OK : constant_1.HTTP_CODES.BAD_REQUEST;
             const message = deleted ? "deleted with success" : "something went wrong, please check your input data";
             this.setStatus(status);
@@ -139,7 +153,14 @@ let AuthController = class AuthController extends tsoa_1.Controller {
     }
     async syncDataToAdmin(req) {
         try {
-            const resp = await serviceInstance.sendDataToAdmin(true);
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            if (!isAdmin) {
+                const isAuthPlatform = await (0, authentication_1.checkIfItIsAuthPlateform)(req);
+                if (!isAuthPlatform)
+                    throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            }
+            ;
+            const resp = await serviceInstance.sendBosInfoToAuth(true);
             this.setStatus(constant_1.HTTP_CODES.OK);
             return { message: "updated" };
         }
@@ -194,6 +215,14 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "registerToAdmin", null);
+__decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
+    (0, tsoa_1.Post)("/update_platform_token"),
+    __param(0, (0, tsoa_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "updateBosTokenInAuthPlatform", null);
 __decorate([
     (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
     (0, tsoa_1.Get)("/get_bos_to_auth_credential"),

@@ -27,6 +27,7 @@ exports.expressAuthentication = expressAuthentication;
 exports.checkIfItIsAdmin = checkIfItIsAdmin;
 exports.getProfileId = getProfileId;
 exports.checkAndGetTokenInfo = checkAndGetTokenInfo;
+exports.checkIfItIsAuthPlateform = checkIfItIsAuthPlateform;
 exports.checkBeforeRedirectToApi = checkBeforeRedirectToApi;
 const constant_1 = require("../constant");
 const services_1 = require("../services");
@@ -60,6 +61,13 @@ async function checkAndGetTokenInfo(request) {
     if (!tokenInfo)
         throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.INVALID_TOKEN);
     return tokenInfo;
+}
+async function checkIfItIsAuthPlateform(request) {
+    const token = (0, utils_1.getToken)(request);
+    if (!token)
+        return false;
+    const authAdmin = await services_1.AuthentificationService.getInstance().getAdminCredential();
+    return token === authAdmin.TokenAdminToPam;
 }
 async function checkBeforeRedirectToApi(request, securityName, scopes) {
     const tokenInfo = await checkAndGetTokenInfo(request);

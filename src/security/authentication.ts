@@ -24,7 +24,7 @@
 
 import * as express from "express";
 import { APP_PROFILE_TYPE, SECURITY_MESSAGES, SECURITY_NAME, USER_TYPES } from "../constant";
-import { AppProfileService, TokenService, UserProfileService } from "../services";
+import { AppProfileService, AuthentificationService, TokenService, UserProfileService } from "../services";
 import { profileHasAccessToApi, getToken } from "./utils";
 import { AuthError } from "./AuthError";
 import { AdminProfileService } from "../services/adminProfile.service";
@@ -68,6 +68,14 @@ export async function checkAndGetTokenInfo(request: express.Request) {
     if (!tokenInfo) throw new AuthError(SECURITY_MESSAGES.INVALID_TOKEN);
 
     return tokenInfo;
+}
+
+export async function checkIfItIsAuthPlateform(request: express.Request): Promise<boolean> {
+    const token = getToken(request);
+    if (!token) return false;
+
+    const authAdmin = await AuthentificationService.getInstance().getAdminCredential();
+    return token === authAdmin.TokenAdminToPam;
 }
 
 
