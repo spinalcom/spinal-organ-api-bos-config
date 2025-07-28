@@ -227,18 +227,14 @@ export class TokenService {
    */
   public async tokenIsValid(token: string, deleteIfExpired: boolean = false): Promise<IUserToken | IApplicationToken> {
 
-    let isAdminToken = false;
 
     try {
       const adminTokenData = await this.getTokenData(token);
       if (!adminTokenData) throw new Error("Token not found in cache or context"); // Check if the token is in the cache or context
 
-      isAdminToken = true;
       await this.verifyTokenForAdmin(token) // Verify the token using the admin secret key
       return adminTokenData;
     } catch (error) {
-      if (isAdminToken) return; // If it is an admin token and verification failed, return undefined;
-
       return this.verifyTokenInAuthPlatform(token);
     }
 
@@ -266,10 +262,10 @@ export class TokenService {
    * @return {*}  {Promise<any>} - Resolves with the verification result.
    * @memberof TokenService
    */
-  public async verifyTokenInAuthPlatform(token: string, actor: "user" | "app" = "user") {
-    const authAdmin = await AuthentificationService.getInstance().getBosToAdminCredential();
+  public async verifyTokenInAuthPlatform(token: string, actor?: "user" | "app" | "code") {
+    const bosCredential = await AuthentificationService.getInstance().getBosToAdminCredential();
 
-    return axios.post(`${authAdmin.urlAdmin}/tokens/verifyToken`, { tokenParam: token, actor }).then((result) => {
+    return axios.post(`${bosCredential.urlAdmin}/tokens/verifyToken`, { tokenParam: token, platformId: bosCredential.idPlateform, actor }).then((result) => {
       return result.data;
     })
   }

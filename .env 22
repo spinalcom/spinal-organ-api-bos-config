@@ -1,0 +1,19 @@
+USER_ID="168"
+USER_MDP="b4v4SsE2"
+
+# HUB_PROTOCOL="http"
+# HUB_HOST="127.0.0.1"
+# HUB_PORT="8064"
+
+
+
+CONFIG_DIRECTORY_PATH="/__users__/admin/"
+CONFIG_FILE_NAME="BOSConfig"
+
+WEBSOCKET_ALERT_TIME="60000" # en milliseconde
+
+SERVER_PORT=8065
+PATH_DIR_STATIC_HTML=".browser_organs"
+
+
+# 135.125.9.142:8159/

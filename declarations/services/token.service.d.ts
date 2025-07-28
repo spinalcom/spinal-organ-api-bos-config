@@ -101,7 +101,7 @@ export declare class TokenService {
      * @return {*}  {Promise<any>} - Resolves with the verification result.
      * @memberof TokenService
      */
-    verifyTokenInAuthPlatform(token: string, actor?: "user" | "app"): Promise<any>;
+    verifyTokenInAuthPlatform(token: string, actor?: "user" | "app" | "code"): Promise<any>;
     /**
      * Verify a token using the admin secret key.
      *

@@ -200,18 +200,14 @@ class TokenService {
      * @memberof TokenService
      */
     async tokenIsValid(token, deleteIfExpired = false) {
-        let isAdminToken = false;
         try {
             const adminTokenData = await this.getTokenData(token);
             if (!adminTokenData)
                 throw new Error("Token not found in cache or context"); // Check if the token is in the cache or context
-            isAdminToken = true;
             await this.verifyTokenForAdmin(token); // Verify the token using the admin secret key
             return adminTokenData;
         }
         catch (error) {
-            if (isAdminToken)
-                return; // If it is an admin token and verification failed, return undefined;
             return this.verifyTokenInAuthPlatform(token);
         }
     }
@@ -236,9 +232,9 @@ class TokenService {
      * @return {*}  {Promise<any>} - Resolves with the verification result.
      * @memberof TokenService
      */
-    async verifyTokenInAuthPlatform(token, actor = "user") {
-        const authAdmin = await authentification_service_1.AuthentificationService.getInstance().getBosToAdminCredential();
-        return axios_1.default.post(`${authAdmin.urlAdmin}/tokens/verifyToken`, { tokenParam: token, actor }).then((result) => {
+    async verifyTokenInAuthPlatform(token, actor) {
+        const bosCredential = await authentification_service_1.AuthentificationService.getInstance().getBosToAdminCredential();
+        return axios_1.default.post(`${bosCredential.urlAdmin}/tokens/verifyToken`, { tokenParam: token, platformId: bosCredential.idPlateform, actor }).then((result) => {
             return result.data;
         });
     }
