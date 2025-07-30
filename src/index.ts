@@ -24,7 +24,7 @@
 
 const path = require('path');
 
-require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
+require('dotenv').config({ override: true, path: path.resolve(__dirname, '../.env') });
 import { spinalCore } from 'spinal-core-connectorjs_type';
 import { configServiceInstance } from './services/configFile.service';
 import expressServer from './server';
