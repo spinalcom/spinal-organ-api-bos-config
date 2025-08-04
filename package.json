@@ -9,6 +9,7 @@
   "scripts": {
     "build": "npm run clean && npm run prebuild && tsc",
     "start": "npm run build && node dist/index.js",
+    "just-start": "node dist/index.js",
     "predev": "npm run swagger",
     "prebuild": "npm run swagger",
     "dev": "concurrently \"nodemon\" \"nodemon -x tsoa spec-and-routes\"",

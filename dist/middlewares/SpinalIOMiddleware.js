@@ -116,7 +116,7 @@ class SpinalIOMiddleware {
             const node = await this.getNodeWithServerId(nodeId, socket);
             //@ts-ignore
             if (node && node instanceof spinal_env_viewer_graph_service_1.SpinalNode)
-                SpinalGraphService._addNode(node);
+                spinal_env_viewer_graph_service_1.SpinalGraphService._addNode(node);
             return node;
         }
         return this.getNodeWithStaticId(nodeId?.toString(), contextId, socket);

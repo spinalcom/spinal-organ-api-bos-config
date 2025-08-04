@@ -30,6 +30,7 @@ import {
   SpinalContext,
   SpinalGraph,
   SpinalNode,
+  SpinalGraphService
 } from 'spinal-env-viewer-graph-service';
 import {SECURITY_MESSAGES} from '../constant';
 import {TokenService, WebsocketLogsService} from '../services';
@@ -155,7 +156,7 @@ export default class SpinalIOMiddleware implements ISpinalIOMiddleware {
       //@ts-ignore
       if (node && node instanceof SpinalNode) SpinalGraphService._addNode(node);
 
-      return node;
+      return node;  
     }
 
     return this.getNodeWithStaticId(nodeId?.toString(), contextId, socket);
