@@ -43,8 +43,13 @@ async function expressAuthentication(request, securityName, scopes) {
     return token;
 }
 async function checkIfItIsAdmin(request) {
-    let profileId = await getProfileId(request);
-    return adminProfile_service_1.AdminProfileService.getInstance().adminNode.getId().get() === profileId;
+    try {
+        let profileId = await getProfileId(request);
+        return adminProfile_service_1.AdminProfileService.getInstance().adminNode.getId().get() === profileId;
+    }
+    catch (error) {
+        return false;
+    }
 }
 async function getProfileId(request) {
     const tokenInfo = await checkAndGetTokenInfo(request);

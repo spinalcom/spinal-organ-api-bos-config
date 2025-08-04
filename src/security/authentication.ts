@@ -41,10 +41,13 @@ export async function expressAuthentication(request: express.Request, securityNa
 
 
 export async function checkIfItIsAdmin(request: express.Request): Promise<boolean> {
+    try {
+        let profileId = await getProfileId(request);
+        return AdminProfileService.getInstance().adminNode.getId().get() === profileId;
+    } catch (error) {
+        return false;
+    }
 
-    let profileId = await getProfileId(request);
-
-    return AdminProfileService.getInstance().adminNode.getId().get() === profileId;
 }
 
 
