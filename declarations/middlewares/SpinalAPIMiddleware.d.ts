@@ -1,5 +1,5 @@
 import { FileSystem, Model } from 'spinal-core-connectorjs';
-import { SpinalGraph } from 'spinal-env-viewer-graph-service';
+import { SpinalGraph, SpinalNode } from 'spinal-env-viewer-graph-service';
 import { IConfig, ISpinalAPIMiddleware } from 'spinal-organ-api-server';
 export default class SpinalAPIMiddleware implements ISpinalAPIMiddleware {
     config: IConfig;
@@ -8,6 +8,7 @@ export default class SpinalAPIMiddleware implements ISpinalAPIMiddleware {
     iteratorGraph: AsyncGenerator<SpinalGraph<any>, never>;
     profilesToGraph: Map<string, SpinalGraph>;
     private static instance;
+    graph: SpinalGraph<any>;
     private constructor();
     static getInstance(conn?: spinal.FileSystem): SpinalAPIMiddleware;
     getGraph(): Promise<SpinalGraph<any>>;
@@ -16,6 +17,7 @@ export default class SpinalAPIMiddleware implements ISpinalAPIMiddleware {
     load<T extends Model>(server_id: number, profileId: string): Promise<T>;
     loadPtr<T extends Model>(ptr: spinal.File<T> | spinal.Ptr<T> | spinal.Pbr<T>): Promise<T>;
     private _geneGraph;
+    setGraph(actualDigitalTwin?: SpinalNode): Promise<SpinalGraph<any>>;
     private _loadNewGraph;
     private _loadwithConnect;
     private _nodeIsBelongUserContext;

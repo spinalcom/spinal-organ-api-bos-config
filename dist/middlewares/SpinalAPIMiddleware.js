@@ -28,7 +28,6 @@ const spinal_core_connectorjs_1 = require("spinal-core-connectorjs");
 const spinal_env_viewer_graph_service_1 = require("spinal-env-viewer-graph-service");
 const constant_1 = require("../constant");
 const services_1 = require("../services");
-const digitalTwinService = services_1.DigitalTwinService.getInstance();
 class SpinalAPIMiddleware {
     config = {
         spinalConnector: {
@@ -50,6 +49,7 @@ class SpinalAPIMiddleware {
     iteratorGraph = this._geneGraph();
     profilesToGraph = new Map();
     static instance;
+    graph;
     constructor(conn) {
         this.conn = conn;
     }
@@ -124,18 +124,21 @@ class SpinalAPIMiddleware {
     //               PRIVATES                   //
     //////////////////////////////////////////////
     async *_geneGraph() {
-        let graph;
-        const actualDigitalTwin = await digitalTwinService.getActualDigitalTwin();
-        graph = await digitalTwinService.getDigitalTwinGraph(actualDigitalTwin);
+        await this.setGraph();
         while (true) {
-            const url = actualDigitalTwin.info.url.get();
-            if (!graph) {
-                graph = await this._loadNewGraph(url);
-            }
-            if (graph)
-                await spinal_env_viewer_graph_service_1.SpinalGraphService.setGraph(graph);
-            yield graph;
+            yield this.graph;
         }
+    }
+    async setGraph(actualDigitalTwin) {
+        if (!actualDigitalTwin) {
+            actualDigitalTwin =
+                await services_1.DigitalTwinService.getInstance().getActualDigitalTwin();
+        }
+        const url = actualDigitalTwin.info.url.get();
+        const graph = await this._loadNewGraph(url);
+        this.graph = graph;
+        await spinal_env_viewer_graph_service_1.SpinalGraphService.setGraph(graph);
+        return graph;
     }
     _loadNewGraph(path) {
         return new Promise((resolve, reject) => {

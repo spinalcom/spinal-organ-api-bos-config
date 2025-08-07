@@ -2,10 +2,11 @@
 	"name": "spinal-organ-api-bos-config",
 	"version": "2.5.12",
 	"description": "",
-	"main": "index.js",
+	"main": "dist/index.js",
 	"keywords": [],
 	"author": "",
 	"license": "ISC",
+	"typings": "declarations/index.d.ts",
 	"scripts": {
 		"build": "npm run clean && npm run prebuild && tsc",
 		"start": "npm run build && node dist/index.js",

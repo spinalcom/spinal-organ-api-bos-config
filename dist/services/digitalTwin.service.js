@@ -30,6 +30,7 @@ const spinal_core_connectorjs_type_1 = require("spinal-core-connectorjs_type");
 const path = require("path");
 const constant_1 = require("../constant");
 const adminProfile_service_1 = require("./adminProfile.service");
+const SpinalAPIMiddleware_1 = require("../middlewares/SpinalAPIMiddleware");
 class DigitalTwinService {
     static instance;
     _actualDigitalTwin;
@@ -182,6 +183,7 @@ class DigitalTwinService {
             digitalTwinNode.info.add_attr({ [this.attrName]: true });
             this.context.info.add_attr({ [this.attrName]: new spinal_core_connectorjs_type_1.Ptr(digitalTwinNode) });
             this._actualDigitalTwin = digitalTwinNode;
+            await SpinalAPIMiddleware_1.default.getInstance().setGraph(digitalTwinNode);
             return digitalTwinNode;
         }
         return undefined;

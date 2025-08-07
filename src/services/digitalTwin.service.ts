@@ -28,6 +28,7 @@ import { spinalCore, Ptr } from "spinal-core-connectorjs_type";
 import * as path from "path";
 import { CONTEXT_TO_DIGITALTWIN_RELATION_NAME, DIGITALTWIN_CONTEXT_NAME, DIGITALTWIN_CONTEXT_TYPE, DIGITALTWIN_TYPE, PORTOFOLIO_CONTEXT_NAME, PTR_LST_TYPE } from "../constant";
 import { AdminProfileService } from "./adminProfile.service";
+import SpinalAPIMiddleware from "../middlewares/SpinalAPIMiddleware";
 
 export class DigitalTwinService {
     private static instance: DigitalTwinService;
@@ -202,6 +203,7 @@ export class DigitalTwinService {
             digitalTwinNode.info.add_attr({ [this.attrName]: true });
             this.context.info.add_attr({ [this.attrName]: new Ptr(digitalTwinNode) });
             this._actualDigitalTwin = digitalTwinNode;
+            await SpinalAPIMiddleware.getInstance().setGraph(digitalTwinNode);
             return digitalTwinNode;
         }
 

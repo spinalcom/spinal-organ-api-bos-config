@@ -28,10 +28,6 @@ import { IConfig, ISpinalAPIMiddleware } from 'spinal-organ-api-server';
 import { EXCLUDES_TYPES, HTTP_CODES } from '../constant';
 import { AppProfileService, AppService, DigitalTwinService, UserProfileService } from '../services';
 
-
-
-const digitalTwinService = DigitalTwinService.getInstance();
-
 export default class SpinalAPIMiddleware implements ISpinalAPIMiddleware {
 
     config: IConfig = {
@@ -54,6 +50,7 @@ export default class SpinalAPIMiddleware implements ISpinalAPIMiddleware {
     iteratorGraph: AsyncGenerator<SpinalGraph<any>, never> = this._geneGraph();
     profilesToGraph: Map<string, SpinalGraph> = new Map();
     private static instance: SpinalAPIMiddleware;
+    graph: SpinalGraph<any>;
 
     private constructor(conn: spinal.FileSystem) {
         this.conn = conn;
@@ -136,20 +133,24 @@ export default class SpinalAPIMiddleware implements ISpinalAPIMiddleware {
     //////////////////////////////////////////////
 
     private async *_geneGraph(): AsyncGenerator<SpinalGraph<any>, never> {
-        let graph;
-        const actualDigitalTwin = await digitalTwinService.getActualDigitalTwin();
-        graph = await digitalTwinService.getDigitalTwinGraph(actualDigitalTwin);
-
+        await this.setGraph();
         while (true) {
-            const url = actualDigitalTwin.info.url.get();
-            if (!graph) {
-                graph = await this._loadNewGraph(url);
-            }
-            
-            if (graph) await SpinalGraphService.setGraph(graph);
-            yield graph;
+            yield this.graph;
         }
     }
+
+    async setGraph(actualDigitalTwin?: SpinalNode) { 
+        if (!actualDigitalTwin) {
+            actualDigitalTwin =
+              await DigitalTwinService.getInstance().getActualDigitalTwin();
+        }
+        const url = actualDigitalTwin.info.url.get();
+        const graph = await this._loadNewGraph(url);
+        this.graph = graph;
+        await SpinalGraphService.setGraph(graph);
+        return graph;
+    }
+
 
     private _loadNewGraph(path: string): Promise<SpinalGraph> {
         return new Promise<SpinalGraph<any>>((resolve, reject) => {
