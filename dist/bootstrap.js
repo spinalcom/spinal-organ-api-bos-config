@@ -37,7 +37,7 @@ async function runStartupTask() {
     if (!match)
         throw new Error('Could not extract credentials JSON');
     const credentials = JSON.parse(match[1]);
-    const url = `http://localhost:${process.env.SERVER_PORT}`;
+    const url = `${process.env.SERVER_PROTOCOL}://localhost:${process.env.SERVER_PORT}`;
     const authResponse = await axios_1.default.post(`${url}/api/v1/auth`, credentials);
     const token = authResponse.data.token;
     const configPath = path.resolve(__dirname, '../startupRoutes.json');
