@@ -46,13 +46,15 @@ class SpinalIOMiddleware {
     conn;
     logService = services_1.WebsocketLogsService.getInstance();
     static instance;
-    constructor(conn) {
-        this.conn = conn;
+    constructor() {
     }
-    static getInstance(conn) {
+    static getInstance() {
         if (!this.instance)
-            this.instance = new SpinalIOMiddleware(conn);
+            this.instance = new SpinalIOMiddleware();
         return this.instance;
+    }
+    setConnection(conn) {
+        this.conn = conn;
     }
     tokenCheckMiddleware(io) {
         io.use(async (socket, next) => {

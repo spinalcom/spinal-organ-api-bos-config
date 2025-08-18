@@ -22,20 +22,20 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
-import {FileSystem} from 'spinal-core-connectorjs';
-import {ISpinalIOMiddleware} from 'spinal-organ-api-pubsub';
+import { FileSystem } from 'spinal-core-connectorjs';
+import { ISpinalIOMiddleware } from 'spinal-organ-api-pubsub';
 import SpinalAPIMiddleware from './SpinalAPIMiddleware';
-import {Socket, Server} from 'socket.io';
+import { Socket, Server } from 'socket.io';
 import {
   SpinalContext,
   SpinalGraph,
   SpinalNode,
   SpinalGraphService
 } from 'spinal-env-viewer-graph-service';
-import {SECURITY_MESSAGES} from '../constant';
-import {TokenService, WebsocketLogsService} from '../services';
-import {NextFunction} from 'express';
-import {IConfig} from 'spinal-organ-api-server';
+import { SECURITY_MESSAGES } from '../constant';
+import { TokenService, WebsocketLogsService } from '../services';
+import { NextFunction } from 'express';
+import { IConfig } from 'spinal-organ-api-server';
 
 export default class SpinalIOMiddleware implements ISpinalIOMiddleware {
   config: IConfig = {
@@ -60,13 +60,17 @@ export default class SpinalIOMiddleware implements ISpinalIOMiddleware {
 
   private static instance: ISpinalIOMiddleware;
 
-  private constructor(conn: spinal.FileSystem) {
-    this.conn = conn;
+  private constructor() {
+
   }
 
-  static getInstance(conn?: spinal.FileSystem): ISpinalIOMiddleware {
-    if (!this.instance) this.instance = new SpinalIOMiddleware(conn);
+  static getInstance(): ISpinalIOMiddleware {
+    if (!this.instance) this.instance = new SpinalIOMiddleware();
     return this.instance;
+  }
+
+  public setConnection(conn: FileSystem) {
+    this.conn = conn;
   }
 
   public tokenCheckMiddleware(io: Server): void {
@@ -84,7 +88,7 @@ export default class SpinalIOMiddleware implements ISpinalIOMiddleware {
 
   public getGraph(): Promise<SpinalGraph> {
     return SpinalAPIMiddleware.getInstance().getGraph();
-  }  
+  }
 
   public async getProfileGraph(socket?: Socket): Promise<SpinalGraph> {
     let profileId = await this._getProfileId(socket);
@@ -156,14 +160,14 @@ export default class SpinalIOMiddleware implements ISpinalIOMiddleware {
       //@ts-ignore
       if (node && node instanceof SpinalNode) SpinalGraphService._addNode(node);
 
-      return node;  
+      return node;
     }
 
     return this.getNodeWithStaticId(nodeId?.toString(), contextId, socket);
   }
 
   private async _getTokenInfo(socket: Socket) {
-    const {header, auth, query} = <any>socket.handshake;
+    const { header, auth, query } = <any>socket.handshake;
     const token = auth?.token || header?.token || query?.token;
     if (!token) throw new Error(SECURITY_MESSAGES.INVALID_TOKEN);
 

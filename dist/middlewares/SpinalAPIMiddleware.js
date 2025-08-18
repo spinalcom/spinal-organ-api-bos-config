@@ -50,13 +50,15 @@ class SpinalAPIMiddleware {
     profilesToGraph = new Map();
     static instance;
     graph;
-    constructor(conn) {
-        this.conn = conn;
+    constructor() {
     }
-    static getInstance(conn) {
+    static getInstance() {
         if (!this.instance)
-            this.instance = new SpinalAPIMiddleware(conn);
+            this.instance = new SpinalAPIMiddleware();
         return this.instance;
+    }
+    setConnection(conn) {
+        this.conn = conn;
     }
     async getGraph() {
         const next = await this.iteratorGraph.next();

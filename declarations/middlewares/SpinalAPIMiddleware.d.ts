@@ -10,7 +10,8 @@ export default class SpinalAPIMiddleware implements ISpinalAPIMiddleware {
     private static instance;
     graph: SpinalGraph<any>;
     private constructor();
-    static getInstance(conn?: spinal.FileSystem): SpinalAPIMiddleware;
+    static getInstance(): SpinalAPIMiddleware;
+    setConnection(conn: spinal.FileSystem): void;
     getGraph(): Promise<SpinalGraph<any>>;
     getProfileGraph(profileId: string): Promise<SpinalGraph>;
     addProfileToMap(profileId: string, graph: SpinalGraph): void;

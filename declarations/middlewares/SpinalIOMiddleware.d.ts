@@ -10,7 +10,8 @@ export default class SpinalIOMiddleware implements ISpinalIOMiddleware {
     logService: WebsocketLogsService;
     private static instance;
     private constructor();
-    static getInstance(conn?: spinal.FileSystem): ISpinalIOMiddleware;
+    static getInstance(): ISpinalIOMiddleware;
+    setConnection(conn: FileSystem): void;
     tokenCheckMiddleware(io: Server): void;
     getGraph(): Promise<SpinalGraph>;
     getProfileGraph(socket?: Socket): Promise<SpinalGraph>;

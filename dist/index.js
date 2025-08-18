@@ -43,9 +43,14 @@ configFile_service_1.configServiceInstance
     .init(conn)
     .then(async () => {
     const { app, server } = await (0, server_1.default)(conn);
+    const spinalAPIMiddleware = SpinalAPIMiddleware_1.default.getInstance();
+    const spinalIOMiddleware = SpinalIOMiddleware_1.default.getInstance();
+    // Set the connection to the middlewares
+    spinalAPIMiddleware.setConnection(conn);
+    spinalIOMiddleware.setConnection(conn);
+    // it is important to call this method after setting the connection to the middlewares
+    // otherwise the digital twin will not be initialized correctly
     await services_1.DigitalTwinService.getInstance().getActualDigitalTwin(true);
-    const spinalAPIMiddleware = SpinalAPIMiddleware_1.default.getInstance(conn);
-    const spinalIOMiddleware = SpinalIOMiddleware_1.default.getInstance(conn);
     const log_body = Number(process.env.LOG_BODY) == 1 ? true : false;
     const { io } = await (0, spinal_organ_api_server_1.runServerRest)(server, app, spinalAPIMiddleware, spinalIOMiddleware, log_body);
     services_1.WebsocketLogsService.getInstance().setIo(io);

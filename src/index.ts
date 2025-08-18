@@ -33,7 +33,7 @@ import SpinalAPIMiddleware from './middlewares/SpinalAPIMiddleware';
 import { runServerRest } from 'spinal-organ-api-server';
 import SpinalIOMiddleware from './middlewares/SpinalIOMiddleware';
 import ConfigFile from 'spinal-lib-organ-monitoring';
-import { runStartupTask } from './bootstrap'; 
+import { runStartupTask } from './bootstrap';
 
 const connect_opt = process.env.HUB_PORT
   ? `${process.env.HUB_PROTOCOL}://${process.env.USER_ID}:${process.env.USER_MDP}@${process.env.HUB_HOST}:${process.env.HUB_PORT}/`
@@ -45,10 +45,18 @@ configServiceInstance
   .init(conn)
   .then(async () => {
     const { app, server } = await expressServer(conn);
-    await DigitalTwinService.getInstance().getActualDigitalTwin(true);
 
-    const spinalAPIMiddleware = SpinalAPIMiddleware.getInstance(conn);
-    const spinalIOMiddleware = SpinalIOMiddleware.getInstance(conn);
+    const spinalAPIMiddleware = SpinalAPIMiddleware.getInstance();
+    const spinalIOMiddleware = SpinalIOMiddleware.getInstance();
+
+
+    // Set the connection to the middlewares
+    spinalAPIMiddleware.setConnection(conn);
+    spinalIOMiddleware.setConnection(conn);
+
+    // it is important to call this method after setting the connection to the middlewares
+    // otherwise the digital twin will not be initialized correctly
+    await DigitalTwinService.getInstance().getActualDigitalTwin(true);
 
     const log_body = Number(process.env.LOG_BODY) == 1 ? true : false;
 
@@ -68,7 +76,7 @@ configServiceInstance
       process.env.HUB_HOST,
       parseInt(process.env.HUB_PORT)
     );
-    if(process.env.RUN_STARTUP_TASK === '1'){
+    if (process.env.RUN_STARTUP_TASK === '1') {
       await runStartupTask();
     }
 

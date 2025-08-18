@@ -52,13 +52,17 @@ export default class SpinalAPIMiddleware implements ISpinalAPIMiddleware {
     private static instance: SpinalAPIMiddleware;
     graph: SpinalGraph<any>;
 
-    private constructor(conn: spinal.FileSystem) {
-        this.conn = conn;
+    private constructor() {
+
     }
 
-    static getInstance(conn?: spinal.FileSystem): SpinalAPIMiddleware {
-        if (!this.instance) this.instance = new SpinalAPIMiddleware(conn);
+    static getInstance(): SpinalAPIMiddleware {
+        if (!this.instance) this.instance = new SpinalAPIMiddleware();
         return this.instance;
+    }
+
+    public setConnection(conn: spinal.FileSystem) {
+        this.conn = conn;
     }
 
     async getGraph(): Promise<SpinalGraph<any>> {
@@ -139,10 +143,10 @@ export default class SpinalAPIMiddleware implements ISpinalAPIMiddleware {
         }
     }
 
-    async setGraph(actualDigitalTwin?: SpinalNode) { 
+    async setGraph(actualDigitalTwin?: SpinalNode) {
         if (!actualDigitalTwin) {
             actualDigitalTwin =
-              await DigitalTwinService.getInstance().getActualDigitalTwin();
+                await DigitalTwinService.getInstance().getActualDigitalTwin();
         }
         const url = actualDigitalTwin.info.url.get();
         const graph = await this._loadNewGraph(url);
