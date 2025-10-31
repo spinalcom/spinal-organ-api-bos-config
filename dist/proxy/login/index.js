@@ -11,7 +11,7 @@ async function useLoginProxy(app) {
             const authPlatformInfo = await services_1.AuthentificationService.getInstance().getBosToAdminCredential();
             if (authPlatformInfo) {
                 let server_url = authPlatformInfo.urlAdmin;
-                const client_id = authPlatformInfo.clientId;
+                const client_id = process.env.PAM_CLIENT_ID || authPlatformInfo.clientId;
                 if (!server_url || !client_id) {
                     return res.send({ status: constant_1.HTTP_CODES.BAD_REQUEST, message: "Invalid auth server details" });
                 }

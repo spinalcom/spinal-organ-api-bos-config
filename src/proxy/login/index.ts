@@ -14,7 +14,7 @@ export async function useLoginProxy(app: express.Application) {
 
             if (authPlatformInfo) {
                 let server_url = authPlatformInfo.urlAdmin;
-                const client_id = authPlatformInfo.clientId;
+                const client_id = process.env.PAM_CLIENT_ID || authPlatformInfo.clientId;
 
                 if (!server_url || !client_id) {
                     return res.send({ status: HTTP_CODES.BAD_REQUEST, message: "Invalid auth server details" });
