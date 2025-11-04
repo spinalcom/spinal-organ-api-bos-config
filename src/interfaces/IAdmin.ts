@@ -40,16 +40,16 @@ export interface IBosInfo {
 }
 
 export interface IBosCredential {
-    id: string;
-    type: string;
-    name: string;
-    statusPlatform: string;
-    address: string;
-    tokenPamToAdmin: string;
-    pamName?: string;
-    idPlateform?: string;
-    urlAdmin?: string;
-    clientId?: string;
+  id: string;
+  type: string;
+  name: string;
+  statusPlatform: string;
+  address: string;
+  tokenBosToAdmin: string;
+  pamName?: string;
+  idPlateform?: string;
+  urlAdmin?: string;
+  clientId?: string;
 }
 
 export interface IAdminCredential {

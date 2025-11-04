@@ -138,8 +138,8 @@ class AuthentificationService {
         let pamCredentials = await this.getBosToAdminCredential();
         if (!pamCredentials)
             throw new Error("No admin registered, register an admin and retry !");
-        const { urlAdmin, clientId, tokenPamToAdmin } = pamCredentials;
-        return axios_1.default.post(`${urlAdmin}/platforms/updatePlatformToken`, { clientId, token: tokenPamToAdmin }, {
+        const { urlAdmin, clientId, tokenBosToAdmin } = pamCredentials;
+        return axios_1.default.post(`${urlAdmin}/platforms/updatePlatformToken`, { clientId, token: tokenBosToAdmin }, {
             headers: { 'Content-Type': 'application/json' },
         }).then(async (result) => {
             if (result.data.error)
@@ -282,13 +282,13 @@ class AuthentificationService {
     }
     async _getRequestBody(update, bosCredential, adminCredential) {
         return JSON.stringify({
-            TokenBosAdmin: bosCredential.tokenPamToAdmin,
+            TokenBosAdmin: bosCredential.tokenBosToAdmin,
             platformId: bosCredential.idPlateform,
             jsonData: await this.getJsonData(),
             ...(!update && {
                 URLBos: `http://localhost:8060`,
                 TokenAdminBos: adminCredential.TokenAdminToPam,
-                idPlatformOfAdmin: adminCredential.idPlatformOfAdmin
+                idPlatformOfAdmin: adminCredential.idPlatformOfAdmin,
             }),
         });
     }
@@ -296,7 +296,7 @@ class AuthentificationService {
         const context = await this._getOrCreateContext(constant_1.BOS_CREDENTIAL_CONTEXT_NAME, constant_1.BOS_CREDENTIAL_CONTEXT_TYPE);
         const contextInfo = context.info;
         if (bosCredential.TokenBosAdmin)
-            contextInfo.mod_attr("tokenPamToAdmin", bosCredential.TokenBosAdmin);
+            contextInfo.mod_attr("tokenBosToAdmin", bosCredential.TokenBosAdmin);
         if (bosCredential.name)
             contextInfo.mod_attr("pamName", bosCredential.name);
         if (bosCredential.id)

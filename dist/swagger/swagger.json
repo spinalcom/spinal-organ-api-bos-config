@@ -357,7 +357,7 @@
                     "address": {
                         "type": "string"
                     },
-                    "tokenPamToAdmin": {
+                    "tokenBosToAdmin": {
                         "type": "string"
                     },
                     "pamName": {
@@ -379,7 +379,7 @@
                     "name",
                     "statusPlatform",
                     "address",
-                    "tokenPamToAdmin"
+                    "tokenBosToAdmin"
                 ],
                 "type": "object",
                 "additionalProperties": false

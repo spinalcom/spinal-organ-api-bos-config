@@ -16,7 +16,7 @@ export interface IBosCredential {
     name: string;
     statusPlatform: string;
     address: string;
-    tokenPamToAdmin: string;
+    tokenBosToAdmin: string;
     pamName?: string;
     idPlateform?: string;
     urlAdmin?: string;

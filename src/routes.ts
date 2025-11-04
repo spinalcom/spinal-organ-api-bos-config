@@ -163,7 +163,7 @@ const models: TsoaRoute.Models = {
             "name": {"dataType":"string","required":true},
             "statusPlatform": {"dataType":"string","required":true},
             "address": {"dataType":"string","required":true},
-            "tokenPamToAdmin": {"dataType":"string","required":true},
+            "tokenBosToAdmin": {"dataType":"string","required":true},
             "pamName": {"dataType":"string"},
             "idPlateform": {"dataType":"string"},
             "urlAdmin": {"dataType":"string"},
