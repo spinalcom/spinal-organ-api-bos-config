@@ -49,6 +49,7 @@ let AuthController = class AuthController extends tsoa_1.Controller {
         super();
     }
     async authenticate(credential) {
+        // public async authenticate(@Body() credential: IUserCredential): Promise<string | IUserToken | { message: string }> {
         try {
             const { code, data } = await serviceInstance.authenticate(credential);
             this.setStatus(code);
@@ -191,9 +192,7 @@ let AuthController = class AuthController extends tsoa_1.Controller {
 exports.AuthController = AuthController;
 __decorate([
     (0, tsoa_1.Security)(constant_1.SECURITY_NAME.all),
-    (0, tsoa_1.Post)("/auth")
-    // public async authenticate(@Body() credential: IUserCredential | IAppCredential | IOAuth2Credential): Promise<string | IApplicationToken | IUserToken | { message: string }> {
-    ,
+    (0, tsoa_1.Post)("/auth"),
     __param(0, (0, tsoa_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
