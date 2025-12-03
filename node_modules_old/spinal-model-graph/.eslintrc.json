@@ -1,0 +1,41 @@
+{
+  "env": {
+    "browser": true,
+    "commonjs": true,
+    "es6": true,
+    "node": true
+  },
+  "extends": [
+    "plugin:vue/essential",
+    "eslint:recommended"
+  ],
+  "parserOptions": {
+    "sourceType": "module"
+  },
+  "rules": {
+    "no-multi-spaces": "error",
+    "no-await-in-loop": "error",
+    "no-async-promise-executor": "error",
+    "no-return-await": "error",
+    "require-atomic-updates": "error",
+    "require-await": "error",
+    "linebreak-style": ["error", "unix"],
+    "no-console": 0,
+    "no-trailing-spaces": "error",
+    "indent": ["error", 2, {
+      "SwitchCase": 1
+    }],
+    "semi": ["error", "always"],
+    "no-confusing-arrow": "error",
+    "no-mixed-operators": "error",
+    "no-unexpected-multiline": "error",
+    "curly": ["error", "multi-line", "consistent"],
+    "object-curly-newline": ["error", {
+      "ImportDeclaration": {
+        "multiline": true,
+        "minProperties": 3
+      }
+    }]
+
+  }
+}

@@ -34,6 +34,7 @@ const appProfile_service_1 = require("./appProfile.service");
 const userList_services_1 = require("./userList.services");
 const AuthError_1 = require("../security/AuthError");
 const codeUnique_service_1 = require("./codeUnique.service");
+const appList_services_1 = require("./appList.services");
 const tokenKey = '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d';
 class AuthentificationService {
     static instance;
@@ -53,12 +54,13 @@ class AuthentificationService {
             throw new AuthError_1.OtherError(constant_1.HTTP_CODES.BAD_REQUEST, "Code unique not valid");
         }
     }
-    // public async authenticate(info: IUserCredential | IAppCredential | IOAuth2Credential): Promise<{ code: number; data: string | IApplicationToken | IUserToken }> {
     async authenticate(info) {
+        //public async authenticate(info: IUserCredential): Promise<{ code: number; data: string | IUserToken }> {
         const isUser = "userName" in info && "password" in info ? true : false;
-        if (!isUser)
-            return { code: constant_1.HTTP_CODES.BAD_REQUEST, data: "Invalid userName and/or password" };
-        return userList_services_1.UserListService.getInstance().authenticateUser(info);
+        if (isUser)
+            return userList_services_1.UserListService.getInstance().authenticateUser(info);
+        let infoFormatted = this._formatInfo(info);
+        return appList_services_1.AppListService.getInstance().authenticateApplication(infoFormatted);
     }
     /**
      * Registers the client to the admin authentication server.

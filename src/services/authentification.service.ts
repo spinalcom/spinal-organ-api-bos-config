@@ -22,7 +22,7 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
-import { IAdminAppProfile, IAdminCredential, IAdminUserProfile, IBosCredential, IJsonData, IUserCredential, IAppCredential, IUserToken, IOAuth2Credential } from "../interfaces";
+import { IAdminAppProfile, IAdminCredential, IAdminUserProfile, IBosCredential, IJsonData, IUserCredential, IAppCredential, IUserToken, IOAuth2Credential, IApplicationToken } from "../interfaces";
 import axios from "axios";
 import { SpinalContext } from "spinal-env-viewer-graph-service";
 import { configServiceInstance } from "./configFile.service";
@@ -35,6 +35,8 @@ import { AppProfileService } from "./appProfile.service";
 import { UserListService } from "./userList.services";
 import { OtherError } from "../security/AuthError";
 import { SpinalCodeUniqueService } from "./codeUnique.service";
+import { AppListService } from "./appList.services"
+
 const tokenKey = '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d';
 
 
@@ -59,12 +61,13 @@ export class AuthentificationService {
         }
     }
 
-    // public async authenticate(info: IUserCredential | IAppCredential | IOAuth2Credential): Promise<{ code: number; data: string | IApplicationToken | IUserToken }> {
-    public async authenticate(info: IUserCredential): Promise<{ code: number; data: string | IUserToken }> {
+    public async authenticate(info: IUserCredential | IAppCredential | IOAuth2Credential): Promise<{ code: number; data: string | IApplicationToken | IUserToken }> {
+    //public async authenticate(info: IUserCredential): Promise<{ code: number; data: string | IUserToken }> {
         const isUser = "userName" in info && "password" in info ? true : false;
 
-        if (!isUser) return { code: HTTP_CODES.BAD_REQUEST, data: "Invalid userName and/or password" };
-        return UserListService.getInstance().authenticateUser(<IUserCredential>info);
+        if (isUser) return UserListService.getInstance().authenticateUser(<IUserCredential>info);
+        let infoFormatted = this._formatInfo(info as IAppCredential | IOAuth2Credential);
+        return AppListService.getInstance().authenticateApplication(infoFormatted);
     }
 
 
