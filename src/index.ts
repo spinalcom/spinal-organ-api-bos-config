@@ -24,16 +24,21 @@
 
 const path = require('path');
 
-require('dotenv').config({ override: true, path: path.resolve(__dirname, '../.env') });
+require('dotenv').config({
+  override: true,
+  path: path.resolve(__dirname, '../.env'),
+});
 import { spinalCore } from 'spinal-core-connectorjs_type';
 import { configServiceInstance } from './services/configFile.service';
-import expressServer from './server';
+import { initExpress, initServer } from './server';
 import { DigitalTwinService, WebsocketLogsService } from './services';
 import SpinalAPIMiddleware from './middlewares/SpinalAPIMiddleware';
 import { runServerRest } from 'spinal-organ-api-server';
 import SpinalIOMiddleware from './middlewares/SpinalIOMiddleware';
 import ConfigFile from 'spinal-lib-organ-monitoring';
-import { runStartupTask } from './bootstrap';
+// import { runStartupTask } from './bootstrap';
+import { AdminProfileService } from './services/adminProfile.service';
+import { viewInfo_func } from 'spinal-organ-api-server';
 
 const connect_opt = process.env.HUB_PORT
   ? `${process.env.HUB_PROTOCOL}://${process.env.USER_ID}:${process.env.USER_MDP}@${process.env.HUB_HOST}:${process.env.HUB_PORT}/`
@@ -44,11 +49,10 @@ console.log(connect_opt);
 configServiceInstance
   .init(conn)
   .then(async () => {
-    const { app, server } = await expressServer(conn);
+    const app = await initExpress();
 
     const spinalAPIMiddleware = SpinalAPIMiddleware.getInstance();
     const spinalIOMiddleware = SpinalIOMiddleware.getInstance();
-
 
     // Set the connection to the middlewares
     spinalAPIMiddleware.setConnection(conn);
@@ -60,6 +64,15 @@ configServiceInstance
 
     const log_body = Number(process.env.LOG_BODY) == 1 ? true : false;
 
+    // create server + listen
+    if (process.env.RUN_STARTUP_TASK === '1') {
+      const adminId = AdminProfileService.getInstance().adminNode.getId().get();
+      console.log('Running startup task...');
+      const res = await viewInfo_func(spinalAPIMiddleware, adminId);
+      console.log('viewInfo_func result code:', res.code);
+    }
+
+    const server = initServer(app);
     const { io } = await runServerRest(
       server,
       app,
@@ -76,10 +89,6 @@ configServiceInstance
       process.env.HUB_HOST,
       parseInt(process.env.HUB_PORT)
     );
-    if (process.env.RUN_STARTUP_TASK === '1') {
-      await runStartupTask();
-    }
-
   })
   .catch((err: Error) => {
     console.error(err);
