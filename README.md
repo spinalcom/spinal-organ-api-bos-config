@@ -5,7 +5,9 @@ Api server that handles most of possible queries to spinalhub - More secured tha
 ## Installation
 
 ### Install `spinalcom-utils`
+
 You can install `spinalcom-utils` by running the following command:
+
 ```bash
 git clone https://github.com/spinalcom/spinalcom-utils.git
 cd spinalcom-utils
@@ -13,11 +15,12 @@ npm install
 npm link
 ```
 
-For more information about spinalcom-utils, visit the [documentation](https://github.com/spinalcom/spinalcom-utils/blob/master/README.md) 
+For more information about spinalcom-utils, visit the [documentation](https://github.com/spinalcom/spinalcom-utils/blob/master/README.md)
 
 ### Install `spinal-organ-api-bos-config`
 
 You can install `spinal-organ-api-bos-config` by running the following commands:
+
 ```bash
 git clone https://github.com/spinalcom/spinal-organ-api-bos-config.git
 cd spinal-organ-api-bos-config
@@ -36,7 +39,7 @@ HUB_PORT=XXXXX
 HUB_PROTOCOL="XXXX"                         # http or https
 SERVER_PORT="XXXX"                          # Port on which the server will listen ideally HUB_PORT+7
 
-CONFIG_DIRECTORY_PATH="/__users__/admin/"   
+CONFIG_DIRECTORY_PATH="/__users__/admin/"
 CONFIG_FILE_NAME="BOSConfig"
 WEBSOCKET_ALERT_TIME="60000"
 ORGAN_NAME="xxxxxxxxxx"                     # Name of the organ. Used by monitoring platform.
@@ -45,32 +48,17 @@ VUE_CLIENT_URI="xxxxxxxxx"                  # URL or the web portal that expects
 RUN_STARTUP_TASK="1"                        # or "0" to disable the startup task ( calling specific api routes)
 ```
 
-If you want to use the startup task, you must also have a `startupRoutes.json` file at the root of the project with the following structure:
+The ecosystem.config is setup to run in cluster mode with `1` instance, if you want to change the number of instances, add in the .env `PM2_INSTANCES=` a `number` or `max` to use the maximum of threads of the computer.
 
-```json
-[
-  {
-    "method": "GET",
-    "url": "/api/v1/some-endpoint",
-    "headers": {
-      "Custom-Header": "value"
-    },
-    "body": {}  
-  }
-]
+```bash
+PM2_INSTANCES=2
 ```
-Exemple of `startupRoutes.json` file:
 
-```json
-[
-    {
-      "method": "POST",
-      "url": "/api/v1/geographicContext/viewInfo",
-      "headers": {},
-      "body": {
-      }
-    }
-]
+After it's launched in pm2 you can change the number of instances via
+
+```bash
+pm2 scale <process_name_in_pm2> <number_of_instances>
+# ex: pm2 scale spinal-api-server-8816-8810 3
 ```
 
 ## Running the api bos config
@@ -78,8 +66,9 @@ Exemple of `startupRoutes.json` file:
 ```bash
 npm run start
 
-# or with pm2 :
+# or with pm2 ecosystem.config.js to use with mode cluster:
+pm2 start ecosystem.config.js
+
+# or with pm2:
 pm2 start dist/index.js --name spinal-organ-api-bos-config-<SERVER_PORT>
 ```
-
-
