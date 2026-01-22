@@ -1,1 +1,0 @@
-# spinal-env-viewer-plugin-bimobjectservice

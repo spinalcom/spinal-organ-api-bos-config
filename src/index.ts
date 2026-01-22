@@ -38,7 +38,8 @@ import SpinalIOMiddleware from './middlewares/SpinalIOMiddleware';
 import ConfigFile from 'spinal-lib-organ-monitoring';
 // import { runStartupTask } from './bootstrap';
 import { AdminProfileService } from './services/adminProfile.service';
-import { viewInfo_func } from 'spinal-organ-api-server';
+import { preloadingScript } from 'spinal-organ-api-server';
+const preload_config = require('../preload_config');
 
 const connect_opt = process.env.HUB_PORT
   ? `${process.env.HUB_PROTOCOL}://${process.env.USER_ID}:${process.env.USER_MDP}@${process.env.HUB_HOST}:${process.env.HUB_PORT}/`
@@ -67,9 +68,11 @@ configServiceInstance
     // create server + listen
     if (process.env.RUN_STARTUP_TASK === '1') {
       const adminId = AdminProfileService.getInstance().adminNode.getId().get();
-      console.log('Running startup task...');
-      const res = await viewInfo_func(spinalAPIMiddleware, adminId);
-      console.log('viewInfo_func result code:', res.code);
+      try {
+        await preloadingScript(spinalAPIMiddleware, adminId, preload_config);
+      } catch (error) {
+        console.error('Error during preloading script:', error);
+      }
     }
 
     const server = initServer(app);
