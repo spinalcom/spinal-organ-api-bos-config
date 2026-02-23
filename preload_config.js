@@ -23,7 +23,11 @@
  */
 
 module.exports = {
-  runViewInfo: true,
+  // This file is is only used if RUN_STARTUP_TASK=1 in the .env file. It is used to preload data into the database when the server starts.
+
+  // array of server_id to preload view info 
+  runViewInfo: [
+  ],
   // array of server_id to preload static details + ticket list details
   runStaticDetails: [
   ],
