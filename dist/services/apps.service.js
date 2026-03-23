@@ -400,8 +400,10 @@ class AppService {
                         subAppNode.info.add_attr(key, element);
                 }
             }
-            const element = await subAppNode.getElement();
-            element.set(newInfo.appConfig);
+            if (!subAppNode.element)
+                await subAppNode.getElement();
+            subAppNode.element.ptr.set(new spinal_core_connectorjs_1.Model(newInfo.appConfig));
+            console.log('SubApp updated with new appConfig:', JSON.stringify(newInfo.appConfig, null, 2));
             return subAppNode;
         }
     }

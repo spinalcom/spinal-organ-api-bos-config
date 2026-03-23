@@ -421,8 +421,11 @@ export class AppService {
           else subAppNode.info.add_attr(key, element);
         }
       }
-      const element = await subAppNode.getElement();
-      element.set(newInfo.appConfig);
+
+      if (!subAppNode.element)
+        await subAppNode.getElement();
+      subAppNode.element.ptr.set(new Model(newInfo.appConfig));
+      console.log('SubApp updated with new appConfig:', JSON.stringify(newInfo.appConfig,null, 2));
       return subAppNode;
     }
   }
