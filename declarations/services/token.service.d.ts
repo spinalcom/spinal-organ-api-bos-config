@@ -53,14 +53,6 @@ export declare class TokenService {
      */
     addTokenToContext(token: string, data: any): Promise<SpinalNode>;
     /**
-     * Get the token data from the cache or from the context.
-     *
-     * @param {string} token
-     * @return {*}  {Promise<any>}
-     * @memberof TokenService
-     */
-    getTokenData(token: string): Promise<any>;
-    /**
      * Get a token node by its name.
      *
      * @param {string} token
@@ -92,7 +84,8 @@ export declare class TokenService {
      * @return {*}  {Promise<string>}
      * @memberof TokenService
      */
-    getProfileIdByToken(token: string): Promise<string>;
+    getProfileIdByToken(token: string): Promise<string | undefined>;
+    private verifyFromCache;
     /**
      * Verify a token in the authentication platform.
      *
@@ -109,7 +102,7 @@ export declare class TokenService {
      * @return {*}  {Promise<any>} - Resolves with the decoded token if valid, rejects if invalid.
      * @memberof TokenService
      */
-    verifyTokenForAdmin(token: string): Promise<any>;
+    verifyTokenForAdmin(token: string, ignoreExpiration?: boolean): Promise<any>;
     /**
      * Check if the token is an application token.
      *

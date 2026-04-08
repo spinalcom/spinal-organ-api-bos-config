@@ -29,6 +29,7 @@ import { Body, Route, Tags, Controller, Post, Get, Put, Delete, Security, Reques
 import { IAdmin, IAdminCredential, IAppCredential, IApplicationToken, IOAuth2Credential, IBosCredential, IUserCredential, IUserToken } from "../interfaces";
 import { AuthError } from "../security/AuthError";
 import { checkIfItIsAdmin, checkIfItIsAuthPlateform } from "../security/authentication";
+import SpinalRedisMiddleware from "../middlewares/SpinalRedisMiddleware";
 
 const serviceInstance = AuthentificationService.getInstance();
 const tokenService = TokenService.getInstance();
@@ -44,12 +45,16 @@ export class AuthController extends Controller {
     @Security(SECURITY_NAME.all)
     @Post("/auth")
     public async authenticate(@Body() credential: IUserCredential | IAppCredential | IOAuth2Credential): Promise<string | IApplicationToken | IUserToken | { message: string }> {
-   // public async authenticate(@Body() credential: IUserCredential): Promise<string | IUserToken | { message: string }> {
+        // public async authenticate(@Body() credential: IUserCredential): Promise<string | IUserToken | { message: string }> {
         try {
             const { code, data } = await serviceInstance.authenticate(credential);
             this.setStatus(code);
+            const token = typeof data === "string" ? null : data.token;
+
+            if (token) SpinalRedisMiddleware.getInstance().set(token, data);
+
             return data;
-        } catch (error) {
+        } catch (error: any) {
             this.setStatus(HTTP_CODES.INTERNAL_ERROR)
             return { message: error.message };
         }
@@ -60,8 +65,12 @@ export class AuthController extends Controller {
         try {
             const resp = await serviceInstance.consumeCodeUnique(data.code);
             this.setStatus(HTTP_CODES.OK);
+
+            const token = resp.token;
+            if (token) SpinalRedisMiddleware.getInstance().set(token, resp);
+
             return resp;
-        } catch (error) {
+        } catch (error: any) {
             this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
@@ -79,7 +88,7 @@ export class AuthController extends Controller {
             await serviceInstance.sendBosInfoToAuth();
             this.setStatus(HTTP_CODES.OK)
             return registeredData;
-        } catch (error) {
+        } catch (error: Error | any) {
             this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
@@ -96,7 +105,7 @@ export class AuthController extends Controller {
 
             this.setStatus(HTTP_CODES.OK)
             return data;
-        } catch (error) {
+        } catch (error: Error | any) {
             this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
@@ -117,7 +126,7 @@ export class AuthController extends Controller {
             }
             this.setStatus(HTTP_CODES.NOT_FOUND)
             return { message: "No admin registered" };
-        } catch (error) {
+        } catch (error: Error | any) {
             this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
@@ -136,7 +145,7 @@ export class AuthController extends Controller {
             const message = deleted ? "deleted with success" : "something went wrong, please check your input data";
             this.setStatus(status);
             return { message };
-        } catch (error) {
+        } catch (error: Error | any) {
             this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
@@ -158,7 +167,7 @@ export class AuthController extends Controller {
 
             this.setStatus(HTTP_CODES.NOT_FOUND)
             return { message: "No admin registered" };
-        } catch (error) {
+        } catch (error: Error | any) {
             this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
@@ -176,7 +185,7 @@ export class AuthController extends Controller {
             const resp = await serviceInstance.sendBosInfoToAuth(true);
             this.setStatus(HTTP_CODES.OK)
             return { message: "updated" };
-        } catch (error) {
+        } catch (error: Error | any) {
             this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
             return { message: error.message };
         }
@@ -190,16 +199,14 @@ export class AuthController extends Controller {
             const token = await tokenService.tokenIsValid(data.token);
             const code = token ? HTTP_CODES.OK : HTTP_CODES.UNAUTHORIZED;
             this.setStatus(code);
-            return {
-                code,
-                data: token
-            }
+
+            if (token) SpinalRedisMiddleware.getInstance().set(data.token, token);
+
+            return { code, data: token };
+
         } catch (error) {
             this.setStatus(HTTP_CODES.UNAUTHORIZED)
-            return {
-                code: HTTP_CODES.UNAUTHORIZED,
-                message: "Token is expired or invalid"
-            }
+            return { code: HTTP_CODES.UNAUTHORIZED, message: "Token is expired or invalid" }
         }
     }
 

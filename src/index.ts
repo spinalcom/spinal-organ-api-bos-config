@@ -22,28 +22,27 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
-const path = require('path');
+const path = require("path");
 
-require('dotenv').config({
+require("dotenv").config({
   override: true,
-  path: path.resolve(__dirname, '../.env'),
+  path: path.resolve(__dirname, "../.env"),
 });
-import { spinalCore } from 'spinal-core-connectorjs_type';
-import { configServiceInstance } from './services/configFile.service';
-import { initExpress, initServer } from './server';
-import { DigitalTwinService, WebsocketLogsService } from './services';
-import SpinalAPIMiddleware from './middlewares/SpinalAPIMiddleware';
-import { runServerRest } from 'spinal-organ-api-server';
-import SpinalIOMiddleware from './middlewares/SpinalIOMiddleware';
-import ConfigFile from 'spinal-lib-organ-monitoring';
+import { spinalCore } from "spinal-core-connectorjs_type";
+import { configServiceInstance } from "./services/configFile.service";
+import { initExpress, initServer } from "./server";
+import { DigitalTwinService, WebsocketLogsService } from "./services";
+import SpinalAPIMiddleware from "./middlewares/SpinalAPIMiddleware";
+import { runServerRest } from "spinal-organ-api-server";
+import SpinalIOMiddleware from "./middlewares/SpinalIOMiddleware";
+import ConfigFile from "spinal-lib-organ-monitoring";
 // import { runStartupTask } from './bootstrap';
-import { AdminProfileService } from './services/adminProfile.service';
-import { preloadingScript } from 'spinal-organ-api-server';
-const preload_config = require('../preload_config');
+import { AdminProfileService } from "./services/adminProfile.service";
+import { preloadingScript } from "spinal-organ-api-server";
 
-const connect_opt = process.env.HUB_PORT
-  ? `${process.env.HUB_PROTOCOL}://${process.env.USER_ID}:${process.env.USER_MDP}@${process.env.HUB_HOST}:${process.env.HUB_PORT}/`
-  : `${process.env.HUB_PROTOCOL}://${process.env.USER_ID}:${process.env.USER_MDP}@${process.env.HUB_HOST}/`;
+const preload_config = require("../preload_config");
+
+const connect_opt = process.env.HUB_PORT ? `${process.env.HUB_PROTOCOL}://${process.env.USER_ID}:${process.env.USER_MDP}@${process.env.HUB_HOST}:${process.env.HUB_PORT}/` : `${process.env.HUB_PROTOCOL}://${process.env.USER_ID}:${process.env.USER_MDP}@${process.env.HUB_HOST}/`;
 const conn = spinalCore.connect(connect_opt);
 console.log(connect_opt);
 
@@ -59,6 +58,7 @@ configServiceInstance
     spinalAPIMiddleware.setConnection(conn);
     spinalIOMiddleware.setConnection(conn);
 
+
     // it is important to call this method after setting the connection to the middlewares
     // otherwise the digital twin will not be initialized correctly
     await DigitalTwinService.getInstance().getActualDigitalTwin(true);
@@ -66,32 +66,20 @@ configServiceInstance
     const log_body = Number(process.env.LOG_BODY) == 1 ? true : false;
 
     // create server + listen
-    if (process.env.RUN_STARTUP_TASK === '1') {
+    if (process.env.RUN_STARTUP_TASK === "1") {
       const adminId = AdminProfileService.getInstance().adminNode.getId().get();
       try {
         await preloadingScript(spinalAPIMiddleware, adminId, preload_config);
       } catch (error) {
-        console.error('Error during preloading script:', error);
+        console.error("Error during preloading script:", error);
       }
     }
 
     const server = initServer(app);
-    const { io } = await runServerRest(
-      server,
-      app,
-      spinalAPIMiddleware,
-      spinalIOMiddleware,
-      log_body
-    );
+    const { io } = await runServerRest(server, app, spinalAPIMiddleware, spinalIOMiddleware, log_body);
 
     WebsocketLogsService.getInstance().setIo(io);
-    await ConfigFile.init(
-      conn,
-      process.env.ORGAN_NAME,
-      'BOS_CONFIG_API',
-      process.env.HUB_HOST,
-      parseInt(process.env.HUB_PORT)
-    );
+    await ConfigFile.init(conn, process.env.ORGAN_NAME, "BOS_CONFIG_API", process.env.HUB_HOST, parseInt(process.env.HUB_PORT));
   })
   .catch((err: Error) => {
     console.error(err);

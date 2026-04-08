@@ -34,6 +34,8 @@ const cron = require("node-cron");
 const authentification_service_1 = require("./authentification.service");
 const axios_1 = require("axios");
 const configFile_service_1 = require("./configFile.service");
+const SpinalRedisMiddleware_1 = require("../middlewares/SpinalRedisMiddleware");
+const redisInstance = SpinalRedisMiddleware_1.default.getInstance();
 class TokenService {
     static instance;
     context;
@@ -135,28 +137,8 @@ class TokenService {
     async addTokenToContext(token, data) {
         const node = new spinal_env_viewer_graph_service_1.SpinalNode(token, constant_1.TOKEN_TYPE, new spinal_core_connectorjs_type_1.Model(data));
         const child = await this.context.addChildInContext(node, constant_1.TOKEN_RELATION_NAME, constant_1.PTR_LST_TYPE);
-        globalCache.set(data.token, data);
+        // globalCache.set(data.token, data);
         return child;
-    }
-    /**
-     * Get the token data from the cache or from the context.
-     *
-     * @param {string} token
-     * @return {*}  {Promise<any>}
-     * @memberof TokenService
-     */
-    async getTokenData(token) {
-        const tokenInCache = globalCache.get(token);
-        if (tokenInCache)
-            return tokenInCache;
-        const tokenNode = await this.getTokenNode(token);
-        if (!tokenNode)
-            return;
-        const nodeElement = await tokenNode.getElement(true);
-        if (nodeElement) {
-            globalCache.set(token, nodeElement.get());
-            return nodeElement.get();
-        }
     }
     /**
      * Get a token node by its name.
@@ -200,15 +182,27 @@ class TokenService {
      * @memberof TokenService
      */
     async tokenIsValid(token, deleteIfExpired = false) {
+        let itsForAdmin = false;
         try {
-            const adminTokenData = await this.getTokenData(token);
-            if (!adminTokenData)
-                throw new Error("Token not found in cache or context"); // Check if the token is in the cache or context
-            await this.verifyTokenForAdmin(token); // Verify the token using the admin secret key
-            return adminTokenData;
+            /////////////////////////////////////////////////////////////
+            // First try to verify with admin key, if it fails,
+            // it might be a user/app token to verify in auth platform
+            ////////////////////////////////////////////////////////////
+            const ignoreExpiration = true;
+            const tokenData = await this.verifyTokenForAdmin(token, ignoreExpiration);
+            itsForAdmin = true; // If decoded with admin key, it's for admin
+            const tokenExpired = tokenData.exp && tokenData.exp < Math.floor(Date.now() / 1000);
+            if (tokenExpired) {
+                if (deleteIfExpired)
+                    this.deleteToken(token);
+                throw new Error("Token expired");
+            }
+            return tokenData;
         }
         catch (error) {
-            return this.verifyTokenInAuthPlatform(token);
+            if (!itsForAdmin)
+                return this.verifyTokenInAuthPlatform(token);
+            throw error; // If it was for admin but failed to decode, rethrow the error
         }
     }
     /**
@@ -224,6 +218,12 @@ class TokenService {
             return data.profile.profileId || data.profile.userProfileBosConfigId || data.profile.appProfileBosConfigId;
         return;
     }
+    async verifyFromCache(token) {
+        const tokenFromCache = await redisInstance.get(token) || globalCache.get(token);
+        if (!tokenFromCache)
+            return { exists: false, data: null };
+        return { exists: true, data: tokenFromCache };
+    }
     /**
      * Verify a token in the authentication platform.
      *
@@ -233,6 +233,18 @@ class TokenService {
      * @memberof TokenService
      */
     async verifyTokenInAuthPlatform(token, actor) {
+        // First check in cache to avoid unnecessary calls to auth platform
+        const cacheResult = await this.verifyFromCache(token);
+        if (cacheResult.exists) {
+            const isExpired = cacheResult.data.expieredToken && cacheResult.data.expieredToken < Math.floor(Date.now() / 1000);
+            if (isExpired) {
+                await redisInstance.delete(token);
+                globalCache.delete(token);
+                throw new Error("Token expired");
+            }
+            return cacheResult.data;
+        }
+        // If not in cache, verify with auth platform
         const bosCredential = await authentification_service_1.AuthentificationService.getInstance().getBosToAdminCredential();
         return axios_1.default.post(`${bosCredential.urlAdmin}/tokens/verifyToken`, { tokenParam: token, platformId: bosCredential.idPlateform, actor }).then((result) => {
             return result.data;
@@ -245,13 +257,14 @@ class TokenService {
      * @return {*}  {Promise<any>} - Resolves with the decoded token if valid, rejects if invalid.
      * @memberof TokenService
      */
-    async verifyTokenForAdmin(token) {
+    async verifyTokenForAdmin(token, ignoreExpiration = false) {
         const tokenKey = this.getOrGenerateTokenKey();
         return new Promise((resolve, reject) => {
-            jwt.verify(token, tokenKey, (err, decoded) => {
+            jwt.verify(token, tokenKey, { ignoreExpiration }, (err, decoded) => {
                 if (err) {
                     return reject(err);
                 }
+                redisInstance.set(token, decoded);
                 resolve(decoded);
             });
         });

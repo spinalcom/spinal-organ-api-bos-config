@@ -40,6 +40,7 @@
     "node-geocoder": "^4.0.0",
     "node-open-geocoder": "^4.0.1",
     "q": "^1.5.1",
+    "redis": "^5.11.0",
     "socket.io": "^4.5.4",
     "socket.io-client": "^4.5.4",
     "swagger-ui-express": "^4.5.0",

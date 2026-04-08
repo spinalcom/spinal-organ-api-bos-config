@@ -20,10 +20,7 @@ function authenticateApplication(urlAdmin, idPlateform, application, context) {
          const node = await _addUserToContext(context, info);
          await TokenService.getInstance().(node, data.token, data);
         */
-        return {
-            code: constant_1.HTTP_CODES.OK,
-            data,
-        };
+        return { code: constant_1.HTTP_CODES.OK, data };
     })
         .catch((err) => {
         return {

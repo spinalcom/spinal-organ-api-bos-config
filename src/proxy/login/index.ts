@@ -4,6 +4,7 @@ import { HTTP_CODES } from "../../constant";
 import * as globalCache from "global-cache";
 import { v4 as uuidv4 } from "uuid";
 import appProfileController from "../../controllers/appProfile.controller";
+import SpinalRedisMiddleware from "../../middlewares/SpinalRedisMiddleware";
 
 export async function useLoginProxy(app: express.Application) {
 
@@ -65,7 +66,11 @@ export async function useLoginProxy(app: express.Application) {
              * I implemented this temporary method.
              */
             const cookiesId = uuidv4();
-            globalCache.set(cookiesId, { uri: vue_client_uri, profileId, token, user }, 30 * 1000); //store data for 30seconds
+            const dataToCache = { uri: vue_client_uri, profileId, token, user };
+
+            // Store the data in Redis with an expiration time of 30 seconds
+            SpinalRedisMiddleware.getInstance().set(cookiesId, dataToCache, { expiration: { type: 'EX', value: 30 } }); //store data for 30seconds
+            globalCache.set(cookiesId, dataToCache, 30 * 1000); //store data for 30seconds
 
 
             let endpoint = vue_client_uri!.endsWith("/") ? "login" : "/login";
@@ -88,20 +93,20 @@ export async function useLoginProxy(app: express.Application) {
             // console.log(res.getHeaders());
 
             // return res.redirect(`${vue_client_uri}?ref=${cookiesId}`);
-        } catch (error) {
+        } catch (error: any) {
             console.error(error.message);
             res.status(HTTP_CODES.INTERNAL_ERROR).send({ status: HTTP_CODES.INTERNAL_ERROR, message: error.message });
         }
     });
 
-    app.get("/getTokenByRef/:ref", (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    app.get("/getTokenByRef/:ref", async (req: express.Request, res: express.Response, next: express.NextFunction) => {
         const cookiesId = req.params.ref;
 
         if (!cookiesId)
             return res.status(HTTP_CODES.BAD_REQUEST).send({ status: HTTP_CODES.BAD_REQUEST, message: "No id provided" });
 
-
-        const data = globalCache.get(cookiesId); // Retrieve the data from the cache using the cookiesId
+        const dataFromRedis = await SpinalRedisMiddleware.getInstance().get(cookiesId);
+        const data = dataFromRedis || globalCache.get(cookiesId); // Retrieve the data from the cache using the cookiesId
 
         if (!data)
             return res.status(HTTP_CODES.NOT_FOUND).send({ status: HTTP_CODES.NOT_FOUND, message: "No found" });
@@ -109,6 +114,7 @@ export async function useLoginProxy(app: express.Application) {
 
         // Clear the cache after retrieving the data
         globalCache.delete(cookiesId);
+        await SpinalRedisMiddleware.getInstance().delete(cookiesId);
 
         return res.status(HTTP_CODES.OK).send(data);
     })
