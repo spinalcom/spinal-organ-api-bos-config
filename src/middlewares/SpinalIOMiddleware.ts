@@ -58,13 +58,11 @@ export default class SpinalIOMiddleware implements ISpinalIOMiddleware {
 
   logService = WebsocketLogsService.getInstance();
 
-  private static instance: ISpinalIOMiddleware;
+  private static instance: SpinalIOMiddleware;
 
-  private constructor() {
+  private constructor() {}
 
-  }
-
-  static getInstance(): ISpinalIOMiddleware {
+  static getInstance(): SpinalIOMiddleware {
     if (!this.instance) this.instance = new SpinalIOMiddleware();
     return this.instance;
   }
@@ -103,9 +101,14 @@ export default class SpinalIOMiddleware implements ISpinalIOMiddleware {
     const profileId = await this._getProfileId(socket);
     if (typeof contextId === 'undefined') return;
     if (!isNaN(contextId as any))
-      return SpinalAPIMiddleware.getInstance().load(<number>contextId, profileId);
+      return SpinalAPIMiddleware.getInstance().load(
+        <number>contextId,
+        profileId
+      );
 
-    const graph = await SpinalAPIMiddleware.getInstance().getProfileGraph(profileId);
+    const graph = await SpinalAPIMiddleware.getInstance().getProfileGraph(
+      profileId
+    );
     if (!graph) return;
 
     const contexts = await graph.getChildren();

@@ -46,8 +46,7 @@ class SpinalIOMiddleware {
     conn;
     logService = services_1.WebsocketLogsService.getInstance();
     static instance;
-    constructor() {
-    }
+    constructor() { }
     static getInstance() {
         if (!this.instance)
             this.instance = new SpinalIOMiddleware();
