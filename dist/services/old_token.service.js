@@ -70,13 +70,13 @@ class TokenService {
      *
      * @param userNode - The user node to which the token will be associated.
      * @param token - The token string to be added.
-     * @param playload - Additional payload data to be stored with the token.
+     * @param payload - Additional payload data to be stored with the token.
      * @returns A promise that resolves to the payload after the token has been added.
      */
-    async addUserToken(userNode, token, playload) {
-        const tokenNode = await this.addTokenToContext(token, playload);
+    async addUserToken(userNode, token, payload) {
+        const tokenNode = await this.addTokenToContext(token, payload);
         await userNode.addChild(tokenNode, constant_1.TOKEN_RELATION_NAME, constant_1.PTR_LST_TYPE);
-        return playload;
+        return payload;
     }
     /**
      * Generates a payload object for an admin user, including a JWT token and additional metadata.
@@ -86,21 +86,21 @@ class TokenService {
      * @param durationInMin - (Optional) The token expiration duration in minutes. Defaults to 7 days if not specified.
      * @returns A promise that resolves to an object containing user information, token details, and admin profile data.
      */
-    async getAdminPlayLoad(userNode, secret, durationInMin) {
-        let playload = { userInfo: userNode.info.get() };
+    async getAdminpayload(userNode, secret, durationInMin) {
+        let payload = { userInfo: userNode.info.get() };
         durationInMin = durationInMin || 7 * 24 * 60 * 60; // par default 7jrs
         const key = secret || this._generateString(15);
-        const token = jwt.sign(playload, key, { expiresIn: durationInMin });
+        const token = jwt.sign(payload, key, { expiresIn: durationInMin });
         const adminProfile = await adminProfile_service_1.AdminProfileService.getInstance().getAdminProfile();
         const now = Date.now();
-        playload = Object.assign({}, playload, {
+        payload = Object.assign({}, payload, {
             createdToken: now,
             expieredToken: now + durationInMin * 60 * 1000,
             userId: userNode.getId().get(),
             token: token,
             profile: { profileId: adminProfile.getId().get() },
         });
-        return playload;
+        return payload;
     }
     /**
      * Adds a new token node to the context with the provided token and associated data.

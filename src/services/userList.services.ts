@@ -292,8 +292,8 @@ export class UserListService {
     const passwordMatch = await _comparePassword(user.password, nodeElement.password.get());
     if (!passwordMatch) return { code: HTTP_CODES.UNAUTHORIZED, data: "bad username and/or password" };
 
-    const tokenPlayLoad = await TokenService.getInstance().generateTokenForAdmin(adminNodeFound);
-    return { code: HTTP_CODES.OK, data: tokenPlayLoad };
+    const tokenpayload = await TokenService.getInstance().generateTokenForAdmin(adminNodeFound);
+    return { code: HTTP_CODES.OK, data: tokenpayload };
   }
 
   /**

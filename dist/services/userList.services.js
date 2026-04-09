@@ -256,8 +256,8 @@ class UserListService {
         const passwordMatch = await (0, UserAuthUtils_1._comparePassword)(user.password, nodeElement.password.get());
         if (!passwordMatch)
             return { code: constant_1.HTTP_CODES.UNAUTHORIZED, data: "bad username and/or password" };
-        const tokenPlayLoad = await token_service_1.TokenService.getInstance().generateTokenForAdmin(adminNodeFound);
-        return { code: constant_1.HTTP_CODES.OK, data: tokenPlayLoad };
+        const tokenpayload = await token_service_1.TokenService.getInstance().generateTokenForAdmin(adminNodeFound);
+        return { code: constant_1.HTTP_CODES.OK, data: tokenpayload };
     }
     /**
      * Authenticates a user via the external authentication platform.

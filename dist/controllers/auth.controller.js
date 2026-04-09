@@ -43,6 +43,7 @@ const tsoa_1 = require("tsoa");
 const AuthError_1 = require("../security/AuthError");
 const authentication_1 = require("../security/authentication");
 const SpinalRedisMiddleware_1 = require("../middlewares/SpinalRedisMiddleware");
+const redisServiceInstance = SpinalRedisMiddleware_1.default.getInstance();
 const serviceInstance = services_1.AuthentificationService.getInstance();
 const tokenService = services_1.TokenService.getInstance();
 let AuthController = class AuthController extends tsoa_1.Controller {
@@ -56,7 +57,7 @@ let AuthController = class AuthController extends tsoa_1.Controller {
             this.setStatus(code);
             const token = typeof data === "string" ? null : data.token;
             if (token)
-                SpinalRedisMiddleware_1.default.getInstance().set(token, data);
+                redisServiceInstance.set(token, data);
             return data;
         }
         catch (error) {
@@ -70,7 +71,7 @@ let AuthController = class AuthController extends tsoa_1.Controller {
             this.setStatus(constant_1.HTTP_CODES.OK);
             const token = resp.token;
             if (token)
-                SpinalRedisMiddleware_1.default.getInstance().set(token, resp);
+                redisServiceInstance.set(token, resp);
             return resp;
         }
         catch (error) {
@@ -183,7 +184,7 @@ let AuthController = class AuthController extends tsoa_1.Controller {
             const code = token ? constant_1.HTTP_CODES.OK : constant_1.HTTP_CODES.UNAUTHORIZED;
             this.setStatus(code);
             if (token)
-                SpinalRedisMiddleware_1.default.getInstance().set(data.token, token);
+                redisServiceInstance.set(data.token, token);
             return { code, data: token };
         }
         catch (error) {

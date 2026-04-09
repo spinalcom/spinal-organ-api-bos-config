@@ -31,6 +31,8 @@ import { AuthError } from "../security/AuthError";
 import { checkIfItIsAdmin, checkIfItIsAuthPlateform } from "../security/authentication";
 import SpinalRedisMiddleware from "../middlewares/SpinalRedisMiddleware";
 
+
+const redisServiceInstance = SpinalRedisMiddleware.getInstance();
 const serviceInstance = AuthentificationService.getInstance();
 const tokenService = TokenService.getInstance();
 
@@ -51,7 +53,7 @@ export class AuthController extends Controller {
             this.setStatus(code);
             const token = typeof data === "string" ? null : data.token;
 
-            if (token) SpinalRedisMiddleware.getInstance().set(token, data);
+            if (token) redisServiceInstance.set(token, data);
 
             return data;
         } catch (error: any) {
@@ -67,7 +69,7 @@ export class AuthController extends Controller {
             this.setStatus(HTTP_CODES.OK);
 
             const token = resp.token;
-            if (token) SpinalRedisMiddleware.getInstance().set(token, resp);
+            if (token) redisServiceInstance.set(token, resp);
 
             return resp;
         } catch (error: any) {
@@ -200,7 +202,7 @@ export class AuthController extends Controller {
             const code = token ? HTTP_CODES.OK : HTTP_CODES.UNAUTHORIZED;
             this.setStatus(code);
 
-            if (token) SpinalRedisMiddleware.getInstance().set(data.token, token);
+            if (token) redisServiceInstance.set(data.token, token);
 
             return { code, data: token };
 

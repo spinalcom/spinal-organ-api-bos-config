@@ -70,18 +70,18 @@ class TokenService {
      *
      * @param {SpinalNode} userNode
      * @param {string} token
-     * @param {*} playload
+     * @param {*} payload
      * @return {*}  {Promise<any>}
      * @memberof TokenService
      */
-    async createToken(userNode, playload, isAdmin = false) {
+    async createToken(userNode, payload, isAdmin = false) {
         const tokenExpiration = isAdmin ? "7d" : "1h";
-        const token = this._generateToken(playload, tokenExpiration);
+        const token = this._generateToken(payload, tokenExpiration);
         const tokenDecoded = await this.verifyTokenForAdmin(token);
-        playload = Object.assign(playload, { createdToken: tokenDecoded.iat, expieredToken: tokenDecoded.exp, token });
-        const tokenNode = await this.addTokenToContext(token, playload);
+        payload = Object.assign(payload, { createdToken: tokenDecoded.iat, expieredToken: tokenDecoded.exp, token });
+        const tokenNode = await this.addTokenToContext(token, payload);
         await userNode.addChild(tokenNode, constant_1.TOKEN_RELATION_NAME, constant_1.PTR_LST_TYPE);
-        return playload;
+        return payload;
     }
     /**
      * Get or generate a token key for signing JWT tokens.
@@ -113,18 +113,13 @@ class TokenService {
      */
     async generateTokenForAdmin(userNode) {
         const adminProfile = await adminProfile_service_1.AdminProfileService.getInstance().getAdminProfile();
-        let playload = {
+        let payload = {
             userInfo: userNode.info.get(),
             userId: userNode.getId().get(),
             profile: { profileId: adminProfile.getId().get() }
         };
         const isAdmin = true;
-        return this.createToken(userNode, playload, isAdmin);
-        // const tokenKey = this.getOrGenerateTokenKey();
-        // const token = jwt.sign(playload, tokenKey, { expiresIn: "7d" });
-        // const tokenDecoded = await this.verifyTokenForAdmin(token);
-        // playload = Object.assign(playload, { createdToken: tokenDecoded.iat, expieredToken: tokenDecoded.exp, token });
-        // return playload;
+        return this.createToken(userNode, payload, isAdmin);
     }
     /**
      * link a token to a context.
@@ -219,10 +214,21 @@ class TokenService {
         return;
     }
     async verifyFromCache(token) {
+        const result = { exists: false, valid: false, data: null };
         const tokenFromCache = await redisInstance.get(token) || globalCache.get(token);
         if (!tokenFromCache)
-            return { exists: false, data: null };
-        return { exists: true, data: tokenFromCache };
+            return result;
+        result.exists = true;
+        const isExpired = tokenFromCache.expieredToken && tokenFromCache.expieredToken < Math.floor(Date.now() / 1000);
+        if (isExpired) {
+            result.valid = false;
+            await redisInstance.delete(token);
+            globalCache.delete(token);
+            return result;
+        }
+        result.valid = true;
+        result.data = tokenFromCache;
+        return result;
     }
     /**
      * Verify a token in the authentication platform.
@@ -234,20 +240,24 @@ class TokenService {
      */
     async verifyTokenInAuthPlatform(token, actor) {
         // First check in cache to avoid unnecessary calls to auth platform
-        const cacheResult = await this.verifyFromCache(token);
-        if (cacheResult.exists) {
-            const isExpired = cacheResult.data.expieredToken && cacheResult.data.expieredToken < Math.floor(Date.now() / 1000);
-            if (isExpired) {
-                await redisInstance.delete(token);
-                globalCache.delete(token);
-                throw new Error("Token expired");
-            }
-            return cacheResult.data;
+        const { exists, valid, data } = await this.verifyFromCache(token);
+        if (exists) {
+            if (valid)
+                return data;
+            // If it exists but not valid, it means it's expired
+            throw new Error("Token expired");
         }
         // If not in cache, verify with auth platform
         const bosCredential = await authentification_service_1.AuthentificationService.getInstance().getBosToAdminCredential();
-        return axios_1.default.post(`${bosCredential.urlAdmin}/tokens/verifyToken`, { tokenParam: token, platformId: bosCredential.idPlateform, actor }).then((result) => {
+        if (!bosCredential || !bosCredential.urlAdmin)
+            throw new Error("Invalid Token");
+        return axios_1.default.post(`${bosCredential.urlAdmin}/tokens/verifyToken`, { tokenParam: token, platformId: bosCredential.idPlateform, actor })
+            .then((result) => {
+            redisInstance.set(token, result.data);
             return result.data;
+        }).catch((error) => {
+            console.error("Error verifying token in auth platform:", error.response?.data || error.message || error);
+            throw new Error("Invalid token");
         });
     }
     /**
@@ -264,6 +274,7 @@ class TokenService {
                 if (err) {
                     return reject(err);
                 }
+                decoded = Object.assign(decoded, { token, createdToken: decoded.iat, expieredToken: decoded.exp }); // Add token and timestamps to the decoded data for caching
                 redisInstance.set(token, decoded);
                 resolve(decoded);
             });

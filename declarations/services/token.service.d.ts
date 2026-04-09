@@ -18,11 +18,11 @@ export declare class TokenService {
      *
      * @param {SpinalNode} userNode
      * @param {string} token
-     * @param {*} playload
+     * @param {*} payload
      * @return {*}  {Promise<any>}
      * @memberof TokenService
      */
-    createToken(userNode: SpinalNode, playload: any, isAdmin?: boolean): Promise<any>;
+    createToken(userNode: SpinalNode, payload: any, isAdmin?: boolean): Promise<any>;
     /**
      * Get or generate a token key for signing JWT tokens.
      * If a secret is already set in the context, it will return that.

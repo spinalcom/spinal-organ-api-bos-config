@@ -1,10 +1,9 @@
 import axios from 'axios';
 import { IAppCredential, IApplicationToken, IOAuth2Credential } from '../interfaces';
 import { CONTEXT_TO_APP_RELATION_NAME, HTTP_CODES, PTR_LST_TYPE, USER_TYPES } from '../constant';
-import { TokenService } from '../services';
 import { SpinalContext, SpinalGraphService, SpinalNode } from 'spinal-env-viewer-graph-service';
-import { AuthError } from '../security/AuthError';
 import SpinalRedisMiddleware from '../middlewares/SpinalRedisMiddleware';
+const redisServiceInstance = SpinalRedisMiddleware.getInstance();
 
 
 export function authenticateApplication(urlAdmin: string, idPlateform: string, application: IAppCredential | IOAuth2Credential, context: SpinalContext): Promise<{ code: number; data: string | IApplicationToken }> {
@@ -25,7 +24,7 @@ export function authenticateApplication(urlAdmin: string, idPlateform: string, a
              await TokenService.getInstance().(node, data.token, data);
             */
 
-
+            redisServiceInstance.set(data.token, data);
             return { code: HTTP_CODES.OK, data };
         })
         .catch((err) => {

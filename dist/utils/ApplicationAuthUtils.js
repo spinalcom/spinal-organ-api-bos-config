@@ -6,6 +6,8 @@ exports._addUserToContext = _addUserToContext;
 const axios_1 = require("axios");
 const constant_1 = require("../constant");
 const spinal_env_viewer_graph_service_1 = require("spinal-env-viewer-graph-service");
+const SpinalRedisMiddleware_1 = require("../middlewares/SpinalRedisMiddleware");
+const redisServiceInstance = SpinalRedisMiddleware_1.default.getInstance();
 function authenticateApplication(urlAdmin, idPlateform, application, context) {
     //  throw new AuthError(`This authentication method is deprecated. Please use the new authentication method.`);
     const url = `${urlAdmin}/applications/login`;
@@ -20,6 +22,7 @@ function authenticateApplication(urlAdmin, idPlateform, application, context) {
          const node = await _addUserToContext(context, info);
          await TokenService.getInstance().(node, data.token, data);
         */
+        redisServiceInstance.set(data.token, data);
         return { code: constant_1.HTTP_CODES.OK, data };
     })
         .catch((err) => {

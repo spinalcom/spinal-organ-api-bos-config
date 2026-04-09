@@ -5,15 +5,16 @@ const Redis = require("redis");
 class SpinalRedisMiddleware {
     static _instance;
     _redisClient;
-    _isEnabled = process.env.ENABLE_REDIS_CACHE === "1";
+    _isEnabled = process.env.ENABLE_REDIS_CACHE == "1";
     constructor() {
-        if (this._isEnabled) {
+        console.log(`SpinalRedisMiddleware initialized. Caching is ${this.isEnabled() ? "enabled" : "disabled"}.`);
+        if (this.isEnabled()) {
             const redisUrl = process.env.REDIS_URL || "redis://localhost:6379";
             this._redisClient = Redis.createClient({ url: redisUrl });
         }
     }
     async connect() {
-        if (!this._isEnabled || !this._redisClient)
+        if (!this.isEnabled() || !this._redisClient)
             return;
         try {
             if (!this._redisClient?.isOpen)
@@ -24,7 +25,7 @@ class SpinalRedisMiddleware {
         }
     }
     async disconnect() {
-        if (!this._isEnabled || !this._redisClient)
+        if (!this.isEnabled() || !this._redisClient)
             return;
         try {
             if (this._redisClient?.isOpen)
@@ -43,38 +44,38 @@ class SpinalRedisMiddleware {
         return this._instance;
     }
     async set(key, value, options = { expiration: { type: 'EX', value: 3600 } }) {
-        if (!this._isEnabled)
+        if (!this.isEnabled())
             return;
         await this.connect(); // Ensure connection before setting value
         const redisValue = { value };
-        return this._redisClient?.set(key, JSON.stringify(redisValue), options).finally(() => this.disconnect());
+        return this._redisClient?.set(key, JSON.stringify(redisValue), options);
     }
     async get(key) {
-        if (!this._isEnabled)
+        if (!this.isEnabled())
             return;
         await this.connect(); // Ensure connection before getting value
         const data = await this._redisClient?.get(key);
         const parsedData = data ? JSON.parse(data) : null;
-        this.disconnect(); // Disconnect after getting value
+        // this.disconnect(); // Disconnect after getting value
         return parsedData ? parsedData.value : null;
     }
     async delete(key) {
-        if (!this._isEnabled)
+        if (!this.isEnabled())
             return;
         await this.connect(); // Ensure connection before deleting value
-        return this._redisClient?.del(key).finally(() => this.disconnect());
+        return this._redisClient?.del(key);
     }
     async exists(key) {
-        if (!this._isEnabled)
+        if (!this.isEnabled())
             return;
         await this.connect(); // Ensure connection before checking existence
-        return this._redisClient?.exists(key).finally(() => this.disconnect());
+        return this._redisClient?.exists(key);
     }
     async flushCache() {
-        if (!this._isEnabled)
+        if (!this.isEnabled())
             return;
         await this.connect(); // Ensure connection before flushing cache
-        return this._redisClient?.flushAll().finally(() => this.disconnect());
+        return this._redisClient?.flushAll();
     }
 }
 exports.default = SpinalRedisMiddleware;

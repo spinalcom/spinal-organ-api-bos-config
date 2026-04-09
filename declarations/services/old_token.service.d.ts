@@ -19,10 +19,10 @@ export declare class TokenService {
      *
      * @param userNode - The user node to which the token will be associated.
      * @param token - The token string to be added.
-     * @param playload - Additional payload data to be stored with the token.
+     * @param payload - Additional payload data to be stored with the token.
      * @returns A promise that resolves to the payload after the token has been added.
      */
-    addUserToken(userNode: SpinalNode, token: string, playload: any): Promise<any>;
+    addUserToken(userNode: SpinalNode, token: string, payload: any): Promise<any>;
     /**
      * Generates a payload object for an admin user, including a JWT token and additional metadata.
      *
@@ -31,7 +31,7 @@ export declare class TokenService {
      * @param durationInMin - (Optional) The token expiration duration in minutes. Defaults to 7 days if not specified.
      * @returns A promise that resolves to an object containing user information, token details, and admin profile data.
      */
-    getAdminPlayLoad(userNode: SpinalNode, secret?: string, durationInMin?: number): Promise<any>;
+    getAdminpayload(userNode: SpinalNode, secret?: string, durationInMin?: number): Promise<any>;
     /**
      * Adds a new token node to the context with the provided token and associated data.
      *
