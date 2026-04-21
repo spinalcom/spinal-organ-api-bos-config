@@ -22,11 +22,12 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
-import type { ISubApp } from "./ISubApp";
+import type { ISubApp } from './ISubApp';
 
 export interface ISpinalApp {
   name: string;
   icon: string;
+  iconColor?: string;
   description: string;
   tags: string[];
   categoryName: string;

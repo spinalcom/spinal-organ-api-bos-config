@@ -3,6 +3,7 @@ export interface ISubApp {
     type?: string;
     name: string;
     icon?: string;
+    iconColor?: string;
     description?: string;
     tags?: string[];
     categoryName?: string;

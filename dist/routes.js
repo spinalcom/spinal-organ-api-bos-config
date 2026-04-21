@@ -47,6 +47,7 @@ const models = {
             "type": { "dataType": "string" },
             "name": { "dataType": "string", "required": true },
             "icon": { "dataType": "string" },
+            "iconColor": { "dataType": "string" },
             "description": { "dataType": "string" },
             "tags": { "dataType": "array", "array": { "dataType": "string" } },
             "categoryName": { "dataType": "string" },
@@ -63,6 +64,7 @@ const models = {
         "properties": {
             "name": { "dataType": "string", "required": true },
             "icon": { "dataType": "string", "required": true },
+            "iconColor": { "dataType": "string" },
             "description": { "dataType": "string", "required": true },
             "tags": { "dataType": "array", "array": { "dataType": "string" }, "required": true },
             "categoryName": { "dataType": "string", "required": true },

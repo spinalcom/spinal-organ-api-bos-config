@@ -50,6 +50,9 @@
 					"icon": {
 						"type": "string"
 					},
+					"iconColor": {
+						"type": "string"
+					},
 					"description": {
 						"type": "string"
 					},
@@ -85,6 +88,9 @@
 						"type": "string"
 					},
 					"icon": {
+						"type": "string"
+					},
+					"iconColor": {
 						"type": "string"
 					},
 					"description": {
