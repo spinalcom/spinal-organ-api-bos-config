@@ -24,7 +24,7 @@ export class UpdateServerController extends Controller {
             }
 
             const output = await runCommand(
-                'git pull && spinalcom-utils i && pm2 restart ecosystem.config.js'
+                'git stash && git pull && git stash pop; spinalcom-utils i && pm2 restart ecosystem.config.js'
             );
 
             this.setStatus(HTTP_CODES.OK);
