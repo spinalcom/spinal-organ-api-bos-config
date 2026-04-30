@@ -104,7 +104,7 @@ export function initSwagger(app: express.Express) {
 }
 
 export function useApiMiddleWare(app: express.Express) {
-  app.use(cors({ origin: '*' }));
+  app.use(cors({ origin: '*', exposedHeaders: ['X-API-Version', 'X-API-BOS-CONFIG-Version'] }));
 
   const bodyParserTicket = bodyParser.json({ limit: '500mb' });
 

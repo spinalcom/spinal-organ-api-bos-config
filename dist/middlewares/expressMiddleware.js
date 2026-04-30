@@ -96,7 +96,7 @@ function initSwagger(app) {
     });
 }
 function useApiMiddleWare(app) {
-    app.use(cors({ origin: '*' }));
+    app.use(cors({ origin: '*', exposedHeaders: ['X-API-Version', 'X-API-BOS-CONFIG-Version'] }));
     const bodyParserTicket = bodyParser.json({ limit: '500mb' });
     app.use((req, res, next) => {
         if (req.originalUrl === '/api/v1/node/convert_base_64' ||

@@ -49,6 +49,7 @@ export async function initExpress() {
   app.use((_req, res, next) => {
     res.setHeader('X-API-Version', apiServerVersion);
     res.setHeader('X-API-BOS-CONFIG-Version', bosConfigVersion);
+
     next();
   });
 
