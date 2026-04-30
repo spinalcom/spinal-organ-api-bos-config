@@ -29,7 +29,7 @@ let UpdateServerController = class UpdateServerController extends tsoa_1.Control
                 this.setStatus(constant_1.HTTP_CODES.UNAUTHORIZED);
                 return { message: 'Only admins can trigger a server update' };
             }
-            const output = await runCommand('git pull && spinalcom-utils i && pm2 restart ecosystem.config.js');
+            const output = await runCommand('git stash && git pull && git stash pop; spinalcom-utils i && pm2 restart ecosystem.config.js');
             this.setStatus(constant_1.HTTP_CODES.OK);
             return { message: 'Server update triggered successfully', output };
         }
