@@ -32,8 +32,15 @@ const https_1 = require("https");
 const fs_1 = require("fs");
 const expressMiddleware_1 = require("./middlewares/expressMiddleware");
 const login_1 = require("./proxy/login");
+const apiServerVersion = require('spinal-organ-api-server/package.json').version;
+const bosConfigVersion = require('../package.json').version;
 async function initExpress() {
     var app = express();
+    app.use((_req, res, next) => {
+        res.setHeader('X-API-Version', apiServerVersion);
+        res.setHeader('X-API-BOS-CONFIG-Version', bosConfigVersion);
+        next();
+    });
     app.use(morgan('dev'));
     (0, expressMiddleware_1.useApiMiddleWare)(app);
     (0, expressMiddleware_1.useHubProxy)(app);

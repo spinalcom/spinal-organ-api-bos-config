@@ -40,8 +40,17 @@ import {
 import { useLoginProxy } from './proxy/login';
 import type { Server } from 'http';
 
+const apiServerVersion = require('spinal-organ-api-server/package.json').version;
+const bosConfigVersion = require('../package.json').version;
+
 export async function initExpress() {
   var app = express();
+
+  app.use((_req, res, next) => {
+    res.setHeader('X-API-Version', apiServerVersion);
+    res.setHeader('X-API-BOS-CONFIG-Version', bosConfigVersion);
+    next();
+  });
 
   app.use(morgan('dev'));
 
