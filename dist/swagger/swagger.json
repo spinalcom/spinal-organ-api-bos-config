@@ -3688,6 +3688,43 @@
                 "parameters": []
             }
         },
+        "/api/v1/update-server": {
+            "post": {
+                "operationId": "UpdateServer",
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "output": {
+                                            "type": "string"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "Server"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": []
+            }
+        },
         "/api/v1/user_profile/create_profile": {
             "post": {
                 "operationId": "CreateUserProfile",

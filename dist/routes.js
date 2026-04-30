@@ -18,6 +18,8 @@ const digitalTwin_controller_1 = require("./controllers/digitalTwin.controller")
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 const hubSession_controller_1 = require("./controllers/hubSession.controller");
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+const updateServer_controller_1 = require("./controllers/updateServer.controller");
+// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 const userProfile_controller_1 = require("./controllers/userProfile.controller");
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 const websocketLogs_controller_1 = require("./controllers/websocketLogs.controller");
@@ -1305,6 +1307,23 @@ function RegisterRoutes(app) {
             validatedArgs = getValidatedArgs(args, request, response);
             const controller = new hubSession_controller_1.HubSessionController();
             const promise = controller.createSession.apply(controller, validatedArgs);
+            promiseHandler(controller, promise, response, undefined, next);
+        }
+        catch (err) {
+            return next(err);
+        }
+    });
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    app.post('/api/v1/update-server', authenticateMiddleware([{ "bearerAuth": [] }]), ...((0, runtime_1.fetchMiddlewares)(updateServer_controller_1.UpdateServerController)), ...((0, runtime_1.fetchMiddlewares)(updateServer_controller_1.UpdateServerController.prototype.updateServer)), function UpdateServerController_updateServer(request, response, next) {
+        const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
+        };
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        let validatedArgs = [];
+        try {
+            validatedArgs = getValidatedArgs(args, request, response);
+            const controller = new updateServer_controller_1.UpdateServerController();
+            const promise = controller.updateServer.apply(controller, validatedArgs);
             promiseHandler(controller, promise, response, undefined, next);
         }
         catch (err) {
