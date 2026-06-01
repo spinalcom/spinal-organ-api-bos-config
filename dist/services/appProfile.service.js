@@ -349,14 +349,14 @@ class AppProfileService {
     }
     async _authorizeAll(profile, data) {
         const authorizePromises = [];
-        authorizePromises.push(this.authorizeProfileToAccessApis(profile, data.apiIds || []));
+        authorizePromises.push(this.authorizeProfileToAccessApis(profile, data.apisIds || []));
         authorizePromises.push(this.authorizeProfileToAccessApps(profile, data.appsIds || []));
         authorizePromises.push(this.authorizeProfileToAccessContext(profile, data.contextIds || []));
         const [apis, apps, contexts] = await Promise.all(authorizePromises);
         return {
             apis,
             apps,
-            contexts
+            contexts,
         };
     }
 }
