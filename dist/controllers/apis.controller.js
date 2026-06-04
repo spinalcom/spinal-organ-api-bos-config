@@ -39,8 +39,9 @@ exports.APIController = void 0;
 const tsoa_1 = require("tsoa");
 const services_1 = require("../services");
 const constant_1 = require("../constant");
-const authentication_1 = require("../security/authentication");
 const AuthError_1 = require("../security/AuthError");
+const authentication_1 = require("../security/authentication");
+const ADMIN_APPS = require("../defaultApps/adminApps.json");
 const express = require("express");
 const apiService = services_1.APIService.getInstance();
 let APIController = class APIController extends tsoa_1.Controller {
@@ -49,8 +50,8 @@ let APIController = class APIController extends tsoa_1.Controller {
     }
     async createBosApiRoute(req, data) {
         try {
-            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
-            if (!isAdmin)
+            const hasAccess = await (0, authentication_1.isAdminOrHasAccessToAdminApp)(req, ADMIN_APPS.api_routes.name);
+            if (!hasAccess)
                 throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
             const node = await apiService.createApiRoute(data);
             this.setStatus(constant_1.HTTP_CODES.CREATED);
@@ -63,8 +64,8 @@ let APIController = class APIController extends tsoa_1.Controller {
     }
     async updateBosApiRoute(req, data, id) {
         try {
-            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
-            if (!isAdmin)
+            const hasAccess = await (0, authentication_1.isAdminOrHasAccessToAdminApp)(req, ADMIN_APPS.api_routes.name);
+            if (!hasAccess)
                 throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
             const node = await apiService.updateApiRoute(id, data);
             this.setStatus(constant_1.HTTP_CODES.ACCEPTED);
@@ -77,8 +78,8 @@ let APIController = class APIController extends tsoa_1.Controller {
     }
     async getBosApiRouteById(req, id) {
         try {
-            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
-            if (!isAdmin)
+            const hasAccess = await (0, authentication_1.isAdminOrHasAccessToAdminApp)(req, ADMIN_APPS.api_routes.name);
+            if (!hasAccess)
                 throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
             const node = await apiService.getApiRouteById(id);
             if (node) {
@@ -95,12 +96,12 @@ let APIController = class APIController extends tsoa_1.Controller {
     }
     async getAllBosApiRoute(req) {
         try {
-            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
-            if (!isAdmin)
+            const hasAccess = await (0, authentication_1.isAdminOrHasAccessToAdminApp)(req, [ADMIN_APPS.api_routes.name, ADMIN_APPS.user_profiles.name, ADMIN_APPS.app_profiles.name]);
+            if (!hasAccess)
                 throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
             const routes = await apiService.getAllApiRoute();
             this.setStatus(constant_1.HTTP_CODES.OK);
-            return routes.map(el => el.info.get());
+            return routes.map((el) => el.info.get());
         }
         catch (error) {
             this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
@@ -109,8 +110,8 @@ let APIController = class APIController extends tsoa_1.Controller {
     }
     async deleteBosApiRoute(req, id) {
         try {
-            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
-            if (!isAdmin)
+            const hasAccess = await (0, authentication_1.isAdminOrHasAccessToAdminApp)(req, ADMIN_APPS.api_routes.name);
+            if (!hasAccess)
                 throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
             await apiService.deleteApiRoute(id);
             this.setStatus(constant_1.HTTP_CODES.OK);
@@ -123,8 +124,8 @@ let APIController = class APIController extends tsoa_1.Controller {
     }
     async uploadBosSwaggerFile(req, file) {
         try {
-            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
-            if (!isAdmin)
+            const hasAccess = await (0, authentication_1.isAdminOrHasAccessToAdminApp)(req, ADMIN_APPS.api_routes.name);
+            if (!hasAccess)
                 throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
             if (!file) {
                 this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
@@ -139,7 +140,7 @@ let APIController = class APIController extends tsoa_1.Controller {
                 }
                 const apis = await apiService.uploadSwaggerFile(file.buffer);
                 this.setStatus(constant_1.HTTP_CODES.OK);
-                return apis.map(el => el.info.get());
+                return apis.map((el) => el.info.get());
             }
             this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
             return { message: "No file uploaded" };
@@ -193,7 +194,7 @@ __decorate([
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], APIController.prototype, "deleteBosApiRoute", null);
 __decorate([

@@ -1,5 +1,5 @@
-import { Controller } from 'tsoa';
-import * as express from 'express';
+import { Controller } from "tsoa";
+import * as express from "express";
 export declare class UpdateServerController extends Controller {
     constructor();
     updateServer(req: express.Request): Promise<{

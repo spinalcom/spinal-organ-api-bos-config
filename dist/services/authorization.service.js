@@ -49,7 +49,7 @@ class AuthorizationService {
         if (!Array.isArray(contextIds))
             contextIds = [contextIds];
         if (!digitalTwinId) {
-            digitalTwinId = await this._getActualDigitalTwinId();
+            digitalTwinId = (await this._getActualDigitalTwinId());
             if (!digitalTwinId)
                 throw "No digital twin is setup";
         }
@@ -57,37 +57,61 @@ class AuthorizationService {
         if (!node)
             throw `No digitalTwin found for ${digitalTwinId}`;
         const graph = await node.getElement(false);
-        return contextIds.reduce(async (prom, contextId) => {
-            const liste = await prom;
+        const contexts = [];
+        for (const contextId of contextIds) {
             const context = await digitalTwin_service_1.DigitalTwinService.getInstance().findContextInDigitalTwin(digitalTwinId, contextId);
             if (context) {
-                try {
-                    await graph.addContext(context);
-                    liste.push(context);
-                }
-                catch (error) { }
-                return liste;
+                // add catch to avoid error if context already linked to the graph
+                await graph.addContext(context).catch(() => null);
+                contexts.push(context);
             }
-        }, Promise.resolve([]));
+        }
+        return contexts;
+        // return contextIds.reduce(async (prom, contextId) => {
+        // 	const liste = await prom;
+        // 	const context = await DigitalTwinService.getInstance().findContextInDigitalTwin(digitalTwinId, contextId);
+        // 	if (context) {
+        // 		try {
+        // 			await graph.addContext(context);
+        // 			liste.push(context);
+        // 		} catch (error) {}
+        // 		return liste;
+        // 	}
+        // }, Promise.resolve([]));
     }
     async authorizeProfileToAccessApps(profile, appIds) {
         if (!Array.isArray(appIds))
             appIds = [appIds];
-        return appIds.reduce(async (prom, appId) => {
-            const liste = await prom;
-            const app = await apps_service_1.AppService.getInstance().getBuildingApp(findNodeBySearchKey_1.searchById, appId);
-            if (app) {
-                try {
-                    const childrenIds = profile.getChildrenIds();
-                    const alreadyLinked = childrenIds.includes(app.getId().get());
-                    if (!alreadyLinked)
-                        await profile.addChild(app, constant_1.PROFILE_TO_AUTHORIZED_APP, constant_1.PTR_LST_TYPE);
-                    liste.push(app);
-                }
-                catch (error) { }
-                return liste;
+        const appsNodes = [];
+        for (const appId of appIds) {
+            const app = await apps_service_1.AppService.getInstance().getApps(findNodeBySearchKey_1.searchById, appId);
+            if (!app)
+                continue;
+            const childrenIds = profile.getChildrenIds();
+            const alreadyLinked = childrenIds.includes(app.getId().get());
+            if (!alreadyLinked) {
+                const relationName = app.getType().get() === constant_1.ADMIN_APP_TYPE ? constant_1.PROFILE_TO_AUTHORIZED_ADMIN_APP : constant_1.PROFILE_TO_AUTHORIZED_APP;
+                // add catch to avoid error
+                await profile.addChild(app, relationName, constant_1.PTR_LST_TYPE).catch(() => null);
+                appsNodes.push(app);
             }
-        }, Promise.resolve([]));
+        }
+        return appsNodes;
+        // return appIds.reduce(async (prom, appId) => {
+        // 	const liste: SpinalNode[] = await prom;
+        // 	const app = await AppService.getInstance().getApps(searchById, appId);
+        // 	if (!app) return liste;
+        // 	try {
+        // 		const childrenIds = profile.getChildrenIds();
+        // 		const alreadyLinked = childrenIds.includes(app.getId().get());
+        // 		if (!alreadyLinked) {
+        // 			const relationName = app.getType().get() === ADMIN_APP_TYPE ? PROFILE_TO_AUTHORIZED_ADMIN_APP : PROFILE_TO_AUTHORIZED_APP;
+        // 			await profile.addChild(app, relationName, PTR_LST_TYPE);
+        // 		}
+        // 		liste.push(app);
+        // 	} catch (error) {}
+        // 	return liste;
+        // }, Promise.resolve([]));
     }
     async authorizeProfileToAccessSubApps(profile, appNodes, subAppIds) {
         if (!Array.isArray(subAppIds))
@@ -104,46 +128,62 @@ class AuthorizationService {
                     .finally(() => subAppNode));
             }
         }
-        return Promise.all(promises);
+        return Promise.all(promises).then((results) => results.filter((node) => node !== null));
     }
     async authorizeProfileToAccessAdminApps(profile, appIds) {
         if (!Array.isArray(appIds))
             appIds = [appIds];
-        return appIds.reduce(async (prom, appId) => {
-            const liste = await prom;
+        const appsNodes = [];
+        for (const appId of appIds) {
             const app = await apps_service_1.AppService.getInstance().getAdminApp(findNodeBySearchKey_1.searchById, appId);
-            if (app) {
-                try {
-                    await profile.addChild(app, constant_1.PROFILE_TO_AUTHORIZED_ADMIN_APP, constant_1.PTR_LST_TYPE);
-                    liste.push(app);
-                }
-                catch (error) { }
-                return liste;
-            }
-        }, Promise.resolve([]));
+            if (!app)
+                continue;
+            await profile.addChild(app, constant_1.PROFILE_TO_AUTHORIZED_ADMIN_APP, constant_1.PTR_LST_TYPE).catch(() => null);
+            appsNodes.push(app);
+        }
+        return appsNodes;
+        // return appIds.reduce(async (prom, appId) => {
+        // 	const liste = await prom;
+        // 	const app = await AppService.getInstance().getAdminApp(searchById, appId);
+        // 	if (app) {
+        // 		try {
+        // 			await profile.addChild(app, PROFILE_TO_AUTHORIZED_ADMIN_APP, PTR_LST_TYPE);
+        // 			liste.push(app);
+        // 		} catch (error) {}
+        // 		return liste;
+        // 	}
+        // }, Promise.resolve([]));
     }
     async authorizeProfileToAccessApis(profile, apiIds) {
         if (!Array.isArray(apiIds))
             apiIds = [apiIds];
-        return apiIds.reduce(async (prom, apiId) => {
-            const liste = await prom;
+        const apiNodes = [];
+        for (const apiId of apiIds) {
             const api = await apis_service_1.APIService.getInstance().getApiRouteById(apiId);
-            if (api) {
-                try {
-                    await profile.addChild(api, constant_1.PROFILE_TO_AUTHORIZED_API, constant_1.PTR_LST_TYPE);
-                    liste.push(api);
-                }
-                catch (error) { }
-                return liste;
-            }
-        }, Promise.resolve([]));
+            if (!api)
+                continue;
+            await profile.addChild(api, constant_1.PROFILE_TO_AUTHORIZED_API, constant_1.PTR_LST_TYPE).catch(() => null);
+            apiNodes.push(api);
+        }
+        return apiNodes;
+        // return apiIds.reduce(async (prom, apiId) => {
+        // 	const liste = await prom;
+        // 	const api = await APIService.getInstance().getApiRouteById(apiId);
+        // 	if (api) {
+        // 		try {
+        // 			await profile.addChild(api, PROFILE_TO_AUTHORIZED_API, PTR_LST_TYPE);
+        // 			liste.push(api);
+        // 		} catch (error) {}
+        // 		return liste;
+        // 	}
+        // }, Promise.resolve([]));
     }
     /////////////////////////////////////////////
     //               GET AUTHORIZED
     /////////////////////////////////////////////
     async getAuthorizedContexts(profile, digitalTwinId) {
         if (!digitalTwinId) {
-            digitalTwinId = await this._getActualDigitalTwinId();
+            digitalTwinId = (await this._getActualDigitalTwinId());
             if (!digitalTwinId)
                 return [];
         }
@@ -169,7 +209,7 @@ class AuthorizationService {
     }
     async getAuthorizedDigitalTwinNode(profile, digitalTwinId, createIfNotExist = false) {
         if (!digitalTwinId) {
-            digitalTwinId = await this._getActualDigitalTwinId();
+            digitalTwinId = (await this._getActualDigitalTwinId());
         }
         const digitalTwins = await profile.getChildren(constant_1.PROFILE_TO_AUTHORIZED_DIGITAL_TWIN_RELATION_NAME);
         const found = digitalTwins.find((el) => el.getId().get() === digitalTwinId || el.info.refId?.get() === digitalTwinId);
@@ -190,7 +230,7 @@ class AuthorizationService {
         if (!Array.isArray(contextIds))
             contextIds = [contextIds];
         if (!digitalTwinId) {
-            digitalTwinId = await this._getActualDigitalTwinId();
+            digitalTwinId = (await this._getActualDigitalTwinId());
             if (!digitalTwinId)
                 throw "No digital twin is setup";
         }
@@ -198,34 +238,51 @@ class AuthorizationService {
         if (!node)
             throw `No digitalTwin found for ${digitalTwinId}`;
         const graph = await node.getElement(false);
-        return contextIds.reduce(async (prom, contextId) => {
-            const liste = await prom;
+        const contexts = [];
+        for (const contextId of contextIds) {
             const context = await digitalTwin_service_1.DigitalTwinService.getInstance().findContextInDigitalTwin(digitalTwinId, contextId);
-            if (context) {
-                try {
-                    await graph.removeChild(context, "hasContext", constant_1.REF_TYPE);
-                    liste.push(context);
-                }
-                catch (error) { }
-                return liste;
-            }
-        }, Promise.resolve([]));
+            if (!context)
+                continue;
+            await graph.removeChild(context, "hasContext", constant_1.REF_TYPE).catch(() => null);
+            contexts.push(context);
+        }
+        return contexts;
+        // return contextIds.reduce(async (prom, contextId) => {
+        // 	const liste = await prom;
+        // 	const context = await DigitalTwinService.getInstance().findContextInDigitalTwin(digitalTwinId, contextId);
+        // 	if (context) {
+        // 		try {
+        // 			await graph.removeChild(context, "hasContext", REF_TYPE);
+        // 			liste.push(context);
+        // 		} catch (error) {}
+        // 		return liste;
+        // 	}
+        // }, Promise.resolve([]));
     }
     async unauthorizeProfileToAccessApps(profile, appIds) {
         if (!Array.isArray(appIds))
             appIds = [appIds];
-        return appIds.reduce(async (prom, appId) => {
-            const liste = await prom;
-            const app = await apps_service_1.AppService.getInstance().getBuildingApp(findNodeBySearchKey_1.searchById, appId);
-            if (app) {
-                try {
-                    await profile.removeChild(app, constant_1.PROFILE_TO_AUTHORIZED_APP, constant_1.PTR_LST_TYPE);
-                    liste.push(app);
-                }
-                catch (error) { }
-                return liste;
-            }
-        }, Promise.resolve([]));
+        const appNodes = [];
+        for (const appId of appIds) {
+            const app = await apps_service_1.AppService.getInstance().getApps(findNodeBySearchKey_1.searchById, appId);
+            if (!app)
+                continue;
+            const relationName = app.getType().get() === constant_1.ADMIN_APP_TYPE ? constant_1.PROFILE_TO_AUTHORIZED_ADMIN_APP : constant_1.PROFILE_TO_AUTHORIZED_APP;
+            await profile.removeChild(app, relationName, constant_1.PTR_LST_TYPE).catch(() => null);
+            appNodes.push(app);
+        }
+        return appNodes;
+        // return appIds.reduce(async (prom, appId) => {
+        // 	const liste: any = await prom;
+        // 	const app = await AppService.getInstance().getApps(searchById, appId);
+        // 	if (!app) return liste;
+        // 	const relationName = app.getType().get() === ADMIN_APP_TYPE ? PROFILE_TO_AUTHORIZED_ADMIN_APP : PROFILE_TO_AUTHORIZED_APP;
+        // 	try {
+        // 		await profile.removeChild(app, relationName, PTR_LST_TYPE);
+        // 		liste.push(app);
+        // 	} catch (error) {}
+        // 	return liste;
+        // }, Promise.resolve([]));
     }
     async unauthorizeProfileToAccessSubApps(profile, subAppIds) {
         if (!Array.isArray(subAppIds))
@@ -247,18 +304,26 @@ class AuthorizationService {
     async unauthorizeProfileToAccessApis(profile, apiIds) {
         if (!Array.isArray(apiIds))
             apiIds = [apiIds];
-        return apiIds.reduce(async (prom, apiId) => {
-            const liste = await prom;
+        const apiNodes = [];
+        for (const apiId of apiIds) {
             const api = await apis_service_1.APIService.getInstance().getApiRouteById(apiId);
-            if (api) {
-                try {
-                    await profile.removeChild(api, constant_1.PROFILE_TO_AUTHORIZED_API, constant_1.PTR_LST_TYPE);
-                    liste.push(api);
-                }
-                catch (error) { }
-                return liste;
-            }
-        }, Promise.resolve([]));
+            if (!api)
+                continue;
+            await profile.removeChild(api, constant_1.PROFILE_TO_AUTHORIZED_API, constant_1.PTR_LST_TYPE).catch(() => null);
+            apiNodes.push(api);
+        }
+        return apiNodes;
+        // return apiIds.reduce(async (prom, apiId) => {
+        // 	const liste = await prom;
+        // 	const api = await APIService.getInstance().getApiRouteById(apiId);
+        // 	if (api) {
+        // 		try {
+        // 			await profile.removeChild(api, PROFILE_TO_AUTHORIZED_API, PTR_LST_TYPE);
+        // 			liste.push(api);
+        // 		} catch (error) {}
+        // 		return liste;
+        // 	}
+        // }, Promise.resolve([]));
     }
     ///////////////////////////////////////////////
     //             VERIFICATION

@@ -21,29 +21,29 @@
  * with this file. If not, see
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
-import { SpinalContext, SpinalNode } from 'spinal-env-viewer-graph-service';
+import { SpinalContext, SpinalNode } from "spinal-env-viewer-graph-service";
 
 export interface IProfile extends IProfileAuth {
-  name: string;
+	name: string;
 }
 
 export interface IProfileAuth {
-  appsIds?: string[];
-  subAppsIds?: string[];
-  apisIds?: string[];
-  contextIds?: string[];
+	appsIds?: string[];
+	subAppsIds?: string[];
+	apisIds?: string[];
+	contextIds?: string[];
 }
 
 export interface IProfileRes extends IProfileAuthRes {
-  node: SpinalNode;
+	node: SpinalNode;
 }
 
 export interface IProfileAuthRes {
-  contexts?: SpinalContext[];
-  apps?: SpinalNode[];
-  subApps?: SpinalNode[];
-  apis?: SpinalNode[];
-  adminApps?: SpinalNode[];
+	contexts?: SpinalContext[];
+	apps?: SpinalNode[];
+	subApps?: SpinalNode[];
+	apis?: SpinalNode[];
+	adminApps?: SpinalNode[];
 }
 
 ///////////////////////////////////
@@ -51,9 +51,9 @@ export interface IProfileAuthRes {
 //////////////////////////////////
 
 export interface IProfileAuthEdit extends IProfileAuth {
-  name?: string;
-  unauthorizeAppsIds?: string[];
-  unauthorizeSubAppsIds?: string[];
-  unauthorizeApisIds?: string[];
-  unauthorizeContextIds?: string[];
+	name?: string;
+	unauthorizeAppsIds?: string[];
+	unauthorizeSubAppsIds?: string[];
+	unauthorizeApisIds?: string[];
+	unauthorizeContextIds?: string[];
 }

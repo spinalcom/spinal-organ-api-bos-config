@@ -43,7 +43,7 @@ class SpinalRedisMiddleware {
             this._instance = new SpinalRedisMiddleware();
         return this._instance;
     }
-    async set(key, value, options = { expiration: { type: 'EX', value: 3600 } }) {
+    async set(key, value, options = { expiration: { type: "EX", value: 3600 } }) {
         if (!this.isEnabled())
             return;
         await this.connect(); // Ensure connection before setting value

@@ -37,73 +37,75 @@ const directory_path = process.env.CONFIG_DIRECTORY_PATH || CONFIG_DEFAULT_DIREC
 const fileName = process.env.CONFIG_FILE_NAME || CONFIG_DEFAULT_NAME;
 
 export default class ConfigFileService {
-  private static instance: ConfigFileService;
-  public graph: SpinalGraph;
-  public hubConnect: spinal.FileSystem;
+	private static instance: ConfigFileService;
+	public graph: SpinalGraph | null = null;
+	public hubConnect: spinal.FileSystem | null = null;
 
-  private constructor() { }
+	private constructor() {}
 
-  public static getInstance(): ConfigFileService {
-    if (!ConfigFileService.instance) {
-      ConfigFileService.instance = new ConfigFileService();
-    }
-    return ConfigFileService.instance;
-  }
+	public static getInstance(): ConfigFileService {
+		if (!ConfigFileService.instance) {
+			ConfigFileService.instance = new ConfigFileService();
+		}
+		return ConfigFileService.instance;
+	}
 
-  public init(connect: spinal.FileSystem): Promise<(SpinalContext | void)[]> {
-    return this.loadOrMakeConfigFile(connect).then((graph: SpinalGraph) => {
-      this.hubConnect = connect;
-      this.graph = graph;
-      return this._initServices().then(async (result) => {
-        // await DigitalTwinService.getInstance().init(connect);
-        await createDefaultAdminApps();
-        return result;
-      });
-    });
-  }
+	public init(connect: spinal.FileSystem): Promise<(SpinalContext | void)[]> {
+		return this.loadOrMakeConfigFile(connect).then((graph: SpinalGraph) => {
+			this.hubConnect = connect;
+			this.graph = graph;
+			return this._initServices().then(async (result) => {
+				// await DigitalTwinService.getInstance().init(connect);
+				await createDefaultAdminApps();
+				return result;
+			});
+		});
+	}
 
-  public getContext(contextName: string): Promise<SpinalContext> {
-    return this.graph.getContext(contextName);
-  }
+	public getContext(contextName: string): Promise<SpinalContext> {
+		if (!this.graph) throw new Error("Graph is not initialized");
+		return this.graph.getContext(contextName);
+	}
 
-  public addContext(contextName: string, contextType?: string): Promise<SpinalContext> {
-    const context = new SpinalContext(contextName, contextType);
-    return this.graph.addContext(context);
-  }
+	public addContext(contextName: string, contextType?: string): Promise<SpinalContext> {
+		if (!this.graph) throw new Error("Graph is not initialized");
+		const context = new SpinalContext(contextName, contextType);
+		return this.graph.addContext(context);
+	}
 
-  private async loadOrMakeConfigFile(connect: spinal.FileSystem): Promise<SpinalGraph> {
-    try {
-      const graph = await spinalCore.load<SpinalGraph>(connect, path.resolve(`${directory_path}/${fileName}`));
-      return graph;
-    } catch (error) {
-      const dir = await connect.load_or_make_dir(directory_path);
-      const graph = this._createFile(dir, fileName);
-      return graph;
-    }
-  }
+	private async loadOrMakeConfigFile(connect: spinal.FileSystem): Promise<SpinalGraph> {
+		try {
+			const graph = await spinalCore.load<SpinalGraph>(connect, path.resolve(`${directory_path}/${fileName}`));
+			return graph;
+		} catch (error) {
+			const dir = await connect.load_or_make_dir(directory_path);
+			const graph = this._createFile(dir, fileName);
+			return graph;
+		}
+	}
 
-  private _createFile(directory: spinal.Directory, fileName: string = CONFIG_DEFAULT_NAME): SpinalGraph {
-    const graph = new SpinalGraph(CONFIG_DEFAULT_NAME);
-    directory.force_add_file(fileName, graph, {
-      model_type: CONFIG_FILE_MODEl_TYPE,
-    });
-    return graph;
-  }
+	private _createFile(directory: spinal.Directory, fileName: string = CONFIG_DEFAULT_NAME): SpinalGraph {
+		const graph = new SpinalGraph(CONFIG_DEFAULT_NAME);
+		directory.force_add_file(fileName, graph, {
+			model_type: CONFIG_FILE_MODEl_TYPE,
+		});
+		return graph;
+	}
 
-  private _initServices() {
-    const services = [APIService, AppProfileService, AppService, OrganListService, UserProfileService, UserListService, AppListService, DigitalTwinService, TokenService, LogService, WebsocketLogsService, AuthentificationService, SpinalCodeUniqueService];
+	private _initServices() {
+		const services = [APIService, AppProfileService, AppService, OrganListService, UserProfileService, UserListService, AppListService, DigitalTwinService, TokenService, LogService, WebsocketLogsService, AuthentificationService, SpinalCodeUniqueService];
 
-    const promises = services.map((service) => {
-      try {
-        const instance = service.getInstance();
-        if (typeof instance.init === "function") return instance.init();
-      } catch (error) {
-        console.error(error);
-      }
-    });
+		const promises = services.map((service) => {
+			try {
+				const instance = service.getInstance();
+				if (typeof instance.init === "function") return instance.init();
+			} catch (error) {
+				console.error(error);
+			}
+		});
 
-    return Promise.all(promises);
-  }
+		return Promise.all(promises);
+	}
 }
 
 export const configServiceInstance = ConfigFileService.getInstance();

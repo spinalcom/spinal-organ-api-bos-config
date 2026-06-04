@@ -86,7 +86,7 @@ class AppProfileService {
         const profileNode = await this._getAppProfileNode(appProfileId);
         if (!profileNode)
             return;
-        this._renameProfile(profileNode, appProfile.name);
+        this._renameProfile(profileNode, appProfile.name || "");
         await this._unauthorizeAll(profileNode, appProfile);
         await this._authorizeAll(profileNode, appProfile);
         return this.getAppProfile(profileNode);
@@ -98,7 +98,9 @@ class AppProfileService {
     async getAllAppProfile() {
         const contexts = await this.getAllAppProfileNodes();
         const promises = contexts.map((node) => this.getAppProfile(node));
-        return Promise.all(promises);
+        return Promise.all(promises).then((result) => {
+            return result.filter((node) => node !== undefined);
+        });
     }
     /**
      * Retrieves all application profile nodes in the context.
@@ -146,7 +148,7 @@ class AppProfileService {
      * @param data The authorization data containing context IDs, app IDs, and API IDs.
      * @returns A promise that resolves to the authorized resources.
      */
-    async authorizeProfileToAccessContext(appProfile, contextIds, digitalTwinId) {
+    async authorizeProfileToAccessContext(appProfile, contextIds, digitalTwinId = "") {
         const profile = appProfile instanceof spinal_env_viewer_graph_service_1.SpinalNode ? appProfile : await this._getAppProfileNode(appProfile);
         return authorization_service_1.authorizationInstance.authorizeProfileToAccessContext(profile, digitalTwinId, contextIds);
     }
@@ -202,7 +204,7 @@ class AppProfileService {
      * @return {*}  {Promise<SpinalContext[]>}
      * @memberof AppProfileService
      */
-    async unauthorizeProfileToAccessContext(appProfile, contextIds, digitalTwinId) {
+    async unauthorizeProfileToAccessContext(appProfile, contextIds, digitalTwinId = "") {
         const profile = appProfile instanceof spinal_env_viewer_graph_service_1.SpinalNode ? appProfile : await this._getAppProfileNode(appProfile);
         return authorization_service_1.authorizationInstance.unauthorizeProfileToAccessContext(profile, digitalTwinId, contextIds);
     }
@@ -242,7 +244,7 @@ class AppProfileService {
      * @return {*}  {Promise<SpinalNode>}
      * @memberof AppProfileService
      */
-    async profileHasAccessToContext(appProfile, contextId, digitalTwinId) {
+    async profileHasAccessToContext(appProfile, contextId, digitalTwinId = "") {
         const profile = appProfile instanceof spinal_env_viewer_graph_service_1.SpinalNode ? appProfile : await this._getAppProfileNode(appProfile);
         return authorization_service_1.authorizationInstance.profileHasAccessToContext(profile, digitalTwinId, contextId);
     }
@@ -282,7 +284,7 @@ class AppProfileService {
      * @return {*}  {Promise<SpinalContext[]>}
      * @memberof AppProfileService
      */
-    async getAuthorizedContexts(appProfile, digitalTwinId) {
+    async getAuthorizedContexts(appProfile, digitalTwinId = "") {
         const profile = appProfile instanceof spinal_env_viewer_graph_service_1.SpinalNode ? appProfile : await this._getAppProfileNode(appProfile);
         return authorization_service_1.authorizationInstance.getAuthorizedContexts(profile, digitalTwinId);
     }
@@ -330,7 +332,6 @@ class AppProfileService {
         const children = await startNode.getChildrenInContext(this.context);
         return children.find((el) => {
             if (el.getId().get() === nodeIdOrName || el.getName().get() === nodeIdOrName) {
-                //@ts-ignore
                 spinal_env_viewer_graph_service_1.SpinalGraphService._addNode(el);
                 return true;
             }

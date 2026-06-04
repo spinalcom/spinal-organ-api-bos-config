@@ -3,7 +3,7 @@ import { IProfile, IProfileAuthEdit, IProfileAuthRes, IProfileRes } from "../int
 import { TAppSearch } from "../utils/findNodeBySearchKey";
 export declare class UserProfileService {
     private static instance;
-    context: SpinalContext;
+    context: SpinalContext | undefined;
     private constructor();
     static getInstance(): UserProfileService;
     init(): Promise<SpinalContext>;
@@ -26,7 +26,7 @@ export declare class UserProfileService {
      * @returns A promise that resolves to an object containing the user profile node and its authorization structure,
      *          or `undefined` if the node could not be found.
      */
-    getUserProfile(userProfile: string | SpinalNode): Promise<IProfileRes>;
+    getUserProfile(userProfile: string | SpinalNode): Promise<IProfileRes | undefined>;
     /**
      * Updates a user profile with the provided information.
      *
@@ -41,7 +41,7 @@ export declare class UserProfileService {
      * @param userProfile - An object containing the updated profile information and access rights.
      * @returns A promise that resolves to the updated user profile response, or `undefined` if the profile node is not found.
      */
-    updateUserProfile(userProfileId: string, userProfile: IProfileAuthEdit): Promise<IProfileRes>;
+    updateUserProfile(userProfileId: string, userProfile: IProfileAuthEdit): Promise<IProfileRes | undefined>;
     /**
      * Retrieves all user profiles.
      *
@@ -56,7 +56,7 @@ export declare class UserProfileService {
      *
      * @returns {Promise<any[]>} A promise that resolves to an array of user profile nodes found in the context.
      */
-    getAllUserProfileNodes(): Promise<SpinalNode<import("spinal-core-connectorjs").Model>[]>;
+    getAllUserProfileNodes(): Promise<SpinalNode[]>;
     /**
      * Deletes a user profile by its unique identifier.
      *
@@ -121,7 +121,7 @@ export declare class UserProfileService {
      * @param digitalTwinId - (Optional) The unique identifier of the digital twin.
      * @returns A promise that resolves to an object containing the authorization structure.
      */
-    getAutorizationStructure(userProfile: string | SpinalNode, digitalTwinId?: string): Promise<IProfileAuthRes>;
+    getAutorizationStructure(userProfile: string | SpinalNode, digitalTwinId?: string): Promise<IProfileAuthRes | undefined>;
     /**
      * Revokes a user profile's authorization to access one or more contexts within a digital twin.
      *
@@ -163,7 +163,7 @@ export declare class UserProfileService {
      * @param digitalTwinId - (Optional) The identifier of the digital twin instance.
      * @returns A promise that resolves to the SpinalNode if the profile has access to the context.
      */
-    profileHasAccessToContext(userProfile: string | SpinalNode, contextId: string, digitalTwinId?: string): Promise<SpinalNode>;
+    profileHasAccessToContext(userProfile: string | SpinalNode, contextId: string, digitalTwinId?: string): Promise<SpinalNode | undefined>;
     /**
      * Checks if a user profile has access to a specific application.
      *
@@ -172,7 +172,7 @@ export declare class UserProfileService {
      * @param appId - The unique identifier of the application to check access for.
      * @returns A promise that resolves to the SpinalNode representing the application if access is granted.
      */
-    profileHasAccessToApp(searchKeys: TAppSearch, userProfile: string | SpinalNode, appId: string): Promise<SpinalNode>;
+    profileHasAccessToApp(searchKeys: TAppSearch, userProfile: string | SpinalNode, appId: string): Promise<SpinalNode | undefined>;
     /**
      * Checks if a user profile has access to a specific sub-application within an application.
      *
@@ -182,7 +182,7 @@ export declare class UserProfileService {
      * @param subAppNameOrId - The name or ID of the sub-application to check access for.
      * @returns A promise that resolves to the SpinalNode representing the sub-application if access is granted.
      */
-    profileHasAccessToSubApp(searchKeys: TAppSearch, userProfile: string | SpinalNode, appNameOrId: string, subAppNameOrId: string): Promise<SpinalNode>;
+    profileHasAccessToSubApp(searchKeys: TAppSearch, userProfile: string | SpinalNode, appNameOrId: string, subAppNameOrId: string): Promise<SpinalNode | undefined>;
     /**
      * Checks if a user profile has access to a specific API.
      *
@@ -190,7 +190,7 @@ export declare class UserProfileService {
      * @param apiId - The unique identifier of the API to check access for.
      * @returns A promise that resolves to the SpinalNode representing the API if access is granted.
      */
-    profileHasAccessToApi(userProfile: string | SpinalNode, apiId: string): Promise<SpinalNode>;
+    profileHasAccessToApi(userProfile: string | SpinalNode, apiId: string): Promise<SpinalNode | undefined>;
     /**
      * Retrieves all contexts that a user profile is authorized to access.
      *
@@ -227,7 +227,7 @@ export declare class UserProfileService {
      * @returns A promise that resolves to an array of SpinalNode objects representing the authorized APIs.
      */
     getAuthorizedApis(userProfile: string | SpinalNode): Promise<SpinalNode[]>;
-    _getUserProfileNode(userProfileId: string): Promise<SpinalNode>;
+    _getUserProfileNode(userProfileId: string): Promise<SpinalNode | undefined>;
     private _renameProfile;
     private _findChildInContext;
 }

@@ -53,6 +53,8 @@ class AppListService {
      */
     async authenticateApplication(application) {
         const adminCredential = await this._getAuthPlateformInfo();
+        if (!adminCredential || !adminCredential.urlAdmin || !adminCredential.idPlateform)
+            throw new Error("No authentication platform is registered");
         console.warn("this mode is deprecated, please use the new authentication service");
         return (0, ApplicationAuthUtils_1.authenticateApplication)(adminCredential.urlAdmin, adminCredential.idPlateform, application, this.context);
     }

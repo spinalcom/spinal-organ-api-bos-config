@@ -22,18 +22,18 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
-export * from './configFile.service';
-export * from './apis.service';
-export * from './apps.service';
-export * from './appProfile.service';
-export * from './userProfile.service';
-export * from './organList.service';
-export * from './digitalTwin.service';
-export * from './authentification.service';
-export * from './userList.services';
-export * from './appList.services';
-export * from './token.service';
-export * from './log.service';
-export * from './webSocketLogs.service';
-export * from './codeUnique.service';
+export * from "./configFile.service";
+export * from "./apis.service";
+export * from "./apps.service";
+export * from "./appProfile.service";
+export * from "./userProfile.service";
+export * from "./organList.service";
+export * from "./digitalTwin.service";
+export * from "./authentification.service";
+export * from "./userList.services";
+export * from "./appList.services";
+export * from "./token.service";
+export * from "./log.service";
+export * from "./webSocketLogs.service";
+export * from "./codeUnique.service";
 // export * from "./graph.service";

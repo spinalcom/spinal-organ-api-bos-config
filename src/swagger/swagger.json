@@ -1925,6 +1925,65 @@
 				"parameters": []
 			}
 		},
+		"/api/v1/get_all_apps": {
+			"get": {
+				"operationId": "GetAllApps",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"properties": {
+												"adminApps": {
+													"items": {
+														"$ref": "#/components/schemas/ISpinalApp"
+													},
+													"type": "array"
+												},
+												"apps": {
+													"items": {
+														"$ref": "#/components/schemas/ISpinalApp"
+													},
+													"type": "array"
+												}
+											},
+											"required": [
+												"adminApps",
+												"apps"
+											],
+											"type": "object"
+										},
+										{
+											"properties": {
+												"message": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"message"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Applications"
+				],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
+				"parameters": []
+			}
+		},
 		"/api/v1/get_admin_app/{appNameOrId}": {
 			"get": {
 				"operationId": "GetAdminApp",

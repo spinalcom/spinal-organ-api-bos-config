@@ -31,13 +31,13 @@ export declare class AuthentificationService {
      * @returns A promise that resolves to an `IBosCredential` object containing the credentials,
      *          or `undefined` if the context is not available.
      */
-    getBosToAdminCredential(): Promise<IBosCredential>;
+    getBosToAdminCredential(): Promise<IBosCredential | undefined>;
     /**
      * Deletes the BOS and admin credential contexts from the configuration graph.
      *
      * This method attempts to retrieve and remove the BOS credential context and the admin credential context
      * from the configuration graph. If the BOS credential context exists, it is removed. If the admin credential
-     * context does not exist, it attempts to remove it as well (note: this may be a logic error).
+     * context exists, it is removed as well.
      *
      * @returns An object indicating that the credentials have been removed.
      * @async
@@ -46,22 +46,22 @@ export declare class AuthentificationService {
         removed: boolean;
     }>;
     /**
-    * Updates the BOS token in the authentication platform.
-    * @returns A promise that resolves to the updated token data.
-    * @memberof AuthentificationService
-    */
+     * Updates the BOS token in the authentication platform.
+     * @returns A promise that resolves to the updated token data.
+     * @memberof AuthentificationService
+     */
     updateBosTokenInAuthPlatform(): Promise<{
         token: string;
         code: number;
     }>;
     /**
-    * Saves or edits PAM credentials in the graph.
-    *
-    * @private
-    * @param {*} bosCredential
-    * @return {*}  {Promise<IPamCredential>}
-    * @memberof AuthentificationService
-    */
+     * Saves or edits PAM credentials in the graph.
+     *
+     * @private
+     * @param {*} bosCredential
+     * @return {*}  {Promise<IPamCredential>}
+     * @memberof AuthentificationService
+     */
     private _saveOrEditBosCredentials;
     /**
      * Creates a new set of admin credentials by generating a unique client ID and a JWT token.
@@ -79,7 +79,7 @@ export declare class AuthentificationService {
      *
      * @throws This method does not throw, but may return `undefined` if the admin credential context is missing.
      */
-    getAdminCredential(): Promise<IAdminCredential>;
+    getAdminCredential(): Promise<IAdminCredential | undefined>;
     /**
      * Sends data to the admin endpoint for registration or update.
      *
@@ -95,7 +95,7 @@ export declare class AuthentificationService {
      * Retrieves the admin credentials if they exist, or optionally creates them if they do not.
      *
      * @param createIfNotExist - If `true`, creates the admin credentials if they do not already exist. Defaults to `false`.
-     * @returns A promise that resolves to the admin credentials (`IAdminCredential`).
+     * @returns A promise that resolves to the admin credentials (`IAdminCredential`) or `undefined` if they do not exist.
      */
     private _getOrCreateAdminCredential;
     /**

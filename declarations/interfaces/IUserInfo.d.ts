@@ -4,5 +4,5 @@ export interface IUserInfo extends IUserCredential {
     telephone?: string;
     email?: string;
     userType?: string;
-    [key: string]: string;
+    [key: string]: string | any;
 }

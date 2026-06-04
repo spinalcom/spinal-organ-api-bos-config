@@ -73,8 +73,7 @@ class AdminProfileService {
             return;
         const children = await context.getChildren();
         return children.find((el) => {
-            return (el.getName().get() === constant_1.ADMIN_PROFILE_NAME &&
-                el.getType().get() === constant_1.ADMIN_PROFILE_TYPE);
+            return el.getName().get() === constant_1.ADMIN_PROFILE_NAME && el.getType().get() === constant_1.ADMIN_PROFILE_TYPE;
         });
     }
     /**
@@ -86,7 +85,8 @@ class AdminProfileService {
     async addAppToProfil(apps) {
         if (!Array.isArray(apps))
             apps = [apps];
-        return userProfile_service_1.UserProfileService.getInstance().authorizeProfileToAccessApps(this._adminNode, apps.map((el) => el.getId().get()));
+        const appIds = apps.map((el) => el.getId().get());
+        return userProfile_service_1.UserProfileService.getInstance().authorizeProfileToAccessApps(this._adminNode, appIds);
     }
     /**
      * Authorizes the admin profile to access a sub-app under a specific app.
@@ -105,7 +105,8 @@ class AdminProfileService {
     async addAdminAppToProfil(apps) {
         if (!Array.isArray(apps))
             apps = [apps];
-        return authorization_service_1.default.getInstance().authorizeProfileToAccessAdminApps(this._adminNode, apps.map((el) => el.getId().get()));
+        const appIds = apps.map((el) => el.getId().get());
+        return authorization_service_1.default.getInstance().authorizeProfileToAccessAdminApps(this._adminNode, appIds);
     }
     /**
      * Authorizes the admin profile to access the given APIs.
@@ -115,7 +116,8 @@ class AdminProfileService {
     async addApiToProfil(apis) {
         if (!Array.isArray(apis))
             apis = [apis];
-        return userProfile_service_1.UserProfileService.getInstance().authorizeProfileToAccessApis(this._adminNode, apis.map((el) => el.getId().get()));
+        const appIds = apis.map((el) => el.getId().get());
+        return userProfile_service_1.UserProfileService.getInstance().authorizeProfileToAccessApis(this._adminNode, appIds);
     }
     /**
      * Authorizes the admin profile to access the given digital twins.
@@ -128,8 +130,8 @@ class AdminProfileService {
             digitalTwins = [digitalTwins];
         const promises = [];
         for (const digitalTwin of digitalTwins) {
-            promises.push(this._adminNode
-                .addChild(digitalTwin, constant_1.PROFILE_TO_AUTHORIZED_DIGITAL_TWIN_RELATION_NAME, constant_1.PTR_LST_TYPE).catch((error) => { }));
+            // add catch to avoid Promise.all to fail if one of the addChild fails
+            promises.push(this._adminNode.addChild(digitalTwin, constant_1.PROFILE_TO_AUTHORIZED_DIGITAL_TWIN_RELATION_NAME, constant_1.PTR_LST_TYPE).catch((error) => { }));
         }
         return Promise.all(promises).then((result) => {
             return result.filter((node) => node instanceof spinal_env_viewer_graph_service_1.SpinalNode);
@@ -150,10 +152,7 @@ class AdminProfileService {
     async syncAdminProfile() {
         return {
             digitaTwins: await this._authorizeAllDigitalTwin(),
-            apps: await Promise.all([
-                this._authorizeAllApps(),
-                this._authorizeAllAdminApps(),
-            ]),
+            apps: await Promise.all([this._authorizeAllApps(), this._authorizeAllAdminApps()]),
             apis: await this._authorizeAllApis(),
         };
     }

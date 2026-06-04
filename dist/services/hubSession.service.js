@@ -39,11 +39,11 @@ class HubSessionService {
         let hubPwd = process.env.USER_MDP;
         return axios_1.default
             .post(`${hubUrl}/sceen/_`, `U ${hubId} ${hubPwd} S 1 E `, {
-            headers: { 'Content-Type': 'text/plain' },
+            headers: { "Content-Type": "text/plain" },
         })
             .then((result) => {
             const rep = result.data;
-            return rep.split('\n')[0].split(' = ')[1].split(';')[0];
+            return rep.split("\n")[0].split(" = ")[1].split(";")[0];
         });
     }
 }

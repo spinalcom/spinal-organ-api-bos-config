@@ -7,7 +7,7 @@ const globalCache = require("global-cache");
 const uuid_1 = require("uuid");
 const SpinalRedisMiddleware_1 = require("../../middlewares/SpinalRedisMiddleware");
 async function useLoginProxy(app) {
-    app.get('/login', async (req, res, next) => {
+    app.get("/login", async (req, res, next) => {
         try {
             const authPlatformInfo = await services_1.AuthentificationService.getInstance().getBosToAdminCredential();
             if (authPlatformInfo) {
@@ -20,16 +20,16 @@ async function useLoginProxy(app) {
                 return res.status(constant_1.HTTP_CODES.REDIRECT).redirect(server_url + endpoint);
             }
             /*
-            * If no auth server is found, redirect to the admin connect page
-            * Comment this part if you don't want to redirect to the admin page
-            */
+             * If no auth server is found, redirect to the admin connect page
+             * Comment this part if you don't want to redirect to the admin page
+             */
             let client_uri = process.env.VUE_CLIENT_URI;
             let endpoint = client_uri.endsWith("/") ? "admin" : "/admin";
             return res.status(constant_1.HTTP_CODES.REDIRECT).redirect(client_uri + endpoint);
             /*
-            * Discomment this part if you comment the above part
-            * This will return a bad request if no auth server is found
-            */
+             * Discomment this part if you comment the above part
+             * This will return a bad request if no auth server is found
+             */
             // res.status(HTTP_CODES.BAD_REQUEST).send({ status: HTTP_CODES.BAD_REQUEST, message: "No Authentification server url found, use /admin endpoint to connect as admin" });
         }
         catch (error) {
@@ -39,7 +39,7 @@ async function useLoginProxy(app) {
     });
     app.post("/callback", async (req, res, next) => {
         try {
-            const data = typeof req.body.data === 'string' ? JSON.parse(req.body.data) : req.body.data;
+            const data = typeof req.body.data === "string" ? JSON.parse(req.body.data) : req.body.data;
             const formatData = await services_1.UserListService.getInstance().getUserDataFormatted(data, null, true);
             const profileId = formatData.profile.userProfileBosConfigId || data.profile.profileId;
             const token = formatData.token;
@@ -52,7 +52,7 @@ async function useLoginProxy(app) {
             const cookiesId = (0, uuid_1.v4)();
             const dataToCache = { uri: vue_client_uri, profileId, token, user };
             // Store the data in Redis with an expiration time of 30 seconds
-            SpinalRedisMiddleware_1.default.getInstance().set(cookiesId, dataToCache, { expiration: { type: 'EX', value: 30 } }); //store data for 30seconds
+            SpinalRedisMiddleware_1.default.getInstance().set(cookiesId, dataToCache, { expiration: { type: "EX", value: 30 } }); //store data for 30seconds
             globalCache.set(cookiesId, dataToCache, 30 * 1000); //store data for 30seconds
             let endpoint = vue_client_uri.endsWith("/") ? "login" : "/login";
             return res.redirect(`${vue_client_uri + endpoint}?ref=${cookiesId}`);

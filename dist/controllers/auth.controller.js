@@ -43,6 +43,7 @@ const tsoa_1 = require("tsoa");
 const AuthError_1 = require("../security/AuthError");
 const authentication_1 = require("../security/authentication");
 const SpinalRedisMiddleware_1 = require("../middlewares/SpinalRedisMiddleware");
+const ADMIN_APPS = require("../defaultApps/adminApps.json");
 const redisServiceInstance = SpinalRedisMiddleware_1.default.getInstance();
 const serviceInstance = services_1.AuthentificationService.getInstance();
 const tokenService = services_1.TokenService.getInstance();
@@ -81,8 +82,8 @@ let AuthController = class AuthController extends tsoa_1.Controller {
     }
     async registerToAdmin(req, data) {
         try {
-            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
-            if (!isAdmin)
+            const hasAccess = await (0, authentication_1.isAdminOrHasAccessToAdminApp)(req, ADMIN_APPS.auth_platform.name);
+            if (!hasAccess)
                 throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
             const registeredData = await serviceInstance.registerToAdmin(data.urlAdmin, data.clientId, data.clientSecret);
             await serviceInstance.sendBosInfoToAuth();
@@ -96,8 +97,8 @@ let AuthController = class AuthController extends tsoa_1.Controller {
     }
     async updateBosTokenInAuthPlatform(req) {
         try {
-            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
-            if (!isAdmin)
+            const hasAccess = await (0, authentication_1.isAdminOrHasAccessToAdminApp)(req, ADMIN_APPS.auth_platform.name);
+            if (!hasAccess)
                 throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
             const data = await serviceInstance.updateBosTokenInAuthPlatform();
             this.setStatus(constant_1.HTTP_CODES.OK);
@@ -110,8 +111,8 @@ let AuthController = class AuthController extends tsoa_1.Controller {
     }
     async getBosToAdminCredential(req) {
         try {
-            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
-            if (!isAdmin)
+            const hasAccess = await (0, authentication_1.isAdminOrHasAccessToAdminApp)(req, ADMIN_APPS.auth_platform.name);
+            if (!hasAccess)
                 throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
             const bosCredential = await serviceInstance.getBosToAdminCredential();
             if (bosCredential) {
@@ -128,8 +129,8 @@ let AuthController = class AuthController extends tsoa_1.Controller {
     }
     async deleteAdmin(req) {
         try {
-            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
-            if (!isAdmin)
+            const hasAccess = await (0, authentication_1.isAdminOrHasAccessToAdminApp)(req, ADMIN_APPS.auth_platform.name);
+            if (!hasAccess)
                 throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
             const deleted = await serviceInstance.disconnectBosFromAuth();
             const status = deleted ? constant_1.HTTP_CODES.OK : constant_1.HTTP_CODES.BAD_REQUEST;
@@ -144,8 +145,8 @@ let AuthController = class AuthController extends tsoa_1.Controller {
     }
     async getAdminCredential(req) {
         try {
-            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
-            if (!isAdmin)
+            const hasAccess = await (0, authentication_1.isAdminOrHasAccessToAdminApp)(req, ADMIN_APPS.auth_platform.name);
+            if (!hasAccess)
                 throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
             const adminCredential = await serviceInstance.getAdminCredential();
             if (adminCredential) {
@@ -168,7 +169,6 @@ let AuthController = class AuthController extends tsoa_1.Controller {
                 if (!isAuthPlatform)
                     throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
             }
-            ;
             const resp = await serviceInstance.sendBosInfoToAuth(true);
             this.setStatus(constant_1.HTTP_CODES.OK);
             return { message: "updated" };

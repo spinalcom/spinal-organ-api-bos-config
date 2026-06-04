@@ -3,7 +3,7 @@ import { IProfile, IProfileAuthEdit, IProfileAuthRes, IProfileRes } from "../int
 import { TAppSearch } from "../utils/findNodeBySearchKey";
 export declare class AppProfileService {
     private static instance;
-    context: SpinalContext;
+    context: SpinalContext | undefined;
     private constructor();
     static getInstance(): AppProfileService;
     init(): Promise<SpinalContext>;
@@ -20,7 +20,7 @@ export declare class AppProfileService {
      * @returns A promise that resolves to an object containing the profile node and its authorization structure,
      *          or `undefined` if the node could not be found.
      */
-    getAppProfile(appProfile: string | SpinalNode): Promise<IProfileRes>;
+    getAppProfile(appProfile: string | SpinalNode): Promise<IProfileRes | undefined>;
     /**
      * Updates an existing application profile node with new data and re-authorizes access to APIs, apps, and contexts.
      *
@@ -29,7 +29,7 @@ export declare class AppProfileService {
      * @return {*}  {Promise<IProfileRes>}
      * @memberof AppProfileService
      */
-    updateAppProfile(appProfileId: string, appProfile: IProfileAuthEdit): Promise<IProfileRes>;
+    updateAppProfile(appProfileId: string, appProfile: IProfileAuthEdit): Promise<IProfileRes | undefined>;
     /**
      * Retrieves all application profiles with their authorization structures.
      * @returns A promise that resolves to an array of profile nodes and their authorized resources.
@@ -172,7 +172,7 @@ export declare class AppProfileService {
      */
     getAuthorizedApis(appProfile: string | SpinalNode): Promise<SpinalNode[]>;
     _getAppProfileNodeGraph(profileId: string): Promise<SpinalGraph | void>;
-    _getAppProfileNode(appProfileId: string): Promise<SpinalNode>;
+    _getAppProfileNode(appProfileId: string): Promise<SpinalNode | undefined>;
     private _renameProfile;
     private _findChildInContext;
     private _unauthorizeAll;

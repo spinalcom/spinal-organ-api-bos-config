@@ -35,8 +35,8 @@ const directory_path = process.env.CONFIG_DIRECTORY_PATH || constant_1.CONFIG_DE
 const fileName = process.env.CONFIG_FILE_NAME || constant_1.CONFIG_DEFAULT_NAME;
 class ConfigFileService {
     static instance;
-    graph;
-    hubConnect;
+    graph = null;
+    hubConnect = null;
     constructor() { }
     static getInstance() {
         if (!ConfigFileService.instance) {
@@ -56,9 +56,13 @@ class ConfigFileService {
         });
     }
     getContext(contextName) {
+        if (!this.graph)
+            throw new Error("Graph is not initialized");
         return this.graph.getContext(contextName);
     }
     addContext(contextName, contextType) {
+        if (!this.graph)
+            throw new Error("Graph is not initialized");
         const context = new spinal_model_graph_1.SpinalContext(contextName, contextType);
         return this.graph.addContext(context);
     }

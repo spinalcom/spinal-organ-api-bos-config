@@ -326,7 +326,7 @@ function RegisterRoutes(app) {
     app.delete('/api/v1/delete_bos_api_route/:id', authenticateMiddleware([{ "bearerAuth": [] }]), ...((0, runtime_1.fetchMiddlewares)(apis_controller_1.APIController)), ...((0, runtime_1.fetchMiddlewares)(apis_controller_1.APIController.prototype.deleteBosApiRoute)), function APIController_deleteBosApiRoute(request, response, next) {
         const args = {
             req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
-            id: { "in": "path", "name": "id", "required": true, "dataType": "any" },
+            id: { "in": "path", "name": "id", "required": true, "dataType": "string" },
         };
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         let validatedArgs = [];
@@ -683,6 +683,23 @@ function RegisterRoutes(app) {
             validatedArgs = getValidatedArgs(args, request, response);
             const controller = new apps_controller_1.AppsController();
             const promise = controller.getAllBuildingApps.apply(controller, validatedArgs);
+            promiseHandler(controller, promise, response, undefined, next);
+        }
+        catch (err) {
+            return next(err);
+        }
+    });
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    app.get('/api/v1/get_all_apps', authenticateMiddleware([{ "bearerAuth": [] }]), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController)), ...((0, runtime_1.fetchMiddlewares)(apps_controller_1.AppsController.prototype.getAllApps)), function AppsController_getAllApps(request, response, next) {
+        const args = {
+            req: { "in": "request", "name": "req", "required": true, "dataType": "object" },
+        };
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        let validatedArgs = [];
+        try {
+            validatedArgs = getValidatedArgs(args, request, response);
+            const controller = new apps_controller_1.AppsController();
+            const promise = controller.getAllApps.apply(controller, validatedArgs);
             promiseHandler(controller, promise, response, undefined, next);
         }
         catch (err) {

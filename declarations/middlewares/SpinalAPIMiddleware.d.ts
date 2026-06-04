@@ -1,14 +1,14 @@
-import { FileSystem, Model } from 'spinal-core-connectorjs';
-import { SpinalGraph, SpinalNode } from 'spinal-env-viewer-graph-service';
-import { IConfig, ISpinalAPIMiddleware } from 'spinal-organ-api-server';
+import { FileSystem, Model } from "spinal-core-connectorjs";
+import { SpinalGraph, SpinalNode } from "spinal-env-viewer-graph-service";
+import { IConfig, ISpinalAPIMiddleware } from "spinal-organ-api-server";
 export default class SpinalAPIMiddleware implements ISpinalAPIMiddleware {
     config: IConfig;
-    conn: FileSystem;
+    conn: FileSystem | undefined;
     loadedPtr: Map<number, any>;
     iteratorGraph: AsyncGenerator<SpinalGraph<any>, never>;
     profilesToGraph: Map<string, SpinalGraph>;
     private static instance;
-    graph: SpinalGraph<any>;
+    graph: SpinalGraph | undefined;
     private constructor();
     static getInstance(): SpinalAPIMiddleware;
     setConnection(conn: spinal.FileSystem): void;

@@ -62,7 +62,7 @@ class TokenService {
      */
     async purgeToken() {
         const tokens = await this._getAllTokens();
-        const promises = tokens.map(token => this.tokenIsValid(token, true));
+        const promises = tokens.map((token) => this.tokenIsValid(token, true));
         return Promise.all(promises);
     }
     /**
@@ -116,7 +116,7 @@ class TokenService {
         let payload = {
             userInfo: userNode.info.get(),
             userId: userNode.getId().get(),
-            profile: { profileId: adminProfile.getId().get() }
+            profile: { profileId: adminProfile.getId().get() },
         };
         const isAdmin = true;
         return this.createToken(userNode, payload, isAdmin);
@@ -215,7 +215,7 @@ class TokenService {
     }
     async verifyFromCache(token) {
         const result = { exists: false, valid: false, data: null };
-        const tokenFromCache = await redisInstance.get(token) || globalCache.get(token);
+        const tokenFromCache = (await redisInstance.get(token)) || globalCache.get(token);
         if (!tokenFromCache)
             return result;
         result.exists = true;
@@ -251,11 +251,13 @@ class TokenService {
         const bosCredential = await authentification_service_1.AuthentificationService.getInstance().getBosToAdminCredential();
         if (!bosCredential || !bosCredential.urlAdmin)
             throw new Error("Invalid Token");
-        return axios_1.default.post(`${bosCredential.urlAdmin}/tokens/verifyToken`, { tokenParam: token, platformId: bosCredential.idPlateform, actor })
+        return axios_1.default
+            .post(`${bosCredential.urlAdmin}/tokens/verifyToken`, { tokenParam: token, platformId: bosCredential.idPlateform, actor })
             .then((result) => {
             redisInstance.set(token, result.data);
             return result.data;
-        }).catch((error) => {
+        })
+            .catch((error) => {
             console.error("Error verifying token in auth platform:", error.response?.data || error.message || error);
             throw new Error("Invalid token");
         });
@@ -313,11 +315,11 @@ class TokenService {
     }
     async _getAllTokens() {
         const tokens = await this.context.getChildren(constant_1.TOKEN_RELATION_NAME);
-        return tokens.map(el => el.getName().get());
+        return tokens.map((el) => el.getName().get());
     }
     _scheduleTokenPurge() {
         // cron.schedule('0 0 23 * * *', async () => {
-        cron.schedule('30 */1 * * *', async () => {
+        cron.schedule("30 */1 * * *", async () => {
             console.log(new Date().toUTCString(), "purge invalid tokens");
             await this.purgeToken();
         });

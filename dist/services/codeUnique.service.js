@@ -28,8 +28,7 @@ class SpinalCodeUniqueService {
         const bosCredential = await authentification_service_1.AuthentificationService.getInstance().getBosToAdminCredential();
         if (!bosCredential)
             throw new AuthError_1.OtherError(constant_1.HTTP_CODES.NOT_FOUND, `No auth found for code ${code}`);
-        return axios_1.default.post(`${bosCredential.urlAdmin}/codes/consume/${code}`, {}, { headers: { 'Content-Type': 'application/json' } })
-            .then(async (result) => {
+        return axios_1.default.post(`${bosCredential.urlAdmin}/codes/consume/${code}`, {}, { headers: { "Content-Type": "application/json" } }).then(async (result) => {
             let data = result.data;
             data.profile = await this._getProfileInfo(data.token, bosCredential);
             data.userInfo = await this._getCodeInfo(code, bosCredential, data.token);
@@ -43,29 +42,35 @@ class SpinalCodeUniqueService {
     _getProfileInfo(userToken, adminCredential) {
         let urlAdmin = adminCredential.urlAdmin;
         let endpoint = "/tokens/getCodeProfileByToken";
-        return axios_1.default.post(urlAdmin + endpoint, {
+        return axios_1.default
+            .post(urlAdmin + endpoint, {
             platformId: adminCredential.idPlateform,
-            token: userToken
-        }).then((result) => {
+            token: userToken,
+        })
+            .then((result) => {
             if (!result.data)
                 return;
             const data = result.data;
             return data;
-        }).catch(err => {
+        })
+            .catch((err) => {
             return {};
         });
     }
     _getCodeInfo(code, adminCredential, userToken) {
         const config = {
             headers: {
-                'Content-Type': 'application/json',
+                "Content-Type": "application/json",
                 // "x-access-token": adminCredential.tokenBosAdmin
-                "x-access-token": userToken
+                "x-access-token": userToken,
             },
         };
-        return axios_1.default.get(`${adminCredential.urlAdmin}/codes/getcode/${code}`, config).then((result) => {
+        return axios_1.default
+            .get(`${adminCredential.urlAdmin}/codes/getcode/${code}`, config)
+            .then((result) => {
             return result.data;
-        }).catch((err) => {
+        })
+            .catch((err) => {
             console.error(err);
         });
     }

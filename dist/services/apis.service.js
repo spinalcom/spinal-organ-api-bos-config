@@ -161,7 +161,9 @@ class APIService {
         for (const route of routes) {
             promises.push(this.createApiRoute(route).catch((error) => { }));
         }
-        return Promise.all(promises);
+        return Promise.all(promises).then((result) => {
+            return result.filter((node) => node instanceof spinal_env_viewer_graph_service_1.SpinalNode);
+        });
     }
 }
 exports.APIService = APIService;

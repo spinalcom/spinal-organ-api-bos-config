@@ -107,7 +107,8 @@ class UserProfileService {
         const profileNode = await this._getUserProfileNode(userProfileId);
         if (!profileNode)
             return;
-        this._renameProfile(profileNode, userProfile.name);
+        if (userProfile.name)
+            this._renameProfile(profileNode, userProfile.name);
         if (userProfile.unauthorizeApisIds)
             await this.unauthorizeProfileToAccessApis(profileNode, userProfile.unauthorizeApisIds);
         if (userProfile.unauthorizeSubAppsIds)
@@ -138,7 +139,7 @@ class UserProfileService {
     async getAllUserProfile() {
         const contexts = await this.getAllUserProfileNodes();
         const promises = contexts.map((node) => this.getUserProfile(node));
-        return Promise.all(promises);
+        return Promise.all(promises).then((res) => res.filter((el) => el !== undefined));
     }
     /**
      * Retrieves all user profile nodes within the current context.
@@ -196,6 +197,8 @@ class UserProfileService {
      */
     async authorizeProfileToAccessContext(userProfile, contextIds, digitalTwinId) {
         const profile = userProfile instanceof spinal_env_viewer_graph_service_1.SpinalNode ? userProfile : await this._getUserProfileNode(userProfile);
+        if (!profile)
+            return [];
         return authorization_service_1.authorizationInstance.authorizeProfileToAccessContext(profile, digitalTwinId, contextIds);
     }
     /**
@@ -207,6 +210,8 @@ class UserProfileService {
      */
     async authorizeProfileToAccessApps(userProfile, appIds) {
         const profile = userProfile instanceof spinal_env_viewer_graph_service_1.SpinalNode ? userProfile : await this._getUserProfileNode(userProfile);
+        if (!profile)
+            return [];
         return authorization_service_1.authorizationInstance.authorizeProfileToAccessApps(profile, appIds);
     }
     /**
@@ -219,6 +224,8 @@ class UserProfileService {
      */
     async authorizeProfileToAccessSubApps(userProfile, apps, subAppIds) {
         const profile = userProfile instanceof spinal_env_viewer_graph_service_1.SpinalNode ? userProfile : await this._getUserProfileNode(userProfile);
+        if (!profile)
+            return [];
         return authorization_service_1.authorizationInstance.authorizeProfileToAccessSubApps(profile, apps, subAppIds);
     }
     /**
@@ -230,6 +237,8 @@ class UserProfileService {
      */
     async authorizeProfileToAccessApis(userProfile, apiIds) {
         const profile = userProfile instanceof spinal_env_viewer_graph_service_1.SpinalNode ? userProfile : await this._getUserProfileNode(userProfile);
+        if (!profile)
+            return [];
         return authorization_service_1.authorizationInstance.authorizeProfileToAccessApis(profile, apiIds);
     }
     /**
@@ -244,15 +253,18 @@ class UserProfileService {
      */
     async getAutorizationStructure(userProfile, digitalTwinId) {
         const profile = userProfile instanceof spinal_env_viewer_graph_service_1.SpinalNode ? userProfile : await this._getUserProfileNode(userProfile);
+        if (!profile)
+            return undefined;
         const res = {
             contexts: await this.getAuthorizedContexts(profile, digitalTwinId),
             apis: await this.getAuthorizedApis(profile),
             apps: await this.getAuthorizedApps(profile),
             subApps: await this.getAuthorizedSubApps(profile),
+            adminApps: await this.getAuthorizedAdminApps(profile),
         };
-        if (profile.getType().get() === constant_1.ADMIN_PROFILE_TYPE) {
-            res.adminApps = await this.getAuthorizedAdminApps(profile);
-        }
+        // if (profile.getType().get() === ADMIN_PROFILE_TYPE) {
+        // 	res.adminApps = await this.getAuthorizedAdminApps(profile);
+        // }
         return res;
     }
     /////////////////////////////////////////////
@@ -268,6 +280,8 @@ class UserProfileService {
      */
     async unauthorizeProfileToAccessContext(userProfile, contextIds, digitalTwinId) {
         const profile = userProfile instanceof spinal_env_viewer_graph_service_1.SpinalNode ? userProfile : await this._getUserProfileNode(userProfile);
+        if (!profile)
+            return [];
         return authorization_service_1.authorizationInstance.unauthorizeProfileToAccessContext(profile, digitalTwinId, contextIds);
     }
     /**
@@ -279,6 +293,8 @@ class UserProfileService {
      */
     async unauthorizeProfileToAccessApps(userProfile, appIds) {
         const profile = userProfile instanceof spinal_env_viewer_graph_service_1.SpinalNode ? userProfile : await this._getUserProfileNode(userProfile);
+        if (!profile)
+            return [];
         return authorization_service_1.authorizationInstance.unauthorizeProfileToAccessApps(profile, appIds);
     }
     /**
@@ -290,6 +306,8 @@ class UserProfileService {
      */
     async unauthorizeProfileToAccessSubApps(userProfile, subAppIds) {
         const profile = userProfile instanceof spinal_env_viewer_graph_service_1.SpinalNode ? userProfile : await this._getUserProfileNode(userProfile);
+        if (!profile)
+            return [];
         return authorization_service_1.authorizationInstance.unauthorizeProfileToAccessSubApps(profile, subAppIds);
     }
     /**
@@ -301,6 +319,8 @@ class UserProfileService {
      */
     async unauthorizeProfileToAccessApis(userProfile, apiIds) {
         const profile = userProfile instanceof spinal_env_viewer_graph_service_1.SpinalNode ? userProfile : await this._getUserProfileNode(userProfile);
+        if (!profile)
+            return [];
         return authorization_service_1.authorizationInstance.unauthorizeProfileToAccessApis(profile, apiIds);
     }
     ///////////////////////////////////////////////
@@ -316,6 +336,8 @@ class UserProfileService {
      */
     async profileHasAccessToContext(userProfile, contextId, digitalTwinId) {
         const profile = userProfile instanceof spinal_env_viewer_graph_service_1.SpinalNode ? userProfile : await this._getUserProfileNode(userProfile);
+        if (!profile)
+            return undefined;
         return authorization_service_1.authorizationInstance.profileHasAccessToContext(profile, digitalTwinId, contextId);
     }
     /**
@@ -328,6 +350,8 @@ class UserProfileService {
      */
     async profileHasAccessToApp(searchKeys, userProfile, appId) {
         const profile = userProfile instanceof spinal_env_viewer_graph_service_1.SpinalNode ? userProfile : await this._getUserProfileNode(userProfile);
+        if (!profile)
+            return undefined;
         return authorization_service_1.authorizationInstance.profileHasAccessToApp(searchKeys, profile, appId);
     }
     /**
@@ -341,6 +365,8 @@ class UserProfileService {
      */
     async profileHasAccessToSubApp(searchKeys, userProfile, appNameOrId, subAppNameOrId) {
         const profile = userProfile instanceof spinal_env_viewer_graph_service_1.SpinalNode ? userProfile : await this._getUserProfileNode(userProfile);
+        if (!profile)
+            return undefined;
         return authorization_service_1.authorizationInstance.profileHasAccessToSubApp(searchKeys, profile, appNameOrId, subAppNameOrId);
     }
     /**
@@ -352,6 +378,8 @@ class UserProfileService {
      */
     async profileHasAccessToApi(userProfile, apiId) {
         const profile = userProfile instanceof spinal_env_viewer_graph_service_1.SpinalNode ? userProfile : await this._getUserProfileNode(userProfile);
+        if (!profile)
+            return undefined;
         return authorization_service_1.authorizationInstance.profileHasAccessToApi(profile, apiId);
     }
     /////////////////////////////////////////////
@@ -366,6 +394,8 @@ class UserProfileService {
      */
     async getAuthorizedContexts(userProfile, digitalTwinId) {
         const profile = userProfile instanceof spinal_env_viewer_graph_service_1.SpinalNode ? userProfile : await this._getUserProfileNode(userProfile);
+        if (!profile)
+            return [];
         return authorization_service_1.authorizationInstance.getAuthorizedContexts(profile, digitalTwinId);
     }
     /**
@@ -376,6 +406,8 @@ class UserProfileService {
      */
     async getAuthorizedApps(userProfile) {
         const profile = userProfile instanceof spinal_env_viewer_graph_service_1.SpinalNode ? userProfile : await this._getUserProfileNode(userProfile);
+        if (!profile)
+            return [];
         return authorization_service_1.authorizationInstance.getAuthorizedApps(profile);
     }
     /**
@@ -386,6 +418,8 @@ class UserProfileService {
      */
     async getAuthorizedSubApps(userProfile) {
         const profile = userProfile instanceof spinal_env_viewer_graph_service_1.SpinalNode ? userProfile : await this._getUserProfileNode(userProfile);
+        if (!profile)
+            return [];
         return authorization_service_1.authorizationInstance.getAuthorizedSubApps(profile);
     }
     /**
@@ -396,6 +430,8 @@ class UserProfileService {
      */
     async getAuthorizedAdminApps(userProfile) {
         const profile = userProfile instanceof spinal_env_viewer_graph_service_1.SpinalNode ? userProfile : await this._getUserProfileNode(userProfile);
+        if (!profile)
+            return [];
         return authorization_service_1.authorizationInstance.getAuthorizedAdminApps(profile);
     }
     /**
@@ -406,6 +442,8 @@ class UserProfileService {
      */
     async getAuthorizedApis(userProfile) {
         const profile = userProfile instanceof spinal_env_viewer_graph_service_1.SpinalNode ? userProfile : await this._getUserProfileNode(userProfile);
+        if (!profile)
+            return [];
         return authorization_service_1.authorizationInstance.getAuthorizedApis(profile);
     }
     ///////////////////////////////////////////////////////////

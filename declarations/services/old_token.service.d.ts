@@ -2,7 +2,7 @@ import { SpinalContext, SpinalNode } from "spinal-env-viewer-graph-service";
 import { IApplicationToken, IUserToken } from "../interfaces";
 export declare class TokenService {
     private static instance;
-    context: SpinalContext;
+    context: SpinalContext | undefined;
     private constructor();
     static getInstance(): TokenService;
     init(): Promise<SpinalContext>;
@@ -12,7 +12,7 @@ export declare class TokenService {
      * If a token is expired, it will be deleted.
      * @returns {Promise<(IUserToken | IApplicationToken)[]>} Array of token data for valid tokens.
      */
-    purgeToken(): Promise<(IUserToken | IApplicationToken)[]>;
+    purgeToken(): Promise<(IUserToken | IApplicationToken | undefined)[]>;
     /**
      * Associates a new token with a user node by creating a token node and adding it as a child
      * to the specified user node using a predefined relation.
@@ -77,7 +77,7 @@ export declare class TokenService {
      * @param deleteIfExpired - If true, deletes the token if it is expired. Defaults to false.
      * @returns A promise that resolves to the token data if valid, or undefined if expired and deleted.
      */
-    tokenIsValid(token: string, deleteIfExpired?: boolean): Promise<IUserToken | IApplicationToken>;
+    tokenIsValid(token: string, deleteIfExpired?: boolean): Promise<IUserToken | IApplicationToken | undefined>;
     /**
      * Verifies the validity of a given token for a specified actor type.
      *

@@ -34,7 +34,7 @@ const cors = require("cors");
 const express = require("express");
 const path = require("path");
 const constant_1 = require("../constant");
-var proxy = require('express-http-proxy');
+var proxy = require("express-http-proxy");
 const swaggerUi = require("swagger-ui-express");
 const tsoa_1 = require("tsoa");
 const AuthError_1 = require("../security/AuthError");
@@ -46,21 +46,21 @@ const swaggerOption = {
     swaggerOptions: {
         swaggerDefinition: {
             info: {
-                'x-logo': {
-                    url: '/admin/logo',
+                "x-logo": {
+                    url: "/admin/logo",
                 },
-                'x-favicon': {
-                    url: '/admin/favicon',
+                "x-favicon": {
+                    url: "/admin/favicon",
                 },
             },
         },
     },
-    customCss: '.topbar-wrapper img {content: url(/admin/logo);} .swagger-ui .topbar {background: #dbdbdb;}',
+    customCss: ".topbar-wrapper img {content: url(/admin/logo);} .swagger-ui .topbar {background: #dbdbdb;}",
 };
 function useHubProxy(app) {
     const HUB_HOST = `${process.env.HUB_PROTOCOL}://${process.env.HUB_HOST}:${process.env.HUB_PORT}`;
     const proxyHub = proxy(HUB_HOST, {
-        limit: '1tb',
+        limit: "1tb",
         proxyReqPathResolver: function (req) {
             return req.originalUrl;
         },
@@ -73,34 +73,33 @@ function useHubProxy(app) {
     }
 }
 function useClientMiddleWare(app) {
-    const root = process.env.PATH_DIR_STATIC_HTML || path.resolve(__dirname, '..');
+    const root = process.env.PATH_DIR_STATIC_HTML || path.resolve(__dirname, "..");
     app.use(express.static(root));
-    app.get('/', (req, res) => {
-        res.redirect('/spinalcom-api-docs');
+    app.get("/", (req, res) => {
+        res.redirect("/spinalcom-api-docs");
     });
 }
 function initSwagger(app) {
-    app.use('/admin/swagger.json', (req, res) => {
-        res.sendFile(path.resolve(__dirname, '../swagger/swagger.json'));
+    app.use("/admin/swagger.json", (req, res) => {
+        res.sendFile(path.resolve(__dirname, "../swagger/swagger.json"));
     });
-    app.get('/admin/logo', (req, res) => {
-        res.sendFile('spinalcore.png', {
-            root: path.resolve(__dirname, '../../assets'),
+    app.get("/admin/logo", (req, res) => {
+        res.sendFile("spinalcore.png", {
+            root: path.resolve(__dirname, "../../assets"),
         });
     });
     // app.use("/admin_docs", swaggerUi.serve, async (req, res) => {
     // return res.send(swaggerUi.generateHTML(await import("../swagger/swagger.json"), swaggerOption))
     // });
-    app.use('/admin_docs', swaggerUi.serve, async (req, res, next) => {
-        return swaggerUi.setup(await Promise.resolve().then(() => require('../swagger/swagger.json')), swaggerOption)(req, res, next);
+    app.use("/admin_docs", swaggerUi.serve, async (req, res, next) => {
+        return swaggerUi.setup(await Promise.resolve().then(() => require("../swagger/swagger.json")), swaggerOption)(req, res, next);
     });
 }
 function useApiMiddleWare(app) {
-    app.use(cors({ origin: '*', exposedHeaders: ['X-API-Version', 'X-API-BOS-CONFIG-Version'] }));
-    const bodyParserTicket = bodyParser.json({ limit: '500mb' });
+    app.use(cors({ origin: "*", exposedHeaders: ["X-API-Version", "X-API-BOS-CONFIG-Version"] }));
+    const bodyParserTicket = bodyParser.json({ limit: "500mb" });
     app.use((req, res, next) => {
-        if (req.originalUrl === '/api/v1/node/convert_base_64' ||
-            req.originalUrl === '/api/v1/ticket/create_ticket')
+        if (req.originalUrl === "/api/v1/node/convert_base_64" || req.originalUrl === "/api/v1/ticket/create_ticket")
             return bodyParserTicket(req, res, next);
         return bodyParser.json()(req, res, next);
     });
@@ -116,7 +115,7 @@ function errorHandler(err, req, res, next) {
     }
     if (err instanceof Error) {
         return res.status(constant_1.HTTP_CODES.INTERNAL_ERROR).json({
-            message: 'Internal Server Error',
+            message: "Internal Server Error",
         });
     }
     next();
@@ -124,7 +123,7 @@ function errorHandler(err, req, res, next) {
 function _formatValidationError(err) {
     err;
     return {
-        message: 'Validation Failed',
+        message: "Validation Failed",
         details: err?.fields,
     };
 }
@@ -144,11 +143,9 @@ function authenticateRequest(app) {
     });
 }
 function isAdminRoute(apiRoute) {
-    const route = apiRoute.includes('?')
-        ? apiRoute.substring(0, apiRoute.indexOf('?'))
-        : apiRoute;
+    const route = apiRoute.includes("?") ? apiRoute.substring(0, apiRoute.indexOf("?")) : apiRoute;
     return adminRoutes.some((api) => {
-        const routeFormatted = api.replace(/\{(.*?)\}/g, (el) => '(.*?)');
+        const routeFormatted = api.replace(/\{(.*?)\}/g, (el) => "(.*?)");
         const regex = new RegExp(`^${routeFormatted}$`);
         return route.match(regex);
     });

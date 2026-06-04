@@ -27,7 +27,7 @@ exports.AuthentificationService = void 0;
 const axios_1 = require("axios");
 const configFile_service_1 = require("./configFile.service");
 const constant_1 = require("../constant");
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
 const uuid_1 = require("uuid");
 const userProfile_service_1 = require("./userProfile.service");
 const appProfile_service_1 = require("./appProfile.service");
@@ -35,7 +35,7 @@ const userList_services_1 = require("./userList.services");
 const AuthError_1 = require("../security/AuthError");
 const codeUnique_service_1 = require("./codeUnique.service");
 const appList_services_1 = require("./appList.services");
-const tokenKey = '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d';
+const tokenKey = "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d";
 class AuthentificationService {
     static instance;
     authPlatformIsConnected = false;
@@ -72,25 +72,28 @@ class AuthentificationService {
      * @throws {Error} If any of the parameters are invalid or if the registration request fails.
      */
     registerToAdmin(urlAdmin, clientId, clientSecret) {
-        if (!urlAdmin || !(/^https?:\/\//.test(urlAdmin)))
+        if (!urlAdmin || !/^https?:\/\//.test(urlAdmin))
             throw new Error("AUTH_SERVER_URL is not valid!");
         if (!clientId)
             throw new Error("AUTH_CLIENT_ID is not valid!");
         if (!clientSecret)
             throw new Error("AUTH_CLIENT_SECRET is not valid!");
         if (urlAdmin[urlAdmin.length - 1] === "/") {
-            urlAdmin = urlAdmin.substring(0, urlAdmin.lastIndexOf('/'));
+            urlAdmin = urlAdmin.substring(0, urlAdmin.lastIndexOf("/"));
         }
-        return axios_1.default.post(`${urlAdmin}/register`, {
+        return axios_1.default
+            .post(`${urlAdmin}/register`, {
             // platformCreationParms: pamInfo,
             clientId,
-            clientSecret
-        }).then((result) => {
+            clientSecret,
+        })
+            .then((result) => {
             result.data.url = urlAdmin;
             result.data.clientId = clientId;
             this.authPlatformIsConnected = true;
             return this._editBosCredential(result.data);
-        }).catch((e) => {
+        })
+            .catch((e) => {
             this.authPlatformIsConnected = false;
             throw new Error(e.message);
         });
@@ -117,7 +120,7 @@ class AuthentificationService {
      *
      * This method attempts to retrieve and remove the BOS credential context and the admin credential context
      * from the configuration graph. If the BOS credential context exists, it is removed. If the admin credential
-     * context does not exist, it attempts to remove it as well (note: this may be a logic error).
+     * context exists, it is removed as well.
      *
      * @returns An object indicating that the credentials have been removed.
      * @async
@@ -127,23 +130,25 @@ class AuthentificationService {
         if (context)
             await context.removeFromGraph();
         let adminContext = await configFile_service_1.configServiceInstance.getContext(constant_1.ADMIN_CREDENTIAL_CONTEXT_NAME);
-        if (!adminContext)
+        if (adminContext)
             await adminContext.removeFromGraph();
         return { removed: true };
     }
     /**
-    * Updates the BOS token in the authentication platform.
-    * @returns A promise that resolves to the updated token data.
-    * @memberof AuthentificationService
-    */
+     * Updates the BOS token in the authentication platform.
+     * @returns A promise that resolves to the updated token data.
+     * @memberof AuthentificationService
+     */
     async updateBosTokenInAuthPlatform() {
         let pamCredentials = await this.getBosToAdminCredential();
         if (!pamCredentials)
             throw new Error("No admin registered, register an admin and retry !");
         const { urlAdmin, clientId, tokenBosToAdmin } = pamCredentials;
-        return axios_1.default.post(`${urlAdmin}/platforms/updatePlatformToken`, { clientId, token: tokenBosToAdmin }, {
-            headers: { 'Content-Type': 'application/json' },
-        }).then(async (result) => {
+        return axios_1.default
+            .post(`${urlAdmin}/platforms/updatePlatformToken`, { clientId, token: tokenBosToAdmin }, {
+            headers: { "Content-Type": "application/json" },
+        })
+            .then(async (result) => {
             if (result.data.error)
                 throw new Error(result.data.error);
             await this._saveOrEditBosCredentials({ token: result.data.token });
@@ -151,13 +156,13 @@ class AuthentificationService {
         });
     }
     /**
-    * Saves or edits PAM credentials in the graph.
-    *
-    * @private
-    * @param {*} bosCredential
-    * @return {*}  {Promise<IPamCredential>}
-    * @memberof AuthentificationService
-    */
+     * Saves or edits PAM credentials in the graph.
+     *
+     * @private
+     * @param {*} bosCredential
+     * @return {*}  {Promise<IPamCredential>}
+     * @memberof AuthentificationService
+     */
     async _saveOrEditBosCredentials(bosCredential) {
         const context = await this._getOrCreateContext(constant_1.BOS_CREDENTIAL_CONTEXT_NAME, constant_1.BOS_CREDENTIAL_CONTEXT_TYPE);
         // Map the keys of bosCredential to the keys used in the graph context
@@ -167,7 +172,7 @@ class AuthentificationService {
             name: "BosName",
             id: "idPlateform",
             url: "urlAdmin",
-            clientId: "clientId"
+            clientId: "clientId",
         };
         for (const key in bosCredential) {
             if (bosCredential.hasOwnProperty(key)) {
@@ -187,10 +192,10 @@ class AuthentificationService {
      */
     createAdminCredential() {
         const clientId = (0, uuid_1.v4)();
-        const token = jwt.sign({ clientId, type: 'ADMIN SERVER' }, tokenKey);
+        const token = jwt.sign({ clientId, type: "ADMIN SERVER" }, tokenKey);
         return this.editAdminCredential({
             idPlatformOfAdmin: clientId,
-            TokenAdminToPam: token
+            TokenAdminToPam: token,
         });
     }
     async editAdminCredential(admin) {
@@ -232,13 +237,15 @@ class AuthentificationService {
             throw new Error("No admin registered, register an admin and retry !");
         // const endpoint = "register";
         const data = await this._getRequestBody(update, bosCredential, adminCredential);
-        if (bosCredential.urlAdmin.endsWith("/"))
+        if (bosCredential.urlAdmin?.endsWith("/"))
             bosCredential.urlAdmin = bosCredential.urlAdmin.replace(/\/$/, "");
-        return axios_1.default.put(`${bosCredential.urlAdmin}/register`, data, {
+        return axios_1.default
+            .put(`${bosCredential.urlAdmin}/register`, data, {
             headers: {
-                'Content-Type': 'application/json',
+                "Content-Type": "application/json",
             },
-        }).catch(async (err) => {
+        })
+            .catch(async (err) => {
             if (err.response?.status === constant_1.HTTP_CODES.UNAUTHORIZED) {
                 await this.updateBosTokenInAuthPlatform();
                 return this.sendBosInfoToAuth(update);
@@ -253,7 +260,7 @@ class AuthentificationService {
      * Retrieves the admin credentials if they exist, or optionally creates them if they do not.
      *
      * @param createIfNotExist - If `true`, creates the admin credentials if they do not already exist. Defaults to `false`.
-     * @returns A promise that resolves to the admin credentials (`IAdminCredential`).
+     * @returns A promise that resolves to the admin credentials (`IAdminCredential`) or `undefined` if they do not exist.
      */
     async _getOrCreateAdminCredential(createIfNotExist = false) {
         const credentials = await this.getAdminCredential();
@@ -311,18 +318,22 @@ class AuthentificationService {
         return contextInfo.get();
     }
     _formatUserProfiles() {
-        return userProfile_service_1.UserProfileService.getInstance().getAllUserProfileNodes().then((nodes) => {
-            return nodes.map(el => ({
+        return userProfile_service_1.UserProfileService.getInstance()
+            .getAllUserProfileNodes()
+            .then((nodes) => {
+            return nodes.map((el) => ({
                 userProfileId: el.info.id.get(),
-                label: el.info.name.get()
+                label: el.info.name.get(),
             }));
         });
     }
     _formatAppProfiles() {
-        return appProfile_service_1.AppProfileService.getInstance().getAllAppProfileNodes().then((nodes) => {
-            return nodes.map(el => ({
+        return appProfile_service_1.AppProfileService.getInstance()
+            .getAllAppProfileNodes()
+            .then((nodes) => {
+            return nodes.map((el) => ({
                 appProfileId: el.info.id.get(),
-                label: el.info.name.get()
+                label: el.info.name.get(),
             }));
         });
     }

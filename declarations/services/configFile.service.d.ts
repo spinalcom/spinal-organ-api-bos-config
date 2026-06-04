@@ -1,8 +1,8 @@
 import { SpinalGraph, SpinalContext } from "spinal-model-graph";
 export default class ConfigFileService {
     private static instance;
-    graph: SpinalGraph;
-    hubConnect: spinal.FileSystem;
+    graph: SpinalGraph | null;
+    hubConnect: spinal.FileSystem | null;
     private constructor();
     static getInstance(): ConfigFileService;
     init(connect: spinal.FileSystem): Promise<(SpinalContext | void)[]>;

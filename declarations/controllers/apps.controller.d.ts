@@ -1,7 +1,7 @@
-import { Controller } from 'tsoa';
-import { ISpinalApp } from '../interfaces';
-import * as express from 'express';
-import { ISubApp } from '../interfaces/ISubApp';
+import { Controller } from "tsoa";
+import { ISpinalApp } from "../interfaces";
+import * as express from "express";
+import { ISubApp } from "../interfaces/ISubApp";
 export declare class AppsController extends Controller {
     constructor();
     createAdminApp(req: express.Request, appInfo: ISpinalApp): Promise<ISpinalApp | {
@@ -17,6 +17,12 @@ export declare class AppsController extends Controller {
         message: string;
     }>;
     getAllBuildingApps(req: express.Request): Promise<ISpinalApp[] | {
+        message: string;
+    }>;
+    getAllApps(req: express.Request): Promise<{
+        apps: ISpinalApp[];
+        adminApps: ISpinalApp[];
+    } | {
         message: string;
     }>;
     getAdminApp(req: express.Request, appNameOrId: string): Promise<ISpinalApp | {

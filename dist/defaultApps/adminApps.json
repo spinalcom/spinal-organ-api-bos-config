@@ -1,81 +1,65 @@
-[
-    {
+{
+    "auth_platform": {
         "name": "Plateforme d'authentification",
         "icon": "mdi-shield-crown",
         "description": "Gestion de la plateforme d'authentification",
-        "tags": [
-            "ADMIN"
-        ],
+        "tags": ["ADMIN"],
         "categoryName": "Administation",
         "groupName": "Administration",
         "packageName": "spinal-env-bos-config-auth-admin-manager"
     },
-    {
+    "user_profiles": {
         "name": "Profils d'utilisateurs",
         "icon": "mdi-face-man-profile",
         "description": "Gestion de profils d'utilisateurs",
-        "tags": [
-            "PROFIL D'UTILISATEURS"
-        ],
+        "tags": ["PROFIL D'UTILISATEURS"],
         "categoryName": "Administation",
         "groupName": "Administration",
         "packageName": "spinal-env-bos-config-user-profile-manager"
     },
-    {
+    "app_profiles": {
         "name": "Profils d'applications",
         "icon": "mdi-apps-box",
         "description": "Gestion de profils d'applications",
-        "tags": [
-            "PROFIL D'APPLICATIONS"
-        ],
+        "tags": ["PROFIL D'APPLICATIONS"],
         "categoryName": "Administation",
         "groupName": "Administration",
         "packageName": "spinal-env-bos-config-app-profile-manager"
     },
-    {
+    "apps": {
         "name": "Gestion d'applications",
         "icon": "mdi-apps",
         "description": "Gestion de types d'applications",
-        "tags": [
-            "APPLICATIONS"
-        ],
+        "tags": ["APPLICATIONS"],
         "categoryName": "Administation",
         "groupName": "Administration",
         "packageName": "spinal-env-bos-config-apps-manager"
     },
-    {
+    "api_routes": {
         "name": "Gestion de Routes d'API",
         "icon": "mdi-api",
         "description": "Gestion de routes d'API",
-        "tags": [
-            "API"
-        ],
+        "tags": ["API"],
         "categoryName": "Administation",
         "groupName": "Administration",
         "packageName": "spinal-env-bos-config-apis-routes-manager"
     },
-    {
+    "digital_twin": {
         "name": "Gestion du jumeau numérique",
         "icon": "mdi-office-building-cog",
         "description": "Selection du jumeau numérique",
-        "tags": [
-            "Digitaltwin",
-            "Jumeau numérique"
-        ],
+        "tags": ["Digitaltwin", "Jumeau numérique"],
         "categoryName": "Administation",
         "groupName": "Administration",
         "packageName": "spinal-env-bos-config-digitaltwin-manager"
     },
-    {
+    "websocket_state": {
         "name": "Surveiller l'état du websocket",
         "icon": "mdi-monitor-eye",
         "description": "Surveiller l'etat et les logs du websocket",
-        "tags": [
-            "WEB_SOCKET",
-            "LOGS"
-        ],
+        "tags": ["WEB_SOCKET", "LOGS"],
         "categoryName": "Administation",
         "groupName": "Administration",
         "packageName": "spinal-env-bos-websocket-state"
     }
-]
+}

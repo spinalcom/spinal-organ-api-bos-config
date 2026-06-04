@@ -45,6 +45,7 @@ const AuthError_1 = require("../security/AuthError");
 const authentication_1 = require("../security/authentication");
 const adminProfile_service_1 = require("../services/adminProfile.service");
 const findNodeBySearchKey_1 = require("../utils/findNodeBySearchKey");
+const ADMIN_APPS = require("../defaultApps/adminApps.json");
 const serviceInstance = services_1.UserProfileService.getInstance();
 let UserProfileController = class UserProfileController extends tsoa_1.Controller {
     constructor() {
@@ -52,12 +53,12 @@ let UserProfileController = class UserProfileController extends tsoa_1.Controlle
     }
     async createUserProfile(req, data) {
         try {
-            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
-            if (!isAdmin)
+            const hasAccess = await (0, authentication_1.isAdminOrHasAccessToAdminApp)(req, ADMIN_APPS.user_profiles.name);
+            if (!hasAccess)
                 throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
             if (!data.name) {
                 this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
-                return { message: 'The profile name is required' };
+                return { message: "The profile name is required" };
             }
             const profile = await serviceInstance.createUserProfile(data);
             this.setStatus(constant_1.HTTP_CODES.CREATED);
@@ -96,8 +97,8 @@ let UserProfileController = class UserProfileController extends tsoa_1.Controlle
                 const res = await (0, profileUtils_1._formatProfile)(data);
                 return res;
             }
-            // this.setStatus(HTTP_CODES.NOT_FOUND)
-            // return { message: `no profile found for ${id}` };
+            this.setStatus(constant_1.HTTP_CODES.NOT_FOUND);
+            return { message: `no profile found for ${profileId}` };
         }
         catch (error) {
             this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
@@ -106,8 +107,8 @@ let UserProfileController = class UserProfileController extends tsoa_1.Controlle
     }
     async getAllUserProfile(req) {
         try {
-            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
-            if (!isAdmin)
+            const hasAccess = await (0, authentication_1.isAdminOrHasAccessToAdminApp)(req, ADMIN_APPS.user_profiles.name);
+            if (!hasAccess)
                 throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
             const nodes = (await serviceInstance.getAllUserProfile()) || [];
             this.setStatus(constant_1.HTTP_CODES.OK);
@@ -120,8 +121,8 @@ let UserProfileController = class UserProfileController extends tsoa_1.Controlle
     }
     async updateUserProfile(req, id, data) {
         try {
-            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
-            if (!isAdmin)
+            const hasAccess = await (0, authentication_1.isAdminOrHasAccessToAdminApp)(req, ADMIN_APPS.user_profiles.name);
+            if (!hasAccess)
                 throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
             const node = await serviceInstance.updateUserProfile(id, data);
             if (node) {
@@ -138,12 +139,12 @@ let UserProfileController = class UserProfileController extends tsoa_1.Controlle
     }
     async deleteUserProfile(req, id) {
         try {
-            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
-            if (!isAdmin)
+            const hasAccess = await (0, authentication_1.isAdminOrHasAccessToAdminApp)(req, ADMIN_APPS.user_profiles.name);
+            if (!hasAccess)
                 throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
             await serviceInstance.deleteUserProfile(id);
             this.setStatus(constant_1.HTTP_CODES.OK);
-            return { message: 'user profile deleted' };
+            return { message: "user profile deleted" };
         }
         catch (error) {
             this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
@@ -182,8 +183,8 @@ let UserProfileController = class UserProfileController extends tsoa_1.Controlle
     }
     async getAuthorizedAdminApps(req, profileId) {
         try {
-            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
-            if (!isAdmin)
+            const hasAccess = await (0, authentication_1.isAdminOrHasAccessToAdminApp)(req, ADMIN_APPS.user_profiles.name);
+            if (!hasAccess)
                 throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
             const contexts = await serviceInstance.getAuthorizedAdminApps(profileId);
             this.setStatus(constant_1.HTTP_CODES.OK);
@@ -196,8 +197,8 @@ let UserProfileController = class UserProfileController extends tsoa_1.Controlle
     }
     async authorizeProfileToAccessContext(req, profileId, data) {
         try {
-            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
-            if (!isAdmin)
+            const hasAccess = await (0, authentication_1.isAdminOrHasAccessToAdminApp)(req, ADMIN_APPS.user_profiles.name);
+            if (!hasAccess)
                 throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
             const contexts = await serviceInstance.authorizeProfileToAccessContext(profileId, data.contextIds, data.digitalTwinId);
             if (contexts) {
@@ -205,7 +206,7 @@ let UserProfileController = class UserProfileController extends tsoa_1.Controlle
                 return (0, profileUtils_1._getNodeListInfo)(contexts);
             }
             this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
-            return { message: 'something went wrong please check your input' };
+            return { message: "something went wrong please check your input" };
         }
         catch (error) {
             this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
@@ -214,8 +215,8 @@ let UserProfileController = class UserProfileController extends tsoa_1.Controlle
     }
     async authorizeProfileToAccessApps(req, profileId, data) {
         try {
-            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
-            if (!isAdmin)
+            const hasAccess = await (0, authentication_1.isAdminOrHasAccessToAdminApp)(req, ADMIN_APPS.user_profiles.name);
+            if (!hasAccess)
                 throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
             const apps = await serviceInstance.authorizeProfileToAccessApps(profileId, data.appIds);
             if (apps) {
@@ -223,7 +224,7 @@ let UserProfileController = class UserProfileController extends tsoa_1.Controlle
                 return (0, profileUtils_1._getNodeListInfo)(apps);
             }
             this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
-            return { message: 'something went wrong please check your input' };
+            return { message: "something went wrong please check your input" };
         }
         catch (error) {
             this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
@@ -232,8 +233,8 @@ let UserProfileController = class UserProfileController extends tsoa_1.Controlle
     }
     async unauthorizeProfileToAccessContext(req, profileId, data) {
         try {
-            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
-            if (!isAdmin)
+            const hasAccess = await (0, authentication_1.isAdminOrHasAccessToAdminApp)(req, ADMIN_APPS.user_profiles.name);
+            if (!hasAccess)
                 throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
             const contexts = await serviceInstance.unauthorizeProfileToAccessContext(profileId, data.contextIds, data.digitalTwinId);
             if (contexts) {
@@ -241,7 +242,7 @@ let UserProfileController = class UserProfileController extends tsoa_1.Controlle
                 return (0, profileUtils_1._getNodeListInfo)(contexts);
             }
             this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
-            return { message: 'something went wrong please check your input' };
+            return { message: "something went wrong please check your input" };
         }
         catch (error) {
             this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
@@ -250,8 +251,8 @@ let UserProfileController = class UserProfileController extends tsoa_1.Controlle
     }
     async unauthorizeProfileToAccessApps(req, profileId, data) {
         try {
-            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
-            if (!isAdmin)
+            const hasAccess = await (0, authentication_1.isAdminOrHasAccessToAdminApp)(req, ADMIN_APPS.user_profiles.name);
+            if (!hasAccess)
                 throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
             const apps = await serviceInstance.unauthorizeProfileToAccessApps(profileId, data.appIds);
             if (apps) {
@@ -259,7 +260,7 @@ let UserProfileController = class UserProfileController extends tsoa_1.Controlle
                 return (0, profileUtils_1._getNodeListInfo)(apps);
             }
             this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
-            return { message: 'something went wrong please check your input' };
+            return { message: "something went wrong please check your input" };
         }
         catch (error) {
             this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
@@ -268,12 +269,12 @@ let UserProfileController = class UserProfileController extends tsoa_1.Controlle
     }
     async profileHasAccessToContext(req, profileId, contextId, digitalTwinId) {
         try {
-            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
-            if (!isAdmin)
+            const hasAccess = await (0, authentication_1.isAdminOrHasAccessToAdminApp)(req, ADMIN_APPS.user_profiles.name);
+            if (!hasAccess)
                 throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-            const hasAccess = await serviceInstance.profileHasAccessToContext(profileId, contextId, digitalTwinId);
+            const profileHasAccess = await serviceInstance.profileHasAccessToContext(profileId, contextId, digitalTwinId);
             this.setStatus(constant_1.HTTP_CODES.OK);
-            return hasAccess ? true : false;
+            return profileHasAccess ? true : false;
         }
         catch (error) {
             this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
@@ -282,12 +283,12 @@ let UserProfileController = class UserProfileController extends tsoa_1.Controlle
     }
     async profileHasAccessToApp(req, profileId, appId) {
         try {
-            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
-            if (!isAdmin)
+            const hasAccess = await (0, authentication_1.isAdminOrHasAccessToAdminApp)(req, ADMIN_APPS.user_profiles.name);
+            if (!hasAccess)
                 throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-            const hasAccess = await serviceInstance.profileHasAccessToApp(findNodeBySearchKey_1.searchById, profileId, appId);
+            const profileHasAccessToApp = await serviceInstance.profileHasAccessToApp(findNodeBySearchKey_1.searchById, profileId, appId);
             this.setStatus(constant_1.HTTP_CODES.OK);
-            return hasAccess ? true : false;
+            return profileHasAccessToApp ? true : false;
         }
         catch (error) {
             this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
@@ -296,12 +297,12 @@ let UserProfileController = class UserProfileController extends tsoa_1.Controlle
     }
     async profileHasAccessToSubApp(req, profileId, appNameOrId, subAppNameOrId) {
         try {
-            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
-            if (!isAdmin)
+            const hasAccess = await (0, authentication_1.isAdminOrHasAccessToAdminApp)(req, ADMIN_APPS.user_profiles.name);
+            if (!hasAccess)
                 throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
-            const hasAccess = await serviceInstance.profileHasAccessToSubApp(findNodeBySearchKey_1.searchById, profileId, appNameOrId, subAppNameOrId);
+            const hasAccessToSubApp = await serviceInstance.profileHasAccessToSubApp(findNodeBySearchKey_1.searchById, profileId, appNameOrId, subAppNameOrId);
             this.setStatus(constant_1.HTTP_CODES.OK);
-            return hasAccess ? true : false;
+            return hasAccessToSubApp ? true : false;
         }
         catch (error) {
             this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
@@ -312,7 +313,7 @@ let UserProfileController = class UserProfileController extends tsoa_1.Controlle
 exports.UserProfileController = UserProfileController;
 __decorate([
     (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
-    (0, tsoa_1.Post)('/create_profile'),
+    (0, tsoa_1.Post)("/create_profile"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Body)()),
     __metadata("design:type", Function),
@@ -321,7 +322,7 @@ __decorate([
 ], UserProfileController.prototype, "createUserProfile", null);
 __decorate([
     (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
-    (0, tsoa_1.Get)('/get_profile/{id}'),
+    (0, tsoa_1.Get)("/get_profile/{id}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
@@ -330,7 +331,7 @@ __decorate([
 ], UserProfileController.prototype, "getUserProfile", null);
 __decorate([
     (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
-    (0, tsoa_1.Get)('/get_profile'),
+    (0, tsoa_1.Get)("/get_profile"),
     __param(0, (0, tsoa_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -338,7 +339,7 @@ __decorate([
 ], UserProfileController.prototype, "getUserProfileByToken", null);
 __decorate([
     (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
-    (0, tsoa_1.Get)('/get_all_profile'),
+    (0, tsoa_1.Get)("/get_all_profile"),
     __param(0, (0, tsoa_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -346,7 +347,7 @@ __decorate([
 ], UserProfileController.prototype, "getAllUserProfile", null);
 __decorate([
     (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
-    (0, tsoa_1.Put)('/edit_profile/{id}'),
+    (0, tsoa_1.Put)("/edit_profile/{id}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
     __param(2, (0, tsoa_1.Body)()),
@@ -356,7 +357,7 @@ __decorate([
 ], UserProfileController.prototype, "updateUserProfile", null);
 __decorate([
     (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
-    (0, tsoa_1.Delete)('/delete_profile/{id}'),
+    (0, tsoa_1.Delete)("/delete_profile/{id}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
@@ -365,7 +366,7 @@ __decorate([
 ], UserProfileController.prototype, "deleteUserProfile", null);
 __decorate([
     (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
-    (0, tsoa_1.Get)('/get_authorized_contexts/{profileId}'),
+    (0, tsoa_1.Get)("/get_authorized_contexts/{profileId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
     __param(2, (0, tsoa_1.Query)()),
@@ -375,7 +376,7 @@ __decorate([
 ], UserProfileController.prototype, "getAuthorizedContexts", null);
 __decorate([
     (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
-    (0, tsoa_1.Get)('/get_authorized_apps/{profileId}'),
+    (0, tsoa_1.Get)("/get_authorized_apps/{profileId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
@@ -384,7 +385,7 @@ __decorate([
 ], UserProfileController.prototype, "getAuthorizedApps", null);
 __decorate([
     (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
-    (0, tsoa_1.Get)('/get_authorized_admin_apps/{profileId}'),
+    (0, tsoa_1.Get)("/get_authorized_admin_apps/{profileId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
@@ -393,7 +394,7 @@ __decorate([
 ], UserProfileController.prototype, "getAuthorizedAdminApps", null);
 __decorate([
     (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
-    (0, tsoa_1.Post)('/authorize_profile_to_access_contexts/{profileId}'),
+    (0, tsoa_1.Post)("/authorize_profile_to_access_contexts/{profileId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
     __param(2, (0, tsoa_1.Body)()),
@@ -403,7 +404,7 @@ __decorate([
 ], UserProfileController.prototype, "authorizeProfileToAccessContext", null);
 __decorate([
     (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
-    (0, tsoa_1.Post)('/authorize_profile_to_access_apps/{profileId}'),
+    (0, tsoa_1.Post)("/authorize_profile_to_access_apps/{profileId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
     __param(2, (0, tsoa_1.Body)()),
@@ -413,7 +414,7 @@ __decorate([
 ], UserProfileController.prototype, "authorizeProfileToAccessApps", null);
 __decorate([
     (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
-    (0, tsoa_1.Post)('/unauthorize_profile_to_access_contexts/{profileId}'),
+    (0, tsoa_1.Post)("/unauthorize_profile_to_access_contexts/{profileId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
     __param(2, (0, tsoa_1.Body)()),
@@ -423,7 +424,7 @@ __decorate([
 ], UserProfileController.prototype, "unauthorizeProfileToAccessContext", null);
 __decorate([
     (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
-    (0, tsoa_1.Post)('/unauthorize_profile_to_access_apps/{profileId}'),
+    (0, tsoa_1.Post)("/unauthorize_profile_to_access_apps/{profileId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
     __param(2, (0, tsoa_1.Body)()),
@@ -433,7 +434,7 @@ __decorate([
 ], UserProfileController.prototype, "unauthorizeProfileToAccessApps", null);
 __decorate([
     (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
-    (0, tsoa_1.Get)('/profile_has_access_to_context/{profileId}/{contextId}'),
+    (0, tsoa_1.Get)("/profile_has_access_to_context/{profileId}/{contextId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
     __param(2, (0, tsoa_1.Path)()),
@@ -444,7 +445,7 @@ __decorate([
 ], UserProfileController.prototype, "profileHasAccessToContext", null);
 __decorate([
     (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
-    (0, tsoa_1.Get)('/profile_has_access_to_app/{profileId}/{appId}'),
+    (0, tsoa_1.Get)("/profile_has_access_to_app/{profileId}/{appId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
     __param(2, (0, tsoa_1.Path)()),
@@ -454,7 +455,7 @@ __decorate([
 ], UserProfileController.prototype, "profileHasAccessToApp", null);
 __decorate([
     (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
-    (0, tsoa_1.Get)('/profile_has_access_to_sub_app/{profileId}/{appNameOrId}/{subAppNameOrId}'),
+    (0, tsoa_1.Get)("/profile_has_access_to_sub_app/{profileId}/{appNameOrId}/{subAppNameOrId}"),
     __param(0, (0, tsoa_1.Request)()),
     __param(1, (0, tsoa_1.Path)()),
     __param(2, (0, tsoa_1.Path)()),
@@ -464,8 +465,8 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UserProfileController.prototype, "profileHasAccessToSubApp", null);
 exports.UserProfileController = UserProfileController = __decorate([
-    (0, tsoa_1.Route)('/api/v1/user_profile'),
-    (0, tsoa_1.Tags)('user Profiles'),
+    (0, tsoa_1.Route)("/api/v1/user_profile"),
+    (0, tsoa_1.Tags)("user Profiles"),
     __metadata("design:paramtypes", [])
 ], UserProfileController);
 exports.default = new UserProfileController();

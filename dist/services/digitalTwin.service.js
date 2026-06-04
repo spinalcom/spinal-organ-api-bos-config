@@ -89,7 +89,7 @@ class DigitalTwinService {
      */
     async findContextInDigitalTwin(digitalTwinId, contextId) {
         const contexts = await this.getDigitalTwinContexts(digitalTwinId);
-        return contexts.find(el => el.getId().get() === contextId);
+        return contexts.find((el) => el.getId().get() === contextId);
     }
     /**
      * Creates a new digital twin node and its associated graph file.
@@ -103,10 +103,9 @@ class DigitalTwinService {
      * @returns A promise that resolves to the created `SpinalNode` instance.
      */
     createDigitalTwin(name, directoryPath, setAsDefault = false) {
-        if (directoryPath[directoryPath.length - 1] != '/')
+        if (directoryPath[directoryPath.length - 1] != "/")
             directoryPath += "/";
-        return this._getOrCreateDigitalTwin(name, directoryPath)
-            .then(async (graph) => {
+        return this._getOrCreateDigitalTwin(name, directoryPath).then(async (graph) => {
             return this._createDigitalTwinNode(name, `${directoryPath}${name}`, graph, setAsDefault);
         });
     }
@@ -119,7 +118,7 @@ class DigitalTwinService {
      */
     async getAllDigitalTwins() {
         const children = await this.context.getChildren(constant_1.CONTEXT_TO_DIGITALTWIN_RELATION_NAME);
-        return children.map(el => el);
+        return children.map((el) => el);
     }
     /**
      * Retrieves a specific digital twin node by its unique identifier.
@@ -129,7 +128,7 @@ class DigitalTwinService {
      */
     async getDigitalTwin(digitaltwinId) {
         const allDigitalTwins = await this.getAllDigitalTwins();
-        return allDigitalTwins.find(el => el.getId().get() === digitaltwinId);
+        return allDigitalTwins.find((el) => el.getId().get() === digitaltwinId);
     }
     /**
      * Updates the properties of a digital twin node with new data.
@@ -240,7 +239,7 @@ class DigitalTwinService {
     //                      PRIVATE                        //
     /////////////////////////////////////////////////////////
     _getOrCreateDigitalTwin(name, directoryPath, createIfNotExist = false) {
-        if (directoryPath[directoryPath.length - 1] != '/')
+        if (directoryPath[directoryPath.length - 1] != "/")
             directoryPath += "/";
         const file_path = path.resolve(`${directoryPath}${name}`);
         const connect = configFile_service_1.configServiceInstance.hubConnect;
@@ -272,7 +271,7 @@ class DigitalTwinService {
     async _createDigitalTwinNode(name, directoryPath, graph, setAsDefault = false) {
         const node = new spinal_env_viewer_graph_service_1.SpinalNode(name, constant_1.DIGITALTWIN_TYPE, graph);
         node.info.add_attr({
-            url: directoryPath
+            url: directoryPath,
         });
         await this.context.addChildInContext(node, constant_1.CONTEXT_TO_DIGITALTWIN_RELATION_NAME, constant_1.PTR_LST_TYPE, this.context);
         if (setAsDefault) {

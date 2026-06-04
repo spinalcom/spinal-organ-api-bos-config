@@ -42,6 +42,7 @@ const tsoa_1 = require("tsoa");
 const express = require("express");
 const authentication_1 = require("../security/authentication");
 const AuthError_1 = require("../security/AuthError");
+const ADMIN_APPS = require("../defaultApps/adminApps.json");
 const serviceInstance = services_1.DigitalTwinService.getInstance();
 let DigitaltwinController = class DigitaltwinController extends tsoa_1.Controller {
     constructor() {
@@ -49,12 +50,12 @@ let DigitaltwinController = class DigitaltwinController extends tsoa_1.Controlle
     }
     async addDigitalTwin(req, data, set_as_actual_digitaltwin) {
         try {
-            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
-            if (!isAdmin)
+            const hasAccess = await (0, authentication_1.isAdminOrHasAccessToAdminApp)(req, ADMIN_APPS.digital_twin.name);
+            if (!hasAccess)
                 throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
             if (!data.name || !data.name.trim()) {
                 this.setStatus(constant_1.HTTP_CODES.BAD_REQUEST);
-                return { message: "The file name is mandatory" };
+                return { message: "The digital twin name is mandatory" };
             }
             try {
                 const node = await serviceInstance.createDigitalTwin(data.name, data.url, set_as_actual_digitaltwin);
@@ -73,12 +74,12 @@ let DigitaltwinController = class DigitaltwinController extends tsoa_1.Controlle
     }
     async getAllDigitalTwins(req) {
         try {
-            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
-            if (!isAdmin)
+            const hasAccess = await (0, authentication_1.isAdminOrHasAccessToAdminApp)(req, ADMIN_APPS.digital_twin.name);
+            if (!hasAccess)
                 throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
             const digitalTwins = await serviceInstance.getAllDigitalTwins();
             this.setStatus(constant_1.HTTP_CODES.OK);
-            return digitalTwins.map(el => el.info.get());
+            return digitalTwins.map((el) => el.info.get());
         }
         catch (error) {
             this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
@@ -87,8 +88,8 @@ let DigitaltwinController = class DigitaltwinController extends tsoa_1.Controlle
     }
     async getDigitalTwin(req, digitaltwinId) {
         try {
-            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
-            if (!isAdmin)
+            const hasAccess = await (0, authentication_1.isAdminOrHasAccessToAdminApp)(req, ADMIN_APPS.digital_twin.name);
+            if (!hasAccess)
                 throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
             const digitaltwin = await serviceInstance.getDigitalTwin(digitaltwinId);
             if (digitaltwin) {
@@ -105,8 +106,8 @@ let DigitaltwinController = class DigitaltwinController extends tsoa_1.Controlle
     }
     async setActualDigitalTwin(req, digitaltwinId) {
         try {
-            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
-            if (!isAdmin)
+            const hasAccess = await (0, authentication_1.isAdminOrHasAccessToAdminApp)(req, ADMIN_APPS.digital_twin.name);
+            if (!hasAccess)
                 throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
             const node = await serviceInstance.setActualDigitalTwin(digitaltwinId);
             if (node) {
@@ -123,8 +124,8 @@ let DigitaltwinController = class DigitaltwinController extends tsoa_1.Controlle
     }
     async getActualDigitalTwin(req) {
         try {
-            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
-            if (!isAdmin)
+            const hasAccess = await (0, authentication_1.isAdminOrHasAccessToAdminApp)(req, ADMIN_APPS.digital_twin.name);
+            if (!hasAccess)
                 throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
             const node = await serviceInstance.getActualDigitalTwin();
             if (node) {
@@ -141,12 +142,12 @@ let DigitaltwinController = class DigitaltwinController extends tsoa_1.Controlle
     }
     async getDefaultDigitalTwinContexts(req) {
         try {
-            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
-            if (!isAdmin)
+            const hasAccess = await (0, authentication_1.isAdminOrHasAccessToAdminApp)(req, [ADMIN_APPS.digital_twin.name, ADMIN_APPS.user_profiles.name, ADMIN_APPS.app_profiles.name]);
+            if (!hasAccess)
                 throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
             const contexts = await serviceInstance.getDigitalTwinContexts();
             this.setStatus(constant_1.HTTP_CODES.OK);
-            return contexts.map(el => el.info.get());
+            return contexts.map((el) => el.info.get());
         }
         catch (error) {
             this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
@@ -155,12 +156,12 @@ let DigitaltwinController = class DigitaltwinController extends tsoa_1.Controlle
     }
     async getDigitalTwinContexts(req, digitaltwinId) {
         try {
-            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
-            if (!isAdmin)
+            const hasAccess = await (0, authentication_1.isAdminOrHasAccessToAdminApp)(req, ADMIN_APPS.digital_twin.name);
+            if (!hasAccess)
                 throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
             const contexts = await serviceInstance.getDigitalTwinContexts(digitaltwinId);
             this.setStatus(constant_1.HTTP_CODES.OK);
-            return contexts.map(el => el.info.get());
+            return contexts.map((el) => el.info.get());
         }
         catch (error) {
             this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
@@ -169,8 +170,8 @@ let DigitaltwinController = class DigitaltwinController extends tsoa_1.Controlle
     }
     async editDigitalTwin(req, digitaltwinId, data) {
         try {
-            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
-            if (!isAdmin)
+            const hasAccess = await (0, authentication_1.isAdminOrHasAccessToAdminApp)(req, ADMIN_APPS.digital_twin.name);
+            if (!hasAccess)
                 throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
             const node = await serviceInstance.editDigitalTwin(digitaltwinId, data);
             if (node) {
@@ -187,8 +188,8 @@ let DigitaltwinController = class DigitaltwinController extends tsoa_1.Controlle
     }
     async removeDigitalTwin(req, digitaltwinId) {
         try {
-            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
-            if (!isAdmin)
+            const hasAccess = await (0, authentication_1.isAdminOrHasAccessToAdminApp)(req, ADMIN_APPS.digital_twin.name);
+            if (!hasAccess)
                 throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
             const deleted = await serviceInstance.removeDigitalTwin(digitaltwinId);
             if (deleted) {
@@ -205,8 +206,8 @@ let DigitaltwinController = class DigitaltwinController extends tsoa_1.Controlle
     }
     async removeActualDigitaTwin(req) {
         try {
-            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
-            if (!isAdmin)
+            const hasAccess = await (0, authentication_1.isAdminOrHasAccessToAdminApp)(req, ADMIN_APPS.digital_twin.name);
+            if (!hasAccess)
                 throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
             const deleted = await serviceInstance.removeActualDigitaTwin();
             if (deleted) {

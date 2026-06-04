@@ -30,7 +30,7 @@ const _1 = require(".");
 const constant_1 = require("../constant");
 class WebsocketLogsService {
     static _instance;
-    _alertTime = parseInt(process.env.WEBSOCKET_ALERT_TIME) || 60 * 1000;
+    _alertTime = (process.env.WEBSOCKET_ALERT_TIME && parseInt(process.env.WEBSOCKET_ALERT_TIME)) || 60 * 1000;
     timeoutIds = {};
     _directory;
     _spinalQueue = new SpinalQueue_1.SpinalQueue();
@@ -56,6 +56,8 @@ class WebsocketLogsService {
         return this.context;
     }
     createLog(type, action, targetInfo, nodeInfo) {
+        if (!this.context)
+            return;
         const contextId = this.context.getId().get();
         this._lastSendTime = Date.now();
         clearTimeout(this.timeoutIds[contextId]);
@@ -71,12 +73,14 @@ class WebsocketLogsService {
     // SpinalLog
     //////////////////////////////
     async getLogModel() {
+        if (!this.context)
+            return undefined;
         const contextId = this.context.getId().get();
         if (this._logPromMap.has(contextId))
             return this._logPromMap.get(contextId);
         const spinalLog = await spinal_service_pubsub_logs_1.SpinalServiceLog.getInstance().getLog(this.context);
         if (!spinalLog)
-            return;
+            return undefined;
         this._logPromMap.set(contextId, spinalLog);
         return spinalLog;
     }
@@ -88,6 +92,8 @@ class WebsocketLogsService {
     }
     async getCurrent() {
         const spinalLog = await this.getLogModel();
+        if (!spinalLog)
+            return undefined;
         return spinal_service_pubsub_logs_1.SpinalServiceLog.getInstance().getCurrent(spinalLog);
     }
     async getDataFromLast24Hours() {
@@ -118,6 +124,8 @@ class WebsocketLogsService {
     //             PRIVATE                        //
     ////////////////////////////////////////////////
     _startTimer() {
+        if (!this.context)
+            return;
         const contextId = this.context.getId().get();
         this.timeoutIds[contextId] = setTimeout(() => {
             this._createAlert();
@@ -133,11 +141,11 @@ class WebsocketLogsService {
         //    this._websocket[buildingId].state.set(logTypes.Alarm);
         //    this._addLogs(buildingId, message, logTypes.Alarm);
         //  }
-        return this._addLogs('Alert', 'alert');
+        return this._addLogs("Alert", "alert");
     }
     async _addLogs(logType, action, targetInfo, nodeInfo) {
         const log = { targetInfo, type: logType, action, nodeInfo };
-        console.log('log', log);
+        console.log("log", log);
         this._addToQueue(log);
     }
     _addToQueue(log) {
@@ -146,22 +154,24 @@ class WebsocketLogsService {
     async _createLogsInGraph() {
         while (!this._spinalQueue.isEmpty()) {
             const log = this._spinalQueue.dequeue();
-            const actualState = log.type.toLowerCase() === 'alert'
-                ? spinal_service_pubsub_logs_1.WEBSOCKET_STATE.alert
-                : spinal_service_pubsub_logs_1.WEBSOCKET_STATE.running;
+            const actualState = log.type.toLowerCase() === "alert" ? spinal_service_pubsub_logs_1.WEBSOCKET_STATE.alert : spinal_service_pubsub_logs_1.WEBSOCKET_STATE.running;
+            if (!this.context)
+                return;
             await spinal_service_pubsub_logs_1.SpinalServiceLog.getInstance().pushFromNode(this.context, log);
             await this._changeBuildingState(actualState);
         }
     }
     async _changeBuildingState(actualState) {
         const spinalLog = await this.getLogModel();
+        if (!spinalLog)
+            return;
         return spinal_service_pubsub_logs_1.SpinalServiceLog.getInstance().changeWebsocketState(spinalLog, actualState);
     }
     _getDirectory(connect) {
         return new Promise((resolve, reject) => {
             if (this._directory)
                 return resolve(this._directory);
-            connect.load_or_make_dir('/etc/logs', (directory) => {
+            connect.load_or_make_dir("/etc/logs", (directory) => {
                 this._directory = directory;
                 resolve(directory);
             });
@@ -173,9 +183,10 @@ class WebsocketLogsService {
             if (element.name?.get() === fileName)
                 return element;
         }
+        return undefined;
     }
     _listenSpinalQueueEvent() {
-        this._spinalQueue.on('start', () => {
+        this._spinalQueue.on("start", () => {
             this._createLogsInGraph();
         });
     }

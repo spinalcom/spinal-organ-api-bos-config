@@ -1,4 +1,4 @@
-import { SpinalContext, SpinalNode } from 'spinal-env-viewer-graph-service';
+import { SpinalContext, SpinalNode } from "spinal-env-viewer-graph-service";
 export interface IProfile extends IProfileAuth {
     name: string;
 }

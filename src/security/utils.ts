@@ -1,19 +1,19 @@
 /*
  * Copyright 2022 SpinalCom - www.spinalcom.com
- * 
+ *
  * This file is part of SpinalCore.
- * 
+ *
  * Please read all of the following terms and conditions
  * of the Free Software license Agreement ("Agreement")
  * carefully.
- * 
+ *
  * This Agreement is a legally binding contract between
  * the Licensee (as defined below) and SpinalCom that
  * sets forth the terms and conditions that govern your
  * use of the Program. By installing and/or using the
  * Program, you agree to abide by all the terms and
  * conditions stated or referenced herein.
- * 
+ *
  * If you do not agree to abide by these terms and
  * conditions, do not demonstrate your acceptance and do
  * not install or use the Program.
@@ -23,32 +23,26 @@
  */
 
 import * as express from "express";
-import { SpinalNode } from 'spinal-env-viewer-graph-service';
+import { SpinalNode } from "spinal-env-viewer-graph-service";
 import { AppProfileService } from "../services/appProfile.service";
 import { APIService } from "../services/apis.service";
 
-
-
 export function getToken(request: express.Request): string {
-    const header = request.headers.authorization || request.headers.Authorization;
-    if (header) {
-        const [, token] = (<string>header).split(" ");
-        if (token) return token;
-    }
+	const header = request.headers.authorization || request.headers.Authorization;
+	if (header) {
+		const [, token] = (<string>header).split(" ");
+		if (token) return token;
+	}
 
-    return request.body?.token || request.query?.token || request.headers["x-access-token"];
+	return request.body?.token || request.query?.token || request.headers["x-access-token"];
 }
 
+export async function profileHasAccessToApi(profile: SpinalNode, apiUrl: string, method: string): Promise<SpinalNode | undefined> {
+	const api = await APIService.getInstance().getApiRouteByRoute(<any>{ route: apiUrl, method });
+	if (!api) return;
 
-export async function profileHasAccessToApi(profile: SpinalNode, apiUrl: string, method: string): Promise<SpinalNode> {
-    const api = await APIService.getInstance().getApiRouteByRoute(<any>{ route: apiUrl, method });
-    if (!api) return;
-
-    return AppProfileService.getInstance().profileHasAccessToApi(profile, api.getId().get());
+	return AppProfileService.getInstance().profileHasAccessToApi(profile, api.getId().get());
 }
-
-
-
 
 // async function getProfileNode(profileId: string): Promise<SpinalNode> {
 //     let profile = await UserProfileService.getInstance().getUserProfile(profileId);

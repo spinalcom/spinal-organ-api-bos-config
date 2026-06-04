@@ -2,7 +2,7 @@ import { SpinalContext, SpinalNode } from "spinal-env-viewer-graph-service";
 import { IApiRoute } from "../interfaces";
 export declare class APIService {
     private static instance;
-    context: SpinalContext;
+    context: SpinalContext | undefined;
     private constructor();
     static getInstance(): APIService;
     init(): Promise<SpinalContext>;
@@ -67,5 +67,5 @@ export declare class APIService {
      * @returns A promise that resolves to an array of results from the created API routes.
      * @throws Will propagate errors from reading or formatting the Swagger file, but individual route creation errors are caught and ignored.
      */
-    uploadSwaggerFile(buffer: Buffer): Promise<any[]>;
+    uploadSwaggerFile(buffer: Buffer): Promise<SpinalNode[]>;
 }

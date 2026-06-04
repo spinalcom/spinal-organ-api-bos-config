@@ -30,17 +30,17 @@ const services_1 = require("../services");
 class SpinalIOMiddleware {
     config = {
         spinalConnector: {
-            protocol: process.env.HUB_PROTOCOL || 'http',
-            user: process.env.USER_ID,
-            password: process.env.USER_MDP,
-            host: process.env.HUB_HOST,
-            port: process.env.HUB_PORT,
+            protocol: process.env.HUB_PROTOCOL || "http",
+            user: process.env.USER_ID || "",
+            password: process.env.USER_MDP || "",
+            host: process.env.HUB_HOST || "",
+            port: process.env.HUB_PORT || "",
         },
         api: {
-            port: process.env.SERVER_PORT,
+            port: process.env.SERVER_PORT || 2027,
         },
         file: {
-            path: process.env.CONFIG_DIRECTORY_PATH,
+            path: process.env.CONFIG_DIRECTORY_PATH || "",
         },
     };
     conn;
@@ -76,7 +76,7 @@ class SpinalIOMiddleware {
     }
     async getContext(contextId, socket) {
         const profileId = await this._getProfileId(socket);
-        if (typeof contextId === 'undefined')
+        if (typeof contextId === "undefined")
             return;
         if (!isNaN(contextId))
             return SpinalAPIMiddleware_1.default.getInstance().load(contextId, profileId);
@@ -103,7 +103,8 @@ class SpinalIOMiddleware {
         if (context instanceof spinal_env_viewer_graph_service_1.SpinalContext) {
             const found = await context.findInContext(context, (node, stop) => {
                 if (node.getId().get() === nodeId) {
-                    stop();
+                    if (stop && typeof stop === "function")
+                        stop();
                     return true;
                 }
                 return false;
@@ -112,10 +113,8 @@ class SpinalIOMiddleware {
         }
     }
     async getNode(nodeId, contextId, socket) {
-        //@ts-ignore
         if (!isNaN(nodeId)) {
             const node = await this.getNodeWithServerId(nodeId, socket);
-            //@ts-ignore
             if (node && node instanceof spinal_env_viewer_graph_service_1.SpinalNode)
                 spinal_env_viewer_graph_service_1.SpinalGraphService._addNode(node);
             return node;
@@ -139,10 +138,10 @@ class SpinalIOMiddleware {
         return tokenInfo;
     }
     async _getProfileId(socket) {
+        if (!socket)
+            throw new Error(constant_1.SECURITY_MESSAGES.INVALID_TOKEN);
         const tokenInfo = await this._getTokenInfo(socket);
-        return (tokenInfo.profile.profileId ||
-            tokenInfo.profile.userProfileBosConfigId ||
-            tokenInfo.profile.appProfileBosConfigId);
+        return tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId || tokenInfo.profile.appProfileBosConfigId;
     }
 }
 exports.default = SpinalIOMiddleware;

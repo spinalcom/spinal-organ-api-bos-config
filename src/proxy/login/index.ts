@@ -7,115 +7,104 @@ import appProfileController from "../../controllers/appProfile.controller";
 import SpinalRedisMiddleware from "../../middlewares/SpinalRedisMiddleware";
 
 export async function useLoginProxy(app: express.Application) {
+	app.get("/login", async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+		try {
+			const authPlatformInfo = await AuthentificationService.getInstance().getBosToAdminCredential();
 
-    app.get('/login', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-        try {
+			if (authPlatformInfo) {
+				let server_url = authPlatformInfo.urlAdmin;
+				const client_id = process.env.PAM_CLIENT_ID || authPlatformInfo.clientId;
 
-            const authPlatformInfo = await AuthentificationService.getInstance().getBosToAdminCredential();
+				if (!server_url || !client_id) {
+					return res.send({ status: HTTP_CODES.BAD_REQUEST, message: "Invalid auth server details" });
+				}
 
-            if (authPlatformInfo) {
-                let server_url = authPlatformInfo.urlAdmin;
-                const client_id = process.env.PAM_CLIENT_ID || authPlatformInfo.clientId;
+				let endpoint = server_url.endsWith("/") ? `login/${client_id}` : `/login/${client_id}`;
 
-                if (!server_url || !client_id) {
-                    return res.send({ status: HTTP_CODES.BAD_REQUEST, message: "Invalid auth server details" });
-                }
+				return res.status(HTTP_CODES.REDIRECT).redirect(server_url + endpoint);
+			}
 
-                let endpoint = server_url.endsWith("/") ? `login/${client_id}` : `/login/${client_id}`;
+			/*
+			 * If no auth server is found, redirect to the admin connect page
+			 * Comment this part if you don't want to redirect to the admin page
+			 */
+			let client_uri = process.env.VUE_CLIENT_URI;
+			let endpoint = client_uri!.endsWith("/") ? "admin" : "/admin";
+			return res.status(HTTP_CODES.REDIRECT).redirect(client_uri + endpoint);
 
-                return res.status(HTTP_CODES.REDIRECT).redirect(server_url + endpoint);
-            }
+			/*
+			 * Discomment this part if you comment the above part
+			 * This will return a bad request if no auth server is found
+			 */
+			// res.status(HTTP_CODES.BAD_REQUEST).send({ status: HTTP_CODES.BAD_REQUEST, message: "No Authentification server url found, use /admin endpoint to connect as admin" });
+		} catch (error: Error | any) {
+			console.error(error.message);
+			res.status(HTTP_CODES.INTERNAL_ERROR).send({ status: HTTP_CODES.INTERNAL_ERROR, message: error.message });
+		}
+	});
 
+	app.post("/callback", async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+		try {
+			const data = typeof req.body.data === "string" ? JSON.parse(req.body.data) : req.body.data;
+			const formatData = await UserListService.getInstance().getUserDataFormatted(data, null, true);
 
-            /* 
-            * If no auth server is found, redirect to the admin connect page
-            * Comment this part if you don't want to redirect to the admin page
-            */
-            let client_uri = process.env.VUE_CLIENT_URI;
-            let endpoint = client_uri!.endsWith("/") ? "admin" : "/admin";
-            return res.status(HTTP_CODES.REDIRECT).redirect(client_uri + endpoint);
+			const profileId = formatData.profile.userProfileBosConfigId || data.profile.profileId;
+			const token = formatData.token;
+			const user = Buffer.from(JSON.stringify(formatData.userInfo)).toString("base64");
 
+			const vue_client_uri = process.env.VUE_CLIENT_URI;
 
-            /*
-            * Discomment this part if you comment the above part
-            * This will return a bad request if no auth server is found
-            */
-            // res.status(HTTP_CODES.BAD_REQUEST).send({ status: HTTP_CODES.BAD_REQUEST, message: "No Authentification server url found, use /admin endpoint to connect as admin" });
+			/**
+			 * Sending cookies doesn't work when the client and server are on different origins.
+			 * I implemented this temporary method.
+			 */
+			const cookiesId = uuidv4();
+			const dataToCache = { uri: vue_client_uri, profileId, token, user };
 
-        } catch (error) {
-            console.error(error.message);
-            res.status(HTTP_CODES.INTERNAL_ERROR).send({ status: HTTP_CODES.INTERNAL_ERROR, message: error.message });
-        }
+			// Store the data in Redis with an expiration time of 30 seconds
+			SpinalRedisMiddleware.getInstance().set(cookiesId, dataToCache, { expiration: { type: "EX", value: 30 } }); //store data for 30seconds
+			globalCache.set(cookiesId, dataToCache, 30 * 1000); //store data for 30seconds
 
-    });
+			let endpoint = vue_client_uri!.endsWith("/") ? "login" : "/login";
 
-    app.post("/callback", async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-        try {
-            const data = typeof req.body.data === 'string' ? JSON.parse(req.body.data) : req.body.data;
-            const formatData = await UserListService.getInstance().getUserDataFormatted(data, null, true);
+			return res.redirect(`${vue_client_uri + endpoint}?ref=${cookiesId}`);
 
+			/**
+			 * found a way to send cookies with a redirect, but it doesn't work in all browsers
+			 */
+			// const options: express.CookieOptions = {
+			//     httpOnly: true,
+			//     secure: false,
+			//     sameSite: 'none',
+			// }
 
-            const profileId = formatData.profile.userProfileBosConfigId || data.profile.profileId;
-            const token = formatData.token;
-            const user = Buffer.from(JSON.stringify(formatData.userInfo)).toString("base64");
+			// res.cookie("profileId", profileId, options);
+			// res.cookie("token", token, options);
+			// res.cookie("user", user, options);
 
-            const vue_client_uri = process.env.VUE_CLIENT_URI;
+			// console.log(res.getHeaders());
 
-            /**
-             * Sending cookies doesn't work when the client and server are on different origins.
-             * I implemented this temporary method.
-             */
-            const cookiesId = uuidv4();
-            const dataToCache = { uri: vue_client_uri, profileId, token, user };
+			// return res.redirect(`${vue_client_uri}?ref=${cookiesId}`);
+		} catch (error: Error | any) {
+			console.error(error.message);
+			res.status(HTTP_CODES.INTERNAL_ERROR).send({ status: HTTP_CODES.INTERNAL_ERROR, message: error.message });
+		}
+	});
 
-            // Store the data in Redis with an expiration time of 30 seconds
-            SpinalRedisMiddleware.getInstance().set(cookiesId, dataToCache, { expiration: { type: 'EX', value: 30 } }); //store data for 30seconds
-            globalCache.set(cookiesId, dataToCache, 30 * 1000); //store data for 30seconds
+	app.get("/getTokenByRef/:ref", async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+		const cookiesId = req.params.ref;
 
+		if (!cookiesId) return res.status(HTTP_CODES.BAD_REQUEST).send({ status: HTTP_CODES.BAD_REQUEST, message: "No id provided" });
 
-            let endpoint = vue_client_uri!.endsWith("/") ? "login" : "/login";
+		const dataFromRedis = await SpinalRedisMiddleware.getInstance().get(cookiesId);
+		const data = dataFromRedis || globalCache.get(cookiesId); // Retrieve the data from the cache using the cookiesId
 
-            return res.redirect(`${vue_client_uri + endpoint}?ref=${cookiesId}`);
+		if (!data) return res.status(HTTP_CODES.NOT_FOUND).send({ status: HTTP_CODES.NOT_FOUND, message: "No found" });
 
-            /**
-             * found a way to send cookies with a redirect, but it doesn't work in all browsers
-             */
-            // const options: express.CookieOptions = {
-            //     httpOnly: true,
-            //     secure: false,
-            //     sameSite: 'none',
-            // }
+		// Clear the cache after retrieving the data
+		globalCache.delete(cookiesId);
+		await SpinalRedisMiddleware.getInstance().delete(cookiesId);
 
-            // res.cookie("profileId", profileId, options);
-            // res.cookie("token", token, options);
-            // res.cookie("user", user, options);
-
-            // console.log(res.getHeaders());
-
-            // return res.redirect(`${vue_client_uri}?ref=${cookiesId}`);
-        } catch (error: any) {
-            console.error(error.message);
-            res.status(HTTP_CODES.INTERNAL_ERROR).send({ status: HTTP_CODES.INTERNAL_ERROR, message: error.message });
-        }
-    });
-
-    app.get("/getTokenByRef/:ref", async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-        const cookiesId = req.params.ref;
-
-        if (!cookiesId)
-            return res.status(HTTP_CODES.BAD_REQUEST).send({ status: HTTP_CODES.BAD_REQUEST, message: "No id provided" });
-
-        const dataFromRedis = await SpinalRedisMiddleware.getInstance().get(cookiesId);
-        const data = dataFromRedis || globalCache.get(cookiesId); // Retrieve the data from the cache using the cookiesId
-
-        if (!data)
-            return res.status(HTTP_CODES.NOT_FOUND).send({ status: HTTP_CODES.NOT_FOUND, message: "No found" });
-
-
-        // Clear the cache after retrieving the data
-        globalCache.delete(cookiesId);
-        await SpinalRedisMiddleware.getInstance().delete(cookiesId);
-
-        return res.status(HTTP_CODES.OK).send(data);
-    })
+		return res.status(HTTP_CODES.OK).send(data);
+	});
 }

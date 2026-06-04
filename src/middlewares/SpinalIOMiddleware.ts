@@ -22,177 +22,146 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
-import { FileSystem } from 'spinal-core-connectorjs';
-import { ISpinalIOMiddleware } from 'spinal-organ-api-pubsub';
-import SpinalAPIMiddleware from './SpinalAPIMiddleware';
-import { Socket, Server } from 'socket.io';
-import {
-  SpinalContext,
-  SpinalGraph,
-  SpinalNode,
-  SpinalGraphService
-} from 'spinal-env-viewer-graph-service';
-import { SECURITY_MESSAGES } from '../constant';
-import { TokenService, WebsocketLogsService } from '../services';
-import { NextFunction } from 'express';
-import { IConfig } from 'spinal-organ-api-server';
+import { FileSystem } from "spinal-core-connectorjs";
+import { ISpinalIOMiddleware, IConfig } from "spinal-organ-api-pubsub";
+import SpinalAPIMiddleware from "./SpinalAPIMiddleware";
+import { Socket, Server } from "socket.io";
+import { SpinalContext, SpinalGraph, SpinalNode, SpinalGraphService } from "spinal-env-viewer-graph-service";
+import { SECURITY_MESSAGES } from "../constant";
+import { TokenService, WebsocketLogsService } from "../services";
 
 export default class SpinalIOMiddleware implements ISpinalIOMiddleware {
-  config: IConfig = {
-    spinalConnector: {
-      protocol: process.env.HUB_PROTOCOL || 'http',
-      user: process.env.USER_ID,
-      password: process.env.USER_MDP,
-      host: process.env.HUB_HOST,
-      port: process.env.HUB_PORT,
-    },
-    api: {
-      port: process.env.SERVER_PORT,
-    },
-    file: {
-      path: process.env.CONFIG_DIRECTORY_PATH,
-    },
-  };
+	config: IConfig = {
+		spinalConnector: {
+			protocol: process.env.HUB_PROTOCOL || "http",
+			user: process.env.USER_ID || "",
+			password: process.env.USER_MDP || "",
+			host: process.env.HUB_HOST || "",
+			port: process.env.HUB_PORT || "",
+		},
+		api: {
+			port: process.env.SERVER_PORT || 2027,
+		},
+		file: {
+			path: process.env.CONFIG_DIRECTORY_PATH || "",
+		},
+	};
 
-  conn: FileSystem;
+	conn: FileSystem | undefined;
 
-  logService = WebsocketLogsService.getInstance();
+	logService = WebsocketLogsService.getInstance();
 
-  private static instance: SpinalIOMiddleware;
+	private static instance: SpinalIOMiddleware;
 
-  private constructor() {}
+	private constructor() {}
 
-  static getInstance(): SpinalIOMiddleware {
-    if (!this.instance) this.instance = new SpinalIOMiddleware();
-    return this.instance;
-  }
+	static getInstance(): SpinalIOMiddleware {
+		if (!this.instance) this.instance = new SpinalIOMiddleware();
+		return this.instance;
+	}
 
-  public setConnection(conn: FileSystem) {
-    this.conn = conn;
-  }
+	public setConnection(conn: FileSystem) {
+		this.conn = conn;
+	}
 
-  public tokenCheckMiddleware(io: Server): void {
-    io.use(async (socket: Socket, next: NextFunction) => {
-      let err;
-      try {
-        await this._getTokenInfo(socket);
-      } catch (error) {
-        err = error;
-      }
+	public tokenCheckMiddleware(io: Server): void {
+		io.use(async (socket: Socket, next) => {
+			let err;
 
-      next(err);
-    });
-  }
+			try {
+				await this._getTokenInfo(socket);
+			} catch (error) {
+				err = error;
+			}
 
-  public getGraph(): Promise<SpinalGraph> {
-    return SpinalAPIMiddleware.getInstance().getGraph();
-  }
+			next(err);
+		});
+	}
 
-  public async getProfileGraph(socket?: Socket): Promise<SpinalGraph> {
-    let profileId = await this._getProfileId(socket);
+	public getGraph(): Promise<SpinalGraph> {
+		return SpinalAPIMiddleware.getInstance().getGraph();
+	}
 
-    return SpinalAPIMiddleware.getInstance().getProfileGraph(profileId);
-  }
+	public async getProfileGraph(socket?: Socket): Promise<SpinalGraph> {
+		let profileId = await this._getProfileId(socket);
 
-  public async getContext(
-    contextId: number | string,
-    socket?: Socket
-  ): Promise<SpinalNode> {
-    const profileId = await this._getProfileId(socket);
-    if (typeof contextId === 'undefined') return;
-    if (!isNaN(contextId as any))
-      return SpinalAPIMiddleware.getInstance().load(
-        <number>contextId,
-        profileId
-      );
+		return SpinalAPIMiddleware.getInstance().getProfileGraph(profileId);
+	}
 
-    const graph = await SpinalAPIMiddleware.getInstance().getProfileGraph(
-      profileId
-    );
-    if (!graph) return;
+	public async getContext(contextId: number | string, socket?: Socket): Promise<SpinalNode | undefined> {
+		const profileId = await this._getProfileId(socket);
+		if (typeof contextId === "undefined") return;
+		if (!isNaN(contextId as any)) return SpinalAPIMiddleware.getInstance().load(<number>contextId, profileId);
 
-    const contexts = await graph.getChildren();
-    return contexts.find((el) => {
-      if (el.getId().get() === contextId || el._server_id == contextId) {
-        return true;
-      }
-      return false;
-    });
-  }
+		const graph = await SpinalAPIMiddleware.getInstance().getProfileGraph(profileId);
+		if (!graph) return;
 
-  public async getNodeWithServerId(
-    server_id: number,
-    socket?: Socket
-  ): Promise<SpinalNode> {
-    const profileId = await this._getProfileId(socket);
-    return SpinalAPIMiddleware.getInstance().load(server_id, profileId);
-  }
+		const contexts = await graph.getChildren();
+		return contexts.find((el) => {
+			if (el.getId().get() === contextId || el._server_id == contextId) {
+				return true;
+			}
+			return false;
+		});
+	}
 
-  public async getNodeWithStaticId(
-    nodeId: string,
-    contextId: string | number,
-    socket?: Socket
-  ): Promise<SpinalNode> {
-    if (nodeId === contextId) {
-      return this.getContext(nodeId, socket);
-    }
+	public async getNodeWithServerId(server_id: number, socket?: Socket): Promise<SpinalNode | undefined> {
+		const profileId = await this._getProfileId(socket);
+		return SpinalAPIMiddleware.getInstance().load(server_id, profileId);
+	}
 
-    const context = await this.getContext(contextId, socket);
-    if (context instanceof SpinalContext) {
-      const found = await context.findInContext(context, (node, stop) => {
-        if (node.getId().get() === nodeId) {
-          stop();
-          return true;
-        }
+	public async getNodeWithStaticId(nodeId: string, contextId: string | number, socket?: Socket): Promise<SpinalNode | undefined> {
+		if (nodeId === contextId) {
+			return this.getContext(nodeId, socket);
+		}
 
-        return false;
-      });
+		const context = await this.getContext(contextId, socket);
+		if (context instanceof SpinalContext) {
+			const found = await context.findInContext(context, (node, stop) => {
+				if (node.getId().get() === nodeId) {
+					if (stop && typeof stop === "function") stop();
+					return true;
+				}
 
-      return Array.isArray(found) ? found[0] : found;
-    }
-  }
+				return false;
+			});
 
-  public async getNode(
-    nodeId: string | number,
-    contextId?: string | number,
-    socket?: Socket
-  ): Promise<SpinalNode> {
-    //@ts-ignore
-    if (!isNaN(nodeId)) {
-      const node = await this.getNodeWithServerId(<number>nodeId, socket);
-      //@ts-ignore
-      if (node && node instanceof SpinalNode) SpinalGraphService._addNode(node);
+			return Array.isArray(found) ? found[0] : found;
+		}
+	}
 
-      return node;
-    }
+	public async getNode(nodeId: string | number, contextId?: string | number, socket?: Socket): Promise<SpinalNode | undefined> {
+		if (!isNaN(nodeId as any)) {
+			const node = await this.getNodeWithServerId(<number>nodeId, socket);
+			if (node && node instanceof SpinalNode) SpinalGraphService._addNode(node);
 
-    return this.getNodeWithStaticId(nodeId?.toString(), contextId, socket);
-  }
+			return node;
+		}
 
-  private async _getTokenInfo(socket: Socket) {
-    const { header, auth, query } = <any>socket.handshake;
-    const token = auth?.token || header?.token || query?.token;
-    if (!token) throw new Error(SECURITY_MESSAGES.INVALID_TOKEN);
+		return this.getNodeWithStaticId(nodeId?.toString(), contextId!, socket);
+	}
 
-    const tokenInfo: any = await TokenService.getInstance().tokenIsValid(token);
-    if (!tokenInfo) throw new Error(SECURITY_MESSAGES.INVALID_TOKEN);
+	private async _getTokenInfo(socket: Socket) {
+		const { header, auth, query } = <any>socket.handshake;
+		const token = auth?.token || header?.token || query?.token;
+		if (!token) throw new Error(SECURITY_MESSAGES.INVALID_TOKEN);
 
-    const sessionId = tokenInfo.userInfo?.id;
-    (socket as any).sessionId = sessionId;
-    (socket as any).userInfo = {
-      id: tokenInfo.userInfo?.id,
-      name: tokenInfo.userInfo?.userName,
-    };
+		const tokenInfo: any = await TokenService.getInstance().tokenIsValid(token);
+		if (!tokenInfo) throw new Error(SECURITY_MESSAGES.INVALID_TOKEN);
 
-    return tokenInfo;
-  }
+		const sessionId = tokenInfo.userInfo?.id;
+		(socket as any).sessionId = sessionId;
+		(socket as any).userInfo = {
+			id: tokenInfo.userInfo?.id,
+			name: tokenInfo.userInfo?.userName,
+		};
 
-  private async _getProfileId(socket: Socket): Promise<string> {
-    const tokenInfo = await this._getTokenInfo(socket);
-    return (
-      tokenInfo.profile.profileId ||
-      tokenInfo.profile.userProfileBosConfigId ||
-      tokenInfo.profile.appProfileBosConfigId
-    );
-  }
+		return tokenInfo;
+	}
+
+	private async _getProfileId(socket?: Socket): Promise<string> {
+		if (!socket) throw new Error(SECURITY_MESSAGES.INVALID_TOKEN);
+		const tokenInfo = await this._getTokenInfo(socket);
+		return tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId || tokenInfo.profile.appProfileBosConfigId;
+	}
 }

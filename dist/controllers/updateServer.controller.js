@@ -18,49 +18,49 @@ const express = require("express");
 const child_process_1 = require("child_process");
 const constant_1 = require("../constant");
 const authentication_1 = require("../security/authentication");
+const AuthError_1 = require("../security/AuthError");
+const ADMIN_APPS = require("../defaultApps/adminApps.json");
 let UpdateServerController = class UpdateServerController extends tsoa_1.Controller {
     constructor() {
         super();
     }
     async updateServer(req) {
         try {
-            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
-            if (!isAdmin) {
-                this.setStatus(constant_1.HTTP_CODES.UNAUTHORIZED);
-                return { message: 'Only admins can trigger a server update' };
-            }
-            const output = await runCommand('git stash && git pull && git stash pop; spinalcom-utils i && pm2 restart ecosystem.config.js');
+            const hasAccess = await (0, authentication_1.isAdminOrHasAccessToAdminApp)(req, ADMIN_APPS.api_routes.name);
+            if (!hasAccess)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
+            const output = await runCommand("git stash && git pull && git stash pop; spinalcom-utils i && pm2 restart ecosystem.config.js");
             this.setStatus(constant_1.HTTP_CODES.OK);
-            return { message: 'Server update triggered successfully', output };
+            return { message: "Server update triggered successfully", output };
         }
         catch (error) {
             this.setStatus(constant_1.HTTP_CODES.INTERNAL_ERROR);
-            return { message: error.message || 'Update failed' };
+            return { message: error.message || "Update failed" };
         }
     }
 };
 exports.UpdateServerController = UpdateServerController;
 __decorate([
     (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
-    (0, tsoa_1.Post)('/update-server'),
+    (0, tsoa_1.Post)("/update-server"),
     __param(0, (0, tsoa_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], UpdateServerController.prototype, "updateServer", null);
 exports.UpdateServerController = UpdateServerController = __decorate([
-    (0, tsoa_1.Route)('/api/v1'),
-    (0, tsoa_1.Tags)('Server'),
+    (0, tsoa_1.Route)("/api/v1"),
+    (0, tsoa_1.Tags)("Server"),
     __metadata("design:paramtypes", [])
 ], UpdateServerController);
 function runCommand(cmd) {
     return new Promise((resolve, reject) => {
-        (0, child_process_1.exec)(cmd, { cwd: __dirname + '/../..' }, (error, stdout, stderr) => {
+        (0, child_process_1.exec)(cmd, { cwd: __dirname + "/../.." }, (error, stdout, stderr) => {
             if (error) {
                 reject(new Error(stderr || error.message));
                 return;
             }
-            resolve(stdout + (stderr ? '\n' + stderr : ''));
+            resolve(stdout + (stderr ? "\n" + stderr : ""));
         });
     });
 }

@@ -1,5 +1,5 @@
-import { Controller } from 'tsoa';
-import * as express from 'express';
+import { Controller } from "tsoa";
+import * as express from "express";
 export declare class WebsocketLogsController extends Controller {
     private _websocketLogService;
     constructor();

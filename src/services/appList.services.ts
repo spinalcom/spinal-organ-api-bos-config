@@ -30,51 +30,47 @@ import { AuthentificationService } from "./authentification.service";
 import { _addUserToContext, authenticateApplication } from "../utils/ApplicationAuthUtils";
 
 export class AppListService {
-  private static instance: AppListService;
-  public context: SpinalContext;
+	private static instance: AppListService;
+	public context: SpinalContext | undefined;
 
-  private constructor() { }
+	private constructor() {}
 
-  public static getInstance(): AppListService {
-    if (!this.instance) this.instance = new AppListService();
-    return this.instance;
-  }
+	public static getInstance(): AppListService {
+		if (!this.instance) this.instance = new AppListService();
+		return this.instance;
+	}
 
-  public async init(): Promise<SpinalContext> {
-    this.context = await configServiceInstance.getContext(APP_LIST_CONTEXT_NAME);
-    if (!this.context) {
-      this.context = await configServiceInstance.addContext(APP_LIST_CONTEXT_NAME, APP_LIST_CONTEXT_TYPE);
-    }
+	public async init(): Promise<SpinalContext> {
+		this.context = await configServiceInstance.getContext(APP_LIST_CONTEXT_NAME);
+		if (!this.context) {
+			this.context = await configServiceInstance.addContext(APP_LIST_CONTEXT_NAME, APP_LIST_CONTEXT_TYPE);
+		}
 
-    return this.context;
-  }
+		return this.context;
+	}
 
-  /**
-   * Authenticate an application using the admin platform.
-   *
-   * @param {(IAppCredential | IOAuth2Credential)} application
-   * @return {*}  {(Promise<{ code: number; data: string | IApplicationToken }>)}
-   * @memberof AppListService
-   */
-  public async authenticateApplication(application: IAppCredential | IOAuth2Credential): Promise<{ code: number; data: string | IApplicationToken }> {
+	/**
+	 * Authenticate an application using the admin platform.
+	 *
+	 * @param {(IAppCredential | IOAuth2Credential)} application
+	 * @return {*}  {(Promise<{ code: number; data: string | IApplicationToken }>)}
+	 * @memberof AppListService
+	 */
+	public async authenticateApplication(application: IAppCredential | IOAuth2Credential): Promise<{ code: number; data: string | IApplicationToken }> {
+		const adminCredential = await this._getAuthPlateformInfo();
+		if (!adminCredential || !adminCredential.urlAdmin || !adminCredential.idPlateform) throw new Error("No authentication platform is registered");
 
-    const adminCredential = await this._getAuthPlateformInfo();
+		console.warn("this mode is deprecated, please use the new authentication service");
+		return authenticateApplication(adminCredential.urlAdmin, adminCredential.idPlateform, application, this.context!);
+	}
 
-    console.warn("this mode is deprecated, please use the new authentication service");
-    return authenticateApplication(adminCredential.urlAdmin, adminCredential.idPlateform, application, this.context);
-  }
+	//////////////////////////////////////////////////
+	//                    PRIVATE                   //
+	//////////////////////////////////////////////////
 
-  //////////////////////////////////////////////////
-  //                    PRIVATE                   //
-  //////////////////////////////////////////////////
-
-
-
-
-
-  private async _getAuthPlateformInfo() {
-    const adminCredential = await AuthentificationService.getInstance().getBosToAdminCredential();
-    if (!adminCredential) throw new Error("No authentication platform is registered");
-    return adminCredential;
-  }
+	private async _getAuthPlateformInfo() {
+		const adminCredential = await AuthentificationService.getInstance().getBosToAdminCredential();
+		if (!adminCredential) throw new Error("No authentication platform is registered");
+		return adminCredential;
+	}
 }

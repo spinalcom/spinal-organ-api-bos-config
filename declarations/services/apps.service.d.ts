@@ -8,7 +8,7 @@ export declare const AppsType: Readonly<{
 }>;
 export declare class AppService {
     private static instance;
-    context: SpinalContext;
+    context: SpinalContext | undefined;
     private constructor();
     static getInstance(): AppService;
     init(): Promise<SpinalContext>;
@@ -19,7 +19,7 @@ export declare class AppService {
      * @return {*}  {Promise<SpinalNode>}
      * @memberof AppService
      */
-    createAdminApp(appInfo: ISpinalApp): Promise<SpinalNode>;
+    createAdminApp(appInfo: ISpinalApp): Promise<SpinalNode | undefined>;
     /**
      * Create a building app in the building apps group.
      *
@@ -28,7 +28,7 @@ export declare class AppService {
      * @return {*}  {Promise<SpinalNode>}
      * @memberof AppService
      */
-    createBuildingApp(appInfo: ISpinalApp, silenceAlreadyExist?: boolean): Promise<SpinalNode>;
+    createBuildingApp(appInfo: ISpinalApp, silenceAlreadyExist?: boolean): Promise<SpinalNode | undefined>;
     /**
      * Create a subApp under a building app.
      *
@@ -49,7 +49,7 @@ export declare class AppService {
      * @param appInfo - The information of the admin application to create or update.
      * @returns A promise that resolves to the created or updated SpinalNode, or `undefined` if the group node could not be retrieved.
      */
-    createOrUpadteAdminApp(appInfo: ISpinalApp): Promise<SpinalNode>;
+    createOrUpadteAdminApp(appInfo: ISpinalApp): Promise<SpinalNode | undefined>;
     /**
      * Retrieves all admin application nodes.
      *
@@ -104,7 +104,7 @@ export declare class AppService {
      * @return {*}  {Promise<SpinalNode>}
      * @memberof AppService
      */
-    getBuildingSubApp(searchKeys: TAppSearch, appNameOrId: string, subAppNameOrId: string): Promise<SpinalNode>;
+    getBuildingSubApp(searchKeys: TAppSearch, appNameOrId: string, subAppNameOrId: string): Promise<SpinalNode | undefined>;
     /**
      * Searches for a building sub-application node within a list of application nodes.
      *
@@ -114,9 +114,9 @@ export declare class AppService {
      * @param {TAppSearch} searchKeys - The search method(s) to use (e.g., by name or id).
      * @param {SpinalNode[]} appsNodes - The list of application nodes to search within.
      * @param {string} subAppNameOrId - The name or id of the sub-app to find.
-     * @returns {Promise<SpinalNode>} A promise that resolves to the found sub-app node or undefined.
+     * @returns {Promise<SpinalNode | undefined>} A promise that resolves to the found sub-app node or undefined.
      */
-    findBuildingSubAppInApps(searchKeys: TAppSearch, appsNodes: SpinalNode[], subAppNameOrId: string): Promise<SpinalNode>;
+    findBuildingSubAppInApps(searchKeys: TAppSearch, appsNodes: SpinalNode[], subAppNameOrId: string): Promise<SpinalNode | undefined>;
     /**
      * Formats an array of application nodes and adds their corresponding sub-applications.
      *
@@ -142,7 +142,17 @@ export declare class AppService {
      * @param subAppsNodes - Optional list of sub-app nodes to include.
      * @returns The formatted application object or undefined.
      */
-    formatAppAndAddSubApps(appsNode: SpinalNode, subAppsNodes?: SpinalNode[]): Promise<ISpinalApp>;
+    formatAppAndAddSubApps(appsNode: SpinalNode, subAppsNodes?: SpinalNode[]): Promise<ISpinalApp | undefined>;
+    /**
+     * Retrieves all application node (admin, building app, or sub-app) by search key (name or id).
+     *
+     *
+     * @returns {Promise<SpinalNode[]>} A promise that resolves to an array of all SpinalNodes.
+     */
+    getAllApps(): Promise<{
+        apps: SpinalNode[];
+        adminApps: SpinalNode[];
+    }>;
     /**
      * Retrieves an application node (admin, building app, or sub-app) by search key (name or id).
      *
@@ -153,7 +163,7 @@ export declare class AppService {
      * @param {string} appNameOrId - The name or id of the app to find.
      * @returns {Promise<SpinalNode>} A promise that resolves to the found SpinalNode or undefined.
      */
-    getApps(searchKeys: TAppSearch, appNameOrId: string): Promise<SpinalNode>;
+    getApps(searchKeys: TAppSearch, appNameOrId: string): Promise<SpinalNode | undefined>;
     /**
      * Updates the information of an admin application node with the provided new information.
      *
@@ -162,7 +172,7 @@ export declare class AppService {
      * @returns A promise that resolves to the updated SpinalNode instance.
      * @throws Will throw an error if the application node cannot be found or the update fails.
      */
-    updateAdminApp(appId: string, newInfo: ISpinalApp): Promise<SpinalNode>;
+    updateAdminApp(appId: string, newInfo: ISpinalApp): Promise<SpinalNode | undefined>;
     /**
      * Updates the information of a building application node with the provided new information.
      *
@@ -171,7 +181,7 @@ export declare class AppService {
      * @returns A promise that resolves to the updated SpinalNode instance.
      * @throws Will throw an error if the application node cannot be found or the update fails.
      */
-    updateBuildingApp(appId: string, newInfo: ISpinalApp): Promise<SpinalNode>;
+    updateBuildingApp(appId: string, newInfo: ISpinalApp): Promise<SpinalNode | undefined>;
     /**
      * Updates the information of a given application node with new values provided in `newInfo`.
      *
@@ -197,7 +207,7 @@ export declare class AppService {
      * @param newInfo - An object containing the new information for the sub-application.
      * @returns A promise that resolves to the updated `SpinalNode` representing the sub-application.
      */
-    updateBuildingSubAppInfo(appId: string, subAppId: string, newInfo: ISubApp): Promise<SpinalNode>;
+    updateBuildingSubAppInfo(appId: string, subAppId: string, newInfo: ISubApp): Promise<SpinalNode | undefined>;
     /**
      * Deletes an admin application node by its ID.
      *

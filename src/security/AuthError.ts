@@ -1,19 +1,19 @@
 /*
  * Copyright 2022 SpinalCom - www.spinalcom.com
- * 
+ *
  * This file is part of SpinalCore.
- * 
+ *
  * Please read all of the following terms and conditions
  * of the Free Software license Agreement ("Agreement")
  * carefully.
- * 
+ *
  * This Agreement is a legally binding contract between
  * the Licensee (as defined below) and SpinalCom that
  * sets forth the terms and conditions that govern your
  * use of the Program. By installing and/or using the
  * Program, you agree to abide by all the terms and
  * conditions stated or referenced herein.
- * 
+ *
  * If you do not agree to abide by these terms and
  * conditions, do not demonstrate your acceptance and do
  * not install or use the Program.
@@ -24,23 +24,18 @@
 
 import { HTTP_CODES } from "../constant";
 
-
 export class AuthError extends Error {
-    code: number = HTTP_CODES.UNAUTHORIZED;
-    constructor(message: string) {
-        super(message);
-    }
+	code: number = HTTP_CODES.UNAUTHORIZED;
+	constructor(message: string) {
+		super(message);
+	}
 }
 
-
 export class OtherError extends Error {
+	code: number;
 
-    code: number;
-
-    constructor(code: number, message: string) {
-        super(message);
-        this.code = code;
-    }
-
-
+	constructor(code: number, message: string) {
+		super(message);
+		this.code = code;
+	}
 }

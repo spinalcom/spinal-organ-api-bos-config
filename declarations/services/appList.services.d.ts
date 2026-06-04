@@ -2,7 +2,7 @@ import { SpinalContext } from "spinal-env-viewer-graph-service";
 import { IAppCredential, IApplicationToken, IOAuth2Credential } from "../interfaces";
 export declare class AppListService {
     private static instance;
-    context: SpinalContext;
+    context: SpinalContext | undefined;
     private constructor();
     static getInstance(): AppListService;
     init(): Promise<SpinalContext>;

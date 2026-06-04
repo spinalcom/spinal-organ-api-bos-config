@@ -24,6 +24,7 @@
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.expressAuthentication = expressAuthentication;
+exports.isAdminOrHasAccessToAdminApp = isAdminOrHasAccessToAdminApp;
 exports.checkIfItIsAdmin = checkIfItIsAdmin;
 exports.getProfileId = getProfileId;
 exports.checkAndGetTokenInfo = checkAndGetTokenInfo;
@@ -34,6 +35,7 @@ const services_1 = require("../services");
 const utils_1 = require("./utils");
 const AuthError_1 = require("./AuthError");
 const adminProfile_service_1 = require("../services/adminProfile.service");
+const findNodeBySearchKey_1 = require("../utils/findNodeBySearchKey");
 async function expressAuthentication(request, securityName, scopes) {
     if (securityName === constant_1.SECURITY_NAME.all)
         return;
@@ -41,6 +43,25 @@ async function expressAuthentication(request, securityName, scopes) {
     if (!token)
         throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.INVALID_TOKEN);
     return token;
+}
+async function isAdminOrHasAccessToAdminApp(request, adminAppName = "") {
+    const isAdmin = await checkIfItIsAdmin(request);
+    if (isAdmin)
+        return true;
+    return profileHasAccessToAdminApp(request, adminAppName);
+}
+async function profileHasAccessToAdminApp(request, adminAppName) {
+    if (!adminAppName)
+        return false;
+    if (!Array.isArray(adminAppName))
+        adminAppName = [adminAppName];
+    let profileId = await getProfileId(request);
+    for (const appName of adminAppName) {
+        const appNode = await services_1.UserProfileService.getInstance().profileHasAccessToApp(findNodeBySearchKey_1.searchByName, profileId, appName);
+        if (appNode)
+            return true;
+    }
+    return false;
 }
 async function checkIfItIsAdmin(request) {
     try {
@@ -61,6 +82,8 @@ async function getProfileId(request) {
 async function checkAndGetTokenInfo(request) {
     // check token validity
     const token = await expressAuthentication(request);
+    if (!token)
+        throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.INVALID_TOKEN);
     const tokenInstance = services_1.TokenService.getInstance();
     const tokenInfo = await tokenInstance.tokenIsValid(token);
     if (!tokenInfo)
@@ -80,7 +103,7 @@ async function checkBeforeRedirectToApi(request, securityName, scopes) {
     let profileId = tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId || tokenInfo.profile.appProfileBosConfigId;
     if (!profileId)
         throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.NO_PROFILE_FOUND);
-    let profileNode = await services_1.AppProfileService.getInstance()._getAppProfileNode(profileId) || await services_1.UserProfileService.getInstance()._getUserProfileNode(profileId);
+    let profileNode = (await services_1.AppProfileService.getInstance()._getAppProfileNode(profileId)) || (await services_1.UserProfileService.getInstance()._getUserProfileNode(profileId));
     if (!profileNode)
         throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.NO_PROFILE_FOUND);
     // Check if profile has access to api route

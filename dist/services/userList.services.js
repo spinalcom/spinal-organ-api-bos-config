@@ -64,9 +64,9 @@ class UserListService {
     async authenticateUser(user) {
         return this.authenticateAdmin(user);
         /**
-        * If the user is not an admin, we will try to authenticate the user via the Auth platform.
-        * commented because user authentication is now handled by authentication platform
-        */
+         * If the user is not an admin, we will try to authenticate the user via the Auth platform.
+         * commented because user authentication is now handled by authentication platform
+         */
         // let isAdmin = true;
         // if (data.code === HTTP_CODES.INTERNAL_ERROR) {
         //   data = await this.authenticateUserViaAuthPlateform(user);
@@ -135,7 +135,7 @@ class UserListService {
         const promises = [this.getUser(userId), apps_service_1.AppService.getInstance().getApps(findNodeBySearchKey_1.searchById, appId)];
         return Promise.all(promises).then(async ([user, app]) => {
             if (!user)
-                throw { code: constant_1.HTTP_CODES.BAD_REQUEST, message: `No user found for ${userId}`, };
+                throw { code: constant_1.HTTP_CODES.BAD_REQUEST, message: `No user found for ${userId}` };
             if (!app)
                 throw { code: constant_1.HTTP_CODES.BAD_REQUEST, message: `No app found for ${appId}` };
             return user.addChild(app, constant_1.USER_TO_FAVORITE_APP_RELATION, constant_1.PTR_LST_TYPE);
@@ -178,7 +178,7 @@ class UserListService {
             if (!user)
                 throw { code: constant_1.HTTP_CODES.BAD_REQUEST, message: `No user found for ${userId}` };
             if (!app)
-                throw { code: constant_1.HTTP_CODES.BAD_REQUEST, message: `No app found for ${appId}`, };
+                throw { code: constant_1.HTTP_CODES.BAD_REQUEST, message: `No app found for ${appId}` };
             await user.removeChild(app, constant_1.USER_TO_FAVORITE_APP_RELATION, constant_1.PTR_LST_TYPE);
             return app;
         });
@@ -220,7 +220,7 @@ class UserListService {
             return;
         const password = (userInfo && userInfo.password) || (0, UserAuthUtils_1._generateString)(16);
         const isAdmin = true;
-        const userInfoFormatted = { name: userName, userName, type: constant_1.USER_TYPES.ADMIN, userType: constant_1.USER_TYPES.ADMIN, };
+        const userInfoFormatted = { name: userName, userName, type: constant_1.USER_TYPES.ADMIN, userType: constant_1.USER_TYPES.ADMIN };
         const element = new spinal_core_connectorjs_type_1.Model({ userName, password: await (0, UserAuthUtils_1._hashPassword)(password) });
         return (0, UserAuthUtils_1._addUserToContext)(this.context, userInfoFormatted, element, isAdmin).then((result) => {
             // Log the admin credentials to a file for recovery
@@ -271,12 +271,14 @@ class UserListService {
     async authenticateUserViaAuthPlateform(credentials) {
         const authPlateformCredential = await (0, UserAuthUtils_1._getAuthPlateformInfo)();
         const url = `${authPlateformCredential.urlAdmin}/users/login`;
-        return axios_1.default.post(url, credentials)
+        return axios_1.default
+            .post(url, credentials)
             .then(async (response) => {
             const payload = this.getUserDataFormatted(response.data, authPlateformCredential);
             return { code: constant_1.HTTP_CODES.OK, data: payload };
-        }).catch((err) => {
-            return { code: constant_1.HTTP_CODES.UNAUTHORIZED, data: "bad credential", };
+        })
+            .catch((err) => {
+            return { code: constant_1.HTTP_CODES.UNAUTHORIZED, data: "bad credential" };
         });
     }
     /**
@@ -287,14 +289,14 @@ class UserListService {
      * @returns A promise that resolves to the enriched user data object, including `profile` and `userInfo` properties.
      */
     /**
-      * Retrieves user data and formats it by adding profile and user info.
-      * @param data - The user data to format.
-      * @param adminCredential - Optional admin credentials for fetching user info.
-      * @param useToken - Whether to use the token for fetching user info.
-      * @returns A promise resolving to the formatted user data.
-      */
+     * Retrieves user data and formats it by adding profile and user info.
+     * @param data - The user data to format.
+     * @param adminCredential - Optional admin credentials for fetching user info.
+     * @param useToken - Whether to use the token for fetching user info.
+     * @returns A promise resolving to the formatted user data.
+     */
     async getUserDataFormatted(data, adminCredential, useToken = false) {
-        adminCredential = adminCredential || await (0, UserAuthUtils_1._getAuthPlateformInfo)();
+        adminCredential = adminCredential || (await (0, UserAuthUtils_1._getAuthPlateformInfo)());
         data.profile = await (0, UserAuthUtils_1._getUserProfileInfo)(data.token, adminCredential);
         data.userInfo = await (useToken ? (0, UserAuthUtils_1.getUserInfoByToken)(adminCredential, data.token) : (0, UserAuthUtils_1._getUserInfo)(data.userId, adminCredential, data.token));
         return data;

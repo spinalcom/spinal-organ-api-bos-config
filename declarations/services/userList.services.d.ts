@@ -3,7 +3,7 @@ import { HTTP_CODES } from "../constant";
 import { IUserCredential, IUserInfo, IUserToken } from "../interfaces";
 export declare class UserListService {
     private static instance;
-    context: SpinalContext;
+    context: SpinalContext | undefined;
     private constructor();
     static getInstance(): UserListService;
     init(): Promise<SpinalContext>;
@@ -28,7 +28,7 @@ export declare class UserListService {
      * @param username - The username or user ID to search for.
      * @returns A promise that resolves to the matching `SpinalNode`, or `undefined` if no match is found.
      */
-    getUser(username: string): Promise<SpinalNode>;
+    getUser(username: string): Promise<SpinalNode | undefined>;
     /**
      * Retrieves the list of favorite applications for a given user.
      *
@@ -95,14 +95,14 @@ export declare class UserListService {
      * @param userInfo - Optional user information for the admin user.
      * @returns A promise that resolves to the created SpinalNode, or undefined if the user already exists.
      */
-    createAdminUser(userInfo?: IUserInfo): Promise<SpinalNode>;
+    createAdminUser(userInfo?: IUserInfo): Promise<SpinalNode | undefined>;
     /**
      * Retrieves an admin user node by its username.
      *
      * @param userName - The username of the admin user to retrieve.
      * @returns A promise that resolves to the corresponding `SpinalNode` if found, otherwise `undefined`.
      */
-    getAdminUser(userName: string): Promise<SpinalNode>;
+    getAdminUser(userName: string): Promise<SpinalNode | undefined>;
     /**
      * Authenticates an admin user by verifying the provided credentials.
      *
@@ -138,11 +138,11 @@ export declare class UserListService {
      * @returns A promise that resolves to the enriched user data object, including `profile` and `userInfo` properties.
      */
     /**
-      * Retrieves user data and formats it by adding profile and user info.
-      * @param data - The user data to format.
-      * @param adminCredential - Optional admin credentials for fetching user info.
-      * @param useToken - Whether to use the token for fetching user info.
-      * @returns A promise resolving to the formatted user data.
-      */
+     * Retrieves user data and formats it by adding profile and user info.
+     * @param data - The user data to format.
+     * @param adminCredential - Optional admin credentials for fetching user info.
+     * @param useToken - Whether to use the token for fetching user info.
+     * @returns A promise resolving to the formatted user data.
+     */
     getUserDataFormatted(data: any, adminCredential?: any, useToken?: boolean): Promise<any>;
 }

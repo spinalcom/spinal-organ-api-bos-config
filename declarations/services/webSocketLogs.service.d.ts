@@ -1,6 +1,6 @@
-import { WEBSOCKET_STATE, SpinalLog } from 'spinal-service-pubsub-logs';
-import { SpinalContext } from 'spinal-env-viewer-graph-service';
-import { Server } from 'socket.io';
+import { WEBSOCKET_STATE, SpinalLog } from "spinal-service-pubsub-logs";
+import { SpinalContext } from "spinal-env-viewer-graph-service";
+import { Server } from "socket.io";
 export default class WebsocketLogsService {
     private static _instance;
     private _alertTime;
@@ -26,7 +26,7 @@ export default class WebsocketLogsService {
     getClientConnected(): Promise<{
         numberOfClientConnected: any;
     }>;
-    getLogModel(): Promise<SpinalLog>;
+    getLogModel(): Promise<SpinalLog | undefined>;
     getWebsocketState(): Promise<{
         state: WEBSOCKET_STATE;
         since: number;

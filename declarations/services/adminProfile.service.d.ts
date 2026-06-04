@@ -1,4 +1,4 @@
-import { SpinalContext, SpinalNode } from 'spinal-env-viewer-graph-service';
+import { SpinalContext, SpinalNode } from "spinal-env-viewer-graph-service";
 export declare class AdminProfileService {
     private static instance;
     private _adminNode;
@@ -17,7 +17,7 @@ export declare class AdminProfileService {
      *                     If not provided, the default user profile context is used.
      * @returns A promise that resolves to the admin profile `SpinalNode` if found, otherwise `undefined`.
      */
-    getAdminProfile(argContext?: SpinalContext): Promise<SpinalNode>;
+    getAdminProfile(argContext?: SpinalContext): Promise<SpinalNode | undefined>;
     /**
      * Adds one or more applications to the admin profile, authorizing access for the profile.
      *

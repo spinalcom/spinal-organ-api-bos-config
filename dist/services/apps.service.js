@@ -250,7 +250,7 @@ class AppService {
      * @param {TAppSearch} searchKeys - The search method(s) to use (e.g., by name or id).
      * @param {SpinalNode[]} appsNodes - The list of application nodes to search within.
      * @param {string} subAppNameOrId - The name or id of the sub-app to find.
-     * @returns {Promise<SpinalNode>} A promise that resolves to the found sub-app node or undefined.
+     * @returns {Promise<SpinalNode | undefined>} A promise that resolves to the found sub-app node or undefined.
      */
     async findBuildingSubAppInApps(searchKeys, appsNodes, subAppNameOrId) {
         const promises = appsNodes.map((el) => el.getChildren([constant_1.SUB_APP_RELATION_NAME]));
@@ -304,6 +304,18 @@ class AppService {
             }
         }
         return res;
+    }
+    /**
+     * Retrieves all application node (admin, building app, or sub-app) by search key (name or id).
+     *
+     *
+     * @returns {Promise<SpinalNode[]>} A promise that resolves to an array of all SpinalNodes.
+     */
+    async getAllApps() {
+        return {
+            apps: await this.getAllBuildingAppsAndSubApp(),
+            adminApps: await this.getAllAdminApps(),
+        };
     }
     /**
      * Retrieves an application node (admin, building app, or sub-app) by search key (name or id).
@@ -402,8 +414,8 @@ class AppService {
             }
             if (!subAppNode.element)
                 await subAppNode.getElement();
-            subAppNode.element.ptr.set(new spinal_core_connectorjs_1.Model(newInfo.appConfig));
-            console.log('SubApp updated with new appConfig:', JSON.stringify(newInfo.appConfig, null, 2));
+            subAppNode.element?.ptr.set(new spinal_core_connectorjs_1.Model(newInfo.appConfig));
+            console.log("SubApp updated with new appConfig:", JSON.stringify(newInfo.appConfig, null, 2));
             return subAppNode;
         }
     }
@@ -523,7 +535,7 @@ class AppService {
         for (const item of formattedApps.subApps) {
             try {
                 const app = await this.getBuildingApp(findNodeBySearchKey_1.searchByNameOrId, item.parentApp);
-                if (app) {
+                if (!app) {
                     errors.push(`App ${item.parentApp} not found`);
                     continue;
                 }

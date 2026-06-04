@@ -22,262 +22,205 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
-import {
-  SpinalContext,
-  SpinalGraph,
-  SpinalGraphService,
-  SpinalNode,
-} from 'spinal-env-viewer-graph-service';
-import {
-  ADMIN_PROFILE_NAME,
-  ADMIN_PROFILE_TYPE,
-  APP_RELATION_NAME,
-  CONTEXT_TO_USER_PROFILE_RELATION_NAME,
-  PORTOFOLIO_TYPE,
-  PROFILE_TO_AUTHORIZED_DIGITAL_TWIN_RELATION_NAME,
-  PROFILE_TO_AUTHORIZED_PORTOFOLIO_RELATION,
-  PTR_LST_TYPE,
-} from '../constant';
-import AuthorizationService from './authorization.service';
-import { UserProfileService } from './userProfile.service';
-import { DigitalTwinService } from './digitalTwin.service';
-import { AppService } from './apps.service';
-import { APIService } from './apis.service';
-
+import { SpinalContext, SpinalGraph, SpinalGraphService, SpinalNode } from "spinal-env-viewer-graph-service";
+import { ADMIN_PROFILE_NAME, ADMIN_PROFILE_TYPE, CONTEXT_TO_USER_PROFILE_RELATION_NAME, PORTOFOLIO_TYPE, PROFILE_TO_AUTHORIZED_DIGITAL_TWIN_RELATION_NAME, PROFILE_TO_AUTHORIZED_PORTOFOLIO_RELATION, PTR_LST_TYPE } from "../constant";
+import AuthorizationService from "./authorization.service";
+import { UserProfileService } from "./userProfile.service";
+import { DigitalTwinService } from "./digitalTwin.service";
+import { AppService } from "./apps.service";
+import { APIService } from "./apis.service";
 
 export class AdminProfileService {
-  private static instance: AdminProfileService;
-  private _adminNode: SpinalNode;
+	private static instance: AdminProfileService;
+	private _adminNode: SpinalNode | undefined;
 
-  private constructor() { }
+	private constructor() {}
 
+	public static getInstance(): AdminProfileService {
+		if (!this.instance) {
+			this.instance = new AdminProfileService();
+		}
 
-  public static getInstance(): AdminProfileService {
-    if (!this.instance) {
-      this.instance = new AdminProfileService();
-    }
+		return this.instance;
+	}
 
-    return this.instance;
-  }
+	public get adminNode() {
+		return this._adminNode;
+	}
 
+	public async init(context: SpinalContext): Promise<SpinalNode> {
+		let node = await this.getAdminProfile(context);
 
-  public get adminNode() {
-    return this._adminNode;
-  }
+		if (!node) {
+			node = this._createAdminProfile();
+			await context.addChildInContext(node, CONTEXT_TO_USER_PROFILE_RELATION_NAME, PTR_LST_TYPE, context);
+		}
 
+		this._adminNode = node;
 
-  public async init(context: SpinalContext): Promise<SpinalNode> {
-    let node = await this.getAdminProfile(context);
+		await this.syncAdminProfile();
+		return node;
+	}
 
-    if (!node) {
-      node = this._createAdminProfile();
-      await context.addChildInContext(
-        node,
-        CONTEXT_TO_USER_PROFILE_RELATION_NAME,
-        PTR_LST_TYPE,
-        context
-      );
-    }
+	/**
+	 * Retrieves the admin profile node from the specified context or the default user profile context.
+	 *
+	 * If the admin profile node has already been retrieved and cached, it returns the cached node.
+	 * Otherwise, it fetches the children of the context and searches for a node with the name
+	 * `ADMIN_PROFILE_NAME` and type `ADMIN_PROFILE_TYPE`.
+	 *
+	 * @param argContext - (Optional) The context from which to retrieve the admin profile node.
+	 *                     If not provided, the default user profile context is used.
+	 * @returns A promise that resolves to the admin profile `SpinalNode` if found, otherwise `undefined`.
+	 */
+	public async getAdminProfile(argContext?: SpinalContext): Promise<SpinalNode | undefined> {
+		if (this._adminNode) return this._adminNode;
 
-    this._adminNode = node;
+		const context = argContext || UserProfileService.getInstance().context;
+		if (!context) return;
 
-    await this.syncAdminProfile();
-    return node;
-  }
+		const children = await context.getChildren();
 
+		return children.find((el) => {
+			return el.getName().get() === ADMIN_PROFILE_NAME && el.getType().get() === ADMIN_PROFILE_TYPE;
+		});
+	}
 
-  /**
-   * Retrieves the admin profile node from the specified context or the default user profile context.
-   *
-   * If the admin profile node has already been retrieved and cached, it returns the cached node.
-   * Otherwise, it fetches the children of the context and searches for a node with the name
-   * `ADMIN_PROFILE_NAME` and type `ADMIN_PROFILE_TYPE`.
-   *
-   * @param argContext - (Optional) The context from which to retrieve the admin profile node.
-   *                     If not provided, the default user profile context is used.
-   * @returns A promise that resolves to the admin profile `SpinalNode` if found, otherwise `undefined`.
-   */
-  public async getAdminProfile(argContext?: SpinalContext): Promise<SpinalNode> {
-    if (this._adminNode) return this._adminNode;
+	/**
+	 * Adds one or more applications to the admin profile, authorizing access for the profile.
+	 *
+	 * @param apps - A single `SpinalNode` instance or an array of `SpinalNode` instances representing the applications to be added.
+	 * @returns A promise that resolves to an array of `SpinalNode` instances that have been authorized for the profile.
+	 */
+	async addAppToProfil(apps: SpinalNode | SpinalNode[]): Promise<SpinalNode[]> {
+		if (!Array.isArray(apps)) apps = [apps];
+		const appIds = apps.map((el) => el.getId().get());
 
-    const context = argContext || UserProfileService.getInstance().context;
-    if (!context) return;
+		return UserProfileService.getInstance().authorizeProfileToAccessApps(this._adminNode!, appIds);
+	}
 
-    const children = await context.getChildren();
+	/**
+	 * Authorizes the admin profile to access a sub-app under a specific app.
+	 * @param app The parent app node.
+	 * @param subApp The sub-app node to authorize.
+	 * @returns {Promise<SpinalNode[]>} A promise that resolves to an array of authorized sub-app nodes.
+	 */
+	async addSubAppToProfil(app: SpinalNode, subApp: SpinalNode): Promise<SpinalNode[]> {
+		return UserProfileService.getInstance().authorizeProfileToAccessSubApps(this._adminNode!, [app], subApp.getId().get());
+	}
 
-    return children.find((el) => {
-      return (
-        el.getName().get() === ADMIN_PROFILE_NAME &&
-        el.getType().get() === ADMIN_PROFILE_TYPE
-      );
-    });
-  }
+	/**
+	 * Authorizes the admin profile to access the given admin apps.
+	 * @param apps One or more admin app nodes.
+	 * @returns {Promise<SpinalNode[]>} A promise that resolves to an array of authorized admin app nodes.
+	 */
+	public async addAdminAppToProfil(apps: SpinalNode | SpinalNode[]): Promise<SpinalNode[]> {
+		if (!Array.isArray(apps)) apps = [apps];
 
+		const appIds = apps.map((el) => el.getId().get());
 
-  /**
-   * Adds one or more applications to the admin profile, authorizing access for the profile.
-   *
-   * @param apps - A single `SpinalNode` instance or an array of `SpinalNode` instances representing the applications to be added.
-   * @returns A promise that resolves to an array of `SpinalNode` instances that have been authorized for the profile.
-   */
-  async addAppToProfil(apps: SpinalNode | SpinalNode[]): Promise<SpinalNode[]> {
-    if (!Array.isArray(apps)) apps = [apps];
+		return AuthorizationService.getInstance().authorizeProfileToAccessAdminApps(this._adminNode!, appIds);
+	}
 
-    return UserProfileService.getInstance().authorizeProfileToAccessApps(
-      this._adminNode,
-      apps.map((el) => el.getId().get())
-    );
-  }
+	/**
+	 * Authorizes the admin profile to access the given APIs.
+	 * @param apis One or more API nodes.
+	 * @returns {Promise<SpinalNode[]>} A promise that resolves to an array of authorized API nodes.
+	 */
+	public async addApiToProfil(apis: SpinalNode | SpinalNode[]): Promise<SpinalNode[]> {
+		if (!Array.isArray(apis)) apis = [apis];
+		const appIds = apis.map((el) => el.getId().get());
 
+		return UserProfileService.getInstance().authorizeProfileToAccessApis(this._adminNode!, appIds);
+	}
 
-  /**
-   * Authorizes the admin profile to access a sub-app under a specific app.
-   * @param app The parent app node.
-   * @param subApp The sub-app node to authorize.
-   * @returns {Promise<SpinalNode[]>} A promise that resolves to an array of authorized sub-app nodes.
-   */
-  async addSubAppToProfil(app: SpinalNode, subApp: SpinalNode): Promise<SpinalNode[]> {
-    return UserProfileService.getInstance().authorizeProfileToAccessSubApps(
-      this._adminNode,
-      [app],
-      subApp.getId().get()
-    );
-  }
+	/**
+	 * Authorizes the admin profile to access the given digital twins.
+	 * Adds each digital twin as a child of the admin profile node using the appropriate relation.
+	 * @param digitalTwins One or more digital twin nodes.
+	 * @returns {Promise<SpinalNode[]>} A promise that resolves to an array of authorized digital twin nodes.
+	 */
+	async addDigitalTwinToAdminProfile(digitalTwins: SpinalNode | SpinalNode[]): Promise<SpinalNode[]> {
+		if (!Array.isArray(digitalTwins)) digitalTwins = [digitalTwins];
 
+		const promises: Promise<SpinalNode | void>[] = [];
 
-  /**
-   * Authorizes the admin profile to access the given admin apps.
-   * @param apps One or more admin app nodes.
-   * @returns {Promise<SpinalNode[]>} A promise that resolves to an array of authorized admin app nodes.
-   */
-  public async addAdminAppToProfil(apps: SpinalNode | SpinalNode[]): Promise<SpinalNode[]> {
-    if (!Array.isArray(apps)) apps = [apps];
+		for (const digitalTwin of digitalTwins) {
+			// add catch to avoid Promise.all to fail if one of the addChild fails
+			promises.push(this._adminNode!.addChild(digitalTwin, PROFILE_TO_AUTHORIZED_DIGITAL_TWIN_RELATION_NAME, PTR_LST_TYPE).catch((error) => {}));
+		}
 
-    return AuthorizationService.getInstance().authorizeProfileToAccessAdminApps(
-      this._adminNode,
-      apps.map((el) => el.getId().get())
-    );
-  }
+		return Promise.all(promises).then((result) => {
+			return result.filter((node) => node instanceof SpinalNode);
+		});
+	}
 
+	/**
+	 * Synchronizes the admin profile by authorizing access to all digital twins, apps, admin apps, and APIs.
+	 *
+	 * @returns {Promise<any>} A promise that resolves to an object containing:
+	 *   - `digitaTwins`: The result of authorizing all digital twins.
+	 *   - `apps`: An array with the results of authorizing all apps and all admin apps.
+	 *   - `apis`: The result of authorizing all APIs.
+	 *
+	 * @remarks
+	 * This method aggregates the results of multiple asynchronous authorization operations
+	 * related to digital twins, applications, and APIs for the admin profile.
+	 */
+	public async syncAdminProfile(): Promise<any> {
+		return {
+			digitaTwins: await this._authorizeAllDigitalTwin(),
+			apps: await Promise.all([this._authorizeAllApps(), this._authorizeAllAdminApps()]),
+			apis: await this._authorizeAllApis(),
+		};
+	}
 
-  /**
-   * Authorizes the admin profile to access the given APIs.
-   * @param apis One or more API nodes.
-   * @returns {Promise<SpinalNode[]>} A promise that resolves to an array of authorized API nodes.
-   */
-  public async addApiToProfil(apis: SpinalNode | SpinalNode[]): Promise<SpinalNode[]> {
-    if (!Array.isArray(apis)) apis = [apis];
+	/**
+	 * Creates a new admin profile node.
+	 * @returns {SpinalNode} The created admin profile node.
+	 * @private
+	 */
+	private _createAdminProfile(): SpinalNode {
+		const info = {
+			name: ADMIN_PROFILE_NAME,
+			type: ADMIN_PROFILE_TYPE,
+		};
+		const graph = new SpinalGraph(ADMIN_PROFILE_NAME);
+		const profileId = SpinalGraphService.createNode(info, graph);
 
-    return UserProfileService.getInstance().authorizeProfileToAccessApis(
-      this._adminNode,
-      apis.map((el) => el.getId().get())
-    );
-  }
+		const node = SpinalGraphService.getRealNode(profileId);
+		return node;
+	}
 
+	/**
+	 * Authorizes all digital twins by retrieving them and adding them to the admin profile.
+	 *
+	 * @returns {Promise<SpinalNode[]>} A promise that resolves to an array of `SpinalNode` instances representing the authorized digital twins.
+	 * @private
+	 */
+	private async _authorizeAllDigitalTwin(): Promise<SpinalNode[]> {
+		const digitalTwins = await DigitalTwinService.getInstance().getAllDigitalTwins();
+		return this.addDigitalTwinToAdminProfile(digitalTwins);
+	}
 
-  /**
-   * Authorizes the admin profile to access the given digital twins.
-   * Adds each digital twin as a child of the admin profile node using the appropriate relation.
-   * @param digitalTwins One or more digital twin nodes.
-   * @returns {Promise<SpinalNode[]>} A promise that resolves to an array of authorized digital twin nodes.
-   */
-  async addDigitalTwinToAdminProfile(digitalTwins: SpinalNode | SpinalNode[]): Promise<SpinalNode[]> {
-    if (!Array.isArray(digitalTwins)) digitalTwins = [digitalTwins];
+	/**
+	 * Authorizes all building applications by retrieving them and adding them to the admin profile.
+	 *
+	 * @returns {Promise<SpinalNode[]>} A promise that resolves to an array of `SpinalNode` instances representing the authorized building applications.
+	 * @private
+	 */
+	private async _authorizeAllApps(): Promise<SpinalNode[]> {
+		const buildingApps = await AppService.getInstance().getAllBuildingApps();
+		return this.addAppToProfil(buildingApps);
+	}
 
-    const promises = [];
+	private async _authorizeAllApis(): Promise<SpinalNode[]> {
+		const apis = await APIService.getInstance().getAllApiRoute();
+		return this.addApiToProfil(apis);
+	}
 
-    for (const digitalTwin of digitalTwins) {
-      promises.push(
-        this._adminNode
-          .addChild(
-            digitalTwin,
-            PROFILE_TO_AUTHORIZED_DIGITAL_TWIN_RELATION_NAME,
-            PTR_LST_TYPE
-          ).catch((error) => { })
-      );
-    }
-
-    return Promise.all(promises).then((result) => {
-      return result.filter((node) => node instanceof SpinalNode);
-    });
-  }
-
-
-  /**
-   * Synchronizes the admin profile by authorizing access to all digital twins, apps, admin apps, and APIs.
-   *
-   * @returns {Promise<any>} A promise that resolves to an object containing:
-   *   - `digitaTwins`: The result of authorizing all digital twins.
-   *   - `apps`: An array with the results of authorizing all apps and all admin apps.
-   *   - `apis`: The result of authorizing all APIs.
-   *
-   * @remarks
-   * This method aggregates the results of multiple asynchronous authorization operations
-   * related to digital twins, applications, and APIs for the admin profile.
-   */
-  public async syncAdminProfile(): Promise<any> {
-    return {
-      digitaTwins: await this._authorizeAllDigitalTwin(),
-      apps: await Promise.all([
-        this._authorizeAllApps(),
-        this._authorizeAllAdminApps(),
-      ]),
-      apis: await this._authorizeAllApis(),
-    };
-  }
-
-
-  /**
-   * Creates a new admin profile node.
-   * @returns {SpinalNode} The created admin profile node.
-   * @private
-   */
-  private _createAdminProfile(): SpinalNode {
-    const info = {
-      name: ADMIN_PROFILE_NAME,
-      type: ADMIN_PROFILE_TYPE,
-    };
-    const graph = new SpinalGraph(ADMIN_PROFILE_NAME);
-    const profileId = SpinalGraphService.createNode(info, graph);
-
-    const node = SpinalGraphService.getRealNode(profileId);
-    return node;
-  }
-
-
-  /**
-   * Authorizes all digital twins by retrieving them and adding them to the admin profile.
-   *
-   * @returns {Promise<SpinalNode[]>} A promise that resolves to an array of `SpinalNode` instances representing the authorized digital twins.
-   * @private
-   */
-  private async _authorizeAllDigitalTwin(): Promise<SpinalNode[]> {
-    const digitalTwins =
-      await DigitalTwinService.getInstance().getAllDigitalTwins();
-    return this.addDigitalTwinToAdminProfile(digitalTwins);
-  }
-
-
-  /**
-   * Authorizes all building applications by retrieving them and adding them to the admin profile.
-   *
-   * @returns {Promise<SpinalNode[]>} A promise that resolves to an array of `SpinalNode` instances representing the authorized building applications.
-   * @private
-   */
-  private async _authorizeAllApps(): Promise<SpinalNode[]> {
-    const buildingApps = await AppService.getInstance().getAllBuildingApps();
-    return this.addAppToProfil(buildingApps);
-  }
-
-
-  private async _authorizeAllApis(): Promise<SpinalNode[]> {
-    const apis = await APIService.getInstance().getAllApiRoute();
-    return this.addApiToProfil(apis);
-  }
-
-  private async _authorizeAllAdminApps(): Promise<SpinalNode[]> {
-    const adminApps = await AppService.getInstance().getAllAdminApps();
-    return this.addAdminAppToProfil(adminApps);
-  }
-
+	private async _authorizeAllAdminApps(): Promise<SpinalNode[]> {
+		const adminApps = await AppService.getInstance().getAllAdminApps();
+		return this.addAdminAppToProfil(adminApps);
+	}
 }

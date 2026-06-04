@@ -27,7 +27,8 @@ exports.createDefaultAdminApps = createDefaultAdminApps;
 const services_1 = require("../services");
 const ADMIN_APPS = require("./adminApps.json");
 function createDefaultAdminApps() {
-    return ADMIN_APPS.reduce(async (prom, app) => {
+    const adminApps = Object.values(ADMIN_APPS);
+    return adminApps.reduce(async (prom, app) => {
         const liste = await prom;
         const node = await services_1.AppService.getInstance().createOrUpadteAdminApp(app);
         liste.push(node);

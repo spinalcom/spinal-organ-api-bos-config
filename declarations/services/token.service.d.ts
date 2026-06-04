@@ -2,7 +2,7 @@ import { SpinalContext, SpinalNode } from "spinal-env-viewer-graph-service";
 import { IApplicationToken, IUserToken } from "../interfaces";
 export declare class TokenService {
     private static instance;
-    context: SpinalContext;
+    context: SpinalContext | undefined;
     private constructor();
     static getInstance(): TokenService;
     init(): Promise<SpinalContext>;

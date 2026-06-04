@@ -31,18 +31,18 @@ const services_1 = require("../services");
 class SpinalAPIMiddleware {
     config = {
         spinalConnector: {
-            protocol: process.env.HUB_PROTOCOL || 'http',
+            protocol: process.env.HUB_PROTOCOL || "http",
             user: process.env.USER_ID,
             password: process.env.USER_MDP,
             host: process.env.HUB_HOST,
-            port: process.env.HUB_PORT
+            port: process.env.HUB_PORT,
         },
         api: {
-            port: process.env.SERVER_PORT
+            port: process.env.SERVER_PORT,
         },
         file: {
-            path: process.env.CONFIG_DIRECTORY_PATH
-        }
+            path: process.env.CONFIG_DIRECTORY_PATH,
+        },
     };
     conn;
     loadedPtr = new Map();
@@ -50,8 +50,7 @@ class SpinalAPIMiddleware {
     profilesToGraph = new Map();
     static instance;
     graph;
-    constructor() {
-    }
+    constructor() { }
     static getInstance() {
         if (!this.instance)
             this.instance = new SpinalAPIMiddleware();
@@ -98,7 +97,7 @@ class SpinalAPIMiddleware {
         return Promise.resolve(node);
     }
     loadPtr(ptr) {
-        if (ptr instanceof spinal_core_connectorjs_1.spinalCore._def['File'])
+        if (ptr instanceof spinal_core_connectorjs_1.spinalCore._def["File"])
             return this.loadPtr(ptr._ptr);
         const server_id = ptr.data.value;
         if (this.loadedPtr.has(server_id)) {
@@ -106,6 +105,8 @@ class SpinalAPIMiddleware {
         }
         const prom = new Promise((resolve, reject) => {
             try {
+                if (!this.conn)
+                    return reject(new Error("No connection available"));
                 this.conn.load_ptr(server_id, (model) => {
                     if (!model) {
                         reject(new Error(`LoadedPtr Error server_id: '${server_id}'`));
@@ -133,8 +134,7 @@ class SpinalAPIMiddleware {
     }
     async setGraph(actualDigitalTwin) {
         if (!actualDigitalTwin) {
-            actualDigitalTwin =
-                await services_1.DigitalTwinService.getInstance().getActualDigitalTwin();
+            actualDigitalTwin = await services_1.DigitalTwinService.getInstance().getActualDigitalTwin();
         }
         const url = actualDigitalTwin.info.url.get();
         const graph = await this._loadNewGraph(url);
@@ -144,9 +144,9 @@ class SpinalAPIMiddleware {
     }
     _loadNewGraph(path) {
         return new Promise((resolve, reject) => {
-            spinal_core_connectorjs_1.spinalCore.load(this.conn, path, (graph) => {
-                resolve(graph);
-            }, () => {
+            if (!this.conn)
+                return reject(new Error("No connection available"));
+            spinal_core_connectorjs_1.spinalCore.load(this.conn, path, (graph) => resolve(graph), () => {
                 console.error(`File does not exist in location ${path}`);
                 reject();
             });
@@ -154,6 +154,8 @@ class SpinalAPIMiddleware {
     }
     _loadwithConnect(server_id, profileId) {
         return new Promise((resolve, reject) => {
+            if (!this.conn)
+                return reject(new Error("No connection available"));
             this.conn.load_ptr(server_id, async (model) => {
                 if (!model)
                     return reject({ code: 404, message: "Node is not found" });
@@ -174,7 +176,7 @@ class SpinalAPIMiddleware {
         if (constant_1.EXCLUDES_TYPES.indexOf(type) !== -1)
             return true;
         const contexts = await this._getProfileContexts(profileId);
-        const found = contexts.find(context => {
+        const found = contexts.find((context) => {
             if (node instanceof spinal_env_viewer_graph_service_1.SpinalContext)
                 return node.getId().get() === context.getId().get();
             return node.belongsToContext(context);
@@ -187,7 +189,7 @@ class SpinalAPIMiddleware {
             throw new Error("no graph found");
         const contexts = await graph.getChildren(["hasContext"]);
         //addContext to SpinalNode map
-        return contexts.map(context => {
+        return contexts.map((context) => {
             //@ts-ignore
             spinal_env_viewer_graph_service_1.SpinalGraphService._addNode(context);
             return context;

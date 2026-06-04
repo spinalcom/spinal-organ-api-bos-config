@@ -15,7 +15,7 @@ export declare class APIController extends Controller {
     getAllBosApiRoute(req: any): Promise<IApiRoute[] | {
         message: string;
     }>;
-    deleteBosApiRoute(req: any, id: any): Promise<{
+    deleteBosApiRoute(req: any, id: string): Promise<{
         message: string;
     }>;
     uploadBosSwaggerFile(req: any, file: any): Promise<IApiRoute[] | {

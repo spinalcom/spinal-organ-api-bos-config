@@ -31,7 +31,7 @@ import { TAppSearch } from "../utils/findNodeBySearchKey";
 
 export class AppProfileService {
 	private static instance: AppProfileService;
-	public context: SpinalContext;
+	public context: SpinalContext | undefined;
 
 	private constructor() {}
 
@@ -63,7 +63,7 @@ export class AppProfileService {
 		if (appProfile.appsIds) obj.apps = await this.authorizeProfileToAccessApps(profileNode, appProfile.appsIds);
 		if (appProfile.contextIds) obj.contexts = await this.authorizeProfileToAccessContext(profileNode, appProfile.contextIds);
 
-		await this.context.addChildInContext(profileNode, CONTEXT_TO_USER_PROFILE_RELATION_NAME, PTR_LST_TYPE, this.context);
+		await this.context!.addChildInContext(profileNode, CONTEXT_TO_USER_PROFILE_RELATION_NAME, PTR_LST_TYPE, this.context);
 
 		return obj;
 	}
@@ -75,7 +75,7 @@ export class AppProfileService {
 	 * @returns A promise that resolves to an object containing the profile node and its authorization structure,
 	 *          or `undefined` if the node could not be found.
 	 */
-	public async getAppProfile(appProfile: string | SpinalNode): Promise<IProfileRes> {
+	public async getAppProfile(appProfile: string | SpinalNode): Promise<IProfileRes | undefined> {
 		const node = appProfile instanceof SpinalNode ? appProfile : await this._getAppProfileNode(appProfile);
 		if (!node) return;
 
@@ -90,11 +90,11 @@ export class AppProfileService {
 	 * @return {*}  {Promise<IProfileRes>}
 	 * @memberof AppProfileService
 	 */
-	public async updateAppProfile(appProfileId: string, appProfile: IProfileAuthEdit): Promise<IProfileRes> {
+	public async updateAppProfile(appProfileId: string, appProfile: IProfileAuthEdit): Promise<IProfileRes | undefined> {
 		const profileNode = await this._getAppProfileNode(appProfileId);
 		if (!profileNode) return;
 
-		this._renameProfile(profileNode, appProfile.name);
+		this._renameProfile(profileNode, appProfile.name || "");
 
 		await this._unauthorizeAll(profileNode, appProfile);
 		await this._authorizeAll(profileNode, appProfile);
@@ -109,7 +109,9 @@ export class AppProfileService {
 	public async getAllAppProfile(): Promise<IProfileRes[]> {
 		const contexts = await this.getAllAppProfileNodes();
 		const promises = contexts.map((node) => this.getAppProfile(node));
-		return Promise.all(promises);
+		return Promise.all(promises).then((result) => {
+			return result.filter((node) => node !== undefined) as IProfileRes[];
+		});
 	}
 
 	/**
@@ -117,7 +119,7 @@ export class AppProfileService {
 	 * @returns An array of SpinalNode instances representing all application profiles.
 	 */
 	public getAllAppProfileNodes() {
-		return this.context.getChildrenInContext();
+		return this.context!.getChildrenInContext();
 	}
 
 	/**
@@ -162,9 +164,9 @@ export class AppProfileService {
 	 * @param data The authorization data containing context IDs, app IDs, and API IDs.
 	 * @returns A promise that resolves to the authorized resources.
 	 */
-	public async authorizeProfileToAccessContext(appProfile: string | SpinalNode, contextIds: string | string[], digitalTwinId?: string): Promise<SpinalContext[]> {
+	public async authorizeProfileToAccessContext(appProfile: string | SpinalNode, contextIds: string | string[], digitalTwinId: string = ""): Promise<SpinalContext[]> {
 		const profile = appProfile instanceof SpinalNode ? appProfile : await this._getAppProfileNode(appProfile);
-		return authorizationInstance.authorizeProfileToAccessContext(profile, digitalTwinId, contextIds);
+		return authorizationInstance.authorizeProfileToAccessContext(profile!, digitalTwinId, contextIds);
 	}
 
 	/**
@@ -177,7 +179,7 @@ export class AppProfileService {
 	 */
 	public async authorizeProfileToAccessApps(appProfile: string | SpinalNode, appIds: string | string[]) {
 		const profile = appProfile instanceof SpinalNode ? appProfile : await this._getAppProfileNode(appProfile);
-		return authorizationInstance.authorizeProfileToAccessApps(profile, appIds);
+		return authorizationInstance.authorizeProfileToAccessApps(profile!, appIds);
 	}
 
 	/**
@@ -190,7 +192,7 @@ export class AppProfileService {
 	 */
 	public async authorizeProfileToAccessApis(appProfile: string | SpinalNode, apiIds: string | string[]) {
 		const profile = appProfile instanceof SpinalNode ? appProfile : await this._getAppProfileNode(appProfile);
-		return authorizationInstance.authorizeProfileToAccessApis(profile, apiIds);
+		return authorizationInstance.authorizeProfileToAccessApis(profile!, apiIds);
 	}
 
 	/**
@@ -205,9 +207,9 @@ export class AppProfileService {
 		const profile = appProfile instanceof SpinalNode ? appProfile : await this._getAppProfileNode(appProfile);
 
 		return {
-			contexts: await this.getAuthorizedContexts(profile, digitalTwinId),
-			apis: await this.getAuthorizedApis(profile),
-			apps: await this.getAuthorizedApps(profile),
+			contexts: await this.getAuthorizedContexts(profile!, digitalTwinId),
+			apis: await this.getAuthorizedApis(profile!),
+			apps: await this.getAuthorizedApps(profile!),
 		};
 	}
 
@@ -224,9 +226,9 @@ export class AppProfileService {
 	 * @return {*}  {Promise<SpinalContext[]>}
 	 * @memberof AppProfileService
 	 */
-	public async unauthorizeProfileToAccessContext(appProfile: string | SpinalNode, contextIds: string | string[], digitalTwinId?: string): Promise<SpinalContext[]> {
+	public async unauthorizeProfileToAccessContext(appProfile: string | SpinalNode, contextIds: string | string[], digitalTwinId: string = ""): Promise<SpinalContext[]> {
 		const profile = appProfile instanceof SpinalNode ? appProfile : await this._getAppProfileNode(appProfile);
-		return authorizationInstance.unauthorizeProfileToAccessContext(profile, digitalTwinId, contextIds);
+		return authorizationInstance.unauthorizeProfileToAccessContext(profile!, digitalTwinId, contextIds);
 	}
 
 	/**
@@ -239,7 +241,7 @@ export class AppProfileService {
 	 */
 	public async unauthorizeProfileToAccessApps(appProfile: string | SpinalNode, appIds: string | string[]): Promise<SpinalNode[]> {
 		const profile = appProfile instanceof SpinalNode ? appProfile : await this._getAppProfileNode(appProfile);
-		return authorizationInstance.unauthorizeProfileToAccessApps(profile, appIds);
+		return authorizationInstance.unauthorizeProfileToAccessApps(profile!, appIds);
 	}
 
 	/**
@@ -252,7 +254,7 @@ export class AppProfileService {
 	 */
 	public async unauthorizeProfileToAccessApis(appProfile: string | SpinalNode, apiIds: string | string[]): Promise<SpinalNode[]> {
 		const profile = appProfile instanceof SpinalNode ? appProfile : await this._getAppProfileNode(appProfile);
-		return authorizationInstance.unauthorizeProfileToAccessApis(profile, apiIds);
+		return authorizationInstance.unauthorizeProfileToAccessApis(profile!, apiIds);
 	}
 
 	///////////////////////////////////////////////
@@ -268,9 +270,9 @@ export class AppProfileService {
 	 * @return {*}  {Promise<SpinalNode>}
 	 * @memberof AppProfileService
 	 */
-	public async profileHasAccessToContext(appProfile: string | SpinalNode, contextId: string, digitalTwinId?: string): Promise<SpinalNode> {
+	public async profileHasAccessToContext(appProfile: string | SpinalNode, contextId: string, digitalTwinId: string = ""): Promise<SpinalNode> {
 		const profile = appProfile instanceof SpinalNode ? appProfile : await this._getAppProfileNode(appProfile);
-		return authorizationInstance.profileHasAccessToContext(profile, digitalTwinId, contextId);
+		return authorizationInstance.profileHasAccessToContext(profile!, digitalTwinId, contextId);
 	}
 
 	/**
@@ -284,7 +286,7 @@ export class AppProfileService {
 	 */
 	public async profileHasAccessToApp(searchKeys: TAppSearch, appProfile: string | SpinalNode, appId: string): Promise<SpinalNode> {
 		const profile = appProfile instanceof SpinalNode ? appProfile : await this._getAppProfileNode(appProfile);
-		return authorizationInstance.profileHasAccessToApp(searchKeys, profile, appId);
+		return authorizationInstance.profileHasAccessToApp(searchKeys, profile!, appId);
 	}
 
 	/**
@@ -297,7 +299,7 @@ export class AppProfileService {
 	 */
 	public async profileHasAccessToApi(appProfile: string | SpinalNode, apiId: string): Promise<SpinalNode> {
 		const profile = appProfile instanceof SpinalNode ? appProfile : await this._getAppProfileNode(appProfile);
-		return authorizationInstance.profileHasAccessToApi(profile, apiId);
+		return authorizationInstance.profileHasAccessToApi(profile!, apiId);
 	}
 
 	/////////////////////////////////////////////
@@ -312,9 +314,9 @@ export class AppProfileService {
 	 * @return {*}  {Promise<SpinalContext[]>}
 	 * @memberof AppProfileService
 	 */
-	public async getAuthorizedContexts(appProfile: string | SpinalNode, digitalTwinId?: string): Promise<SpinalContext[]> {
+	public async getAuthorizedContexts(appProfile: string | SpinalNode, digitalTwinId: string = ""): Promise<SpinalContext[]> {
 		const profile = appProfile instanceof SpinalNode ? appProfile : await this._getAppProfileNode(appProfile);
-		return authorizationInstance.getAuthorizedContexts(profile, digitalTwinId);
+		return authorizationInstance.getAuthorizedContexts(profile!, digitalTwinId);
 	}
 
 	/**
@@ -326,7 +328,7 @@ export class AppProfileService {
 	 */
 	public async getAuthorizedApps(appProfile: string | SpinalNode): Promise<SpinalNode[]> {
 		const profile = appProfile instanceof SpinalNode ? appProfile : await this._getAppProfileNode(appProfile);
-		return authorizationInstance.getAuthorizedApps(profile);
+		return authorizationInstance.getAuthorizedApps(profile!);
 	}
 
 	/**
@@ -338,7 +340,7 @@ export class AppProfileService {
 	 */
 	public async getAuthorizedApis(appProfile: string | SpinalNode): Promise<SpinalNode[]> {
 		const profile = appProfile instanceof SpinalNode ? appProfile : await this._getAppProfileNode(appProfile);
-		return authorizationInstance.getAuthorizedApis(profile);
+		return authorizationInstance.getAuthorizedApis(profile!);
 	}
 
 	///////////////////////////////////////////////////////////
@@ -350,22 +352,21 @@ export class AppProfileService {
 		if (profile) return profile.getElement();
 	}
 
-	public async _getAppProfileNode(appProfileId: string): Promise<SpinalNode> {
+	public async _getAppProfileNode(appProfileId: string): Promise<SpinalNode | undefined> {
 		const node = SpinalGraphService.getRealNode(appProfileId);
 		if (node) return node;
 
-		return this._findChildInContext(this.context, appProfileId);
+		return this._findChildInContext(this.context!, appProfileId);
 	}
 
 	private _renameProfile(node: SpinalNode, newName: string) {
 		if (newName && newName.trim()) node.info.name.set(newName);
 	}
 
-	private async _findChildInContext(startNode: SpinalNode, nodeIdOrName: string): Promise<SpinalNode> {
-		const children = await startNode.getChildrenInContext(this.context);
+	private async _findChildInContext(startNode: SpinalNode, nodeIdOrName: string): Promise<SpinalNode | undefined> {
+		const children = await startNode.getChildrenInContext(this.context!);
 		return children.find((el) => {
 			if (el.getId().get() === nodeIdOrName || el.getName().get() === nodeIdOrName) {
-				//@ts-ignore
 				SpinalGraphService._addNode(el);
 				return true;
 			}
@@ -374,7 +375,7 @@ export class AppProfileService {
 	}
 
 	private _unauthorizeAll(profile: SpinalNode, data: { unauthorizeApisIds?: string[]; unauthorizeAppsIds?: string[]; unauthorizeContextIds?: string[] }) {
-		const unauthorizePromises = [];
+		const unauthorizePromises: Promise<SpinalNode[]>[] = [];
 
 		if (data.unauthorizeApisIds) unauthorizePromises.push(this.unauthorizeProfileToAccessApis(profile, data.unauthorizeApisIds));
 		if (data.unauthorizeAppsIds) unauthorizePromises.push(this.unauthorizeProfileToAccessApps(profile, data.unauthorizeAppsIds));
@@ -384,7 +385,7 @@ export class AppProfileService {
 	}
 
 	private async _authorizeAll(profile: SpinalNode, data: { apisIds?: string[]; appsIds?: string[]; contextIds?: string[] }): Promise<IProfileAuthRes> {
-		const authorizePromises = [];
+		const authorizePromises: Promise<SpinalNode[]>[] = [];
 
 		authorizePromises.push(this.authorizeProfileToAccessApis(profile, data.apisIds || []));
 		authorizePromises.push(this.authorizeProfileToAccessApps(profile, data.appsIds || []));

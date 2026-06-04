@@ -1,19 +1,19 @@
 /*
  * Copyright 2022 SpinalCom - www.spinalcom.com
- * 
+ *
  * This file is part of SpinalCore.
- * 
+ *
  * Please read all of the following terms and conditions
  * of the Free Software license Agreement ("Agreement")
  * carefully.
- * 
+ *
  * This Agreement is a legally binding contract between
  * the Licensee (as defined below) and SpinalCom that
  * sets forth the terms and conditions that govern your
  * use of the Program. By installing and/or using the
  * Program, you agree to abide by all the terms and
  * conditions stated or referenced herein.
- * 
+ *
  * If you do not agree to abide by these terms and
  * conditions, do not demonstrate your acceptance and do
  * not install or use the Program.
@@ -28,82 +28,94 @@ import { AppProfileService, AuthentificationService, TokenService, UserProfileSe
 import { profileHasAccessToApi, getToken } from "./utils";
 import { AuthError } from "./AuthError";
 import { AdminProfileService } from "../services/adminProfile.service";
+import { searchByName } from "../utils/findNodeBySearchKey";
 
 export async function expressAuthentication(request: express.Request, securityName?: string, scopes?: string[]) {
-    if (securityName === SECURITY_NAME.all) return;
+	if (securityName === SECURITY_NAME.all) return;
 
-    const token = getToken(request);
-    if (!token) throw new AuthError(SECURITY_MESSAGES.INVALID_TOKEN);
+	const token = getToken(request);
+	if (!token) throw new AuthError(SECURITY_MESSAGES.INVALID_TOKEN);
 
-    return token;
+	return token;
 }
 
+export async function isAdminOrHasAccessToAdminApp(request: express.Request, adminAppName: string | string[] = ""): Promise<boolean> {
+	const isAdmin = await checkIfItIsAdmin(request);
+	if (isAdmin) return true;
 
+	return profileHasAccessToAdminApp(request, adminAppName);
+}
+
+async function profileHasAccessToAdminApp(request: express.Request, adminAppName: string | string[]): Promise<boolean> {
+	if (!adminAppName) return false;
+	if (!Array.isArray(adminAppName)) adminAppName = [adminAppName];
+	let profileId = await getProfileId(request);
+
+	for (const appName of adminAppName) {
+		const appNode = await UserProfileService.getInstance().profileHasAccessToApp(searchByName, profileId, appName);
+		if (appNode) return true;
+	}
+
+	return false;
+}
 
 export async function checkIfItIsAdmin(request: express.Request): Promise<boolean> {
-    try {
-        let profileId = await getProfileId(request);
-        return AdminProfileService.getInstance().adminNode.getId().get() === profileId;
-    } catch (error) {
-        return false;
-    }
-
+	try {
+		let profileId = await getProfileId(request);
+		return AdminProfileService.getInstance().adminNode.getId().get() === profileId;
+	} catch (error) {
+		return false;
+	}
 }
-
 
 export async function getProfileId(request: express.Request): Promise<string> {
-    const tokenInfo: any = await checkAndGetTokenInfo(request);
+	const tokenInfo: any = await checkAndGetTokenInfo(request);
 
-    let profileId = tokenInfo.profile?.profileId || tokenInfo.profile?.userProfileBosConfigId || tokenInfo.profile?.appProfileBosConfigId;
-    if (!profileId) throw new AuthError(SECURITY_MESSAGES.NO_PROFILE_FOUND);
+	let profileId = tokenInfo.profile?.profileId || tokenInfo.profile?.userProfileBosConfigId || tokenInfo.profile?.appProfileBosConfigId;
+	if (!profileId) throw new AuthError(SECURITY_MESSAGES.NO_PROFILE_FOUND);
 
-    return profileId;
+	return profileId;
 }
 
-
 export async function checkAndGetTokenInfo(request: express.Request) {
-    // check token validity
-    const token = await expressAuthentication(request);
+	// check token validity
+	const token = await expressAuthentication(request);
+	if (!token) throw new AuthError(SECURITY_MESSAGES.INVALID_TOKEN);
 
-    const tokenInstance = TokenService.getInstance();
+	const tokenInstance = TokenService.getInstance();
+	const tokenInfo: any = await tokenInstance.tokenIsValid(token);
+	if (!tokenInfo) throw new AuthError(SECURITY_MESSAGES.INVALID_TOKEN);
 
-    const tokenInfo: any = await tokenInstance.tokenIsValid(token);
-    if (!tokenInfo) throw new AuthError(SECURITY_MESSAGES.INVALID_TOKEN);
-
-    return tokenInfo;
+	return tokenInfo;
 }
 
 export async function checkIfItIsAuthPlateform(request: express.Request): Promise<boolean> {
-    const token = getToken(request);
-    if (!token) return false;
+	const token = getToken(request);
+	if (!token) return false;
 
-    const authAdmin = await AuthentificationService.getInstance().getAdminCredential();
-    return token === authAdmin.TokenAdminToPam;
+	const authAdmin = await AuthentificationService.getInstance().getAdminCredential();
+	return token === authAdmin.TokenAdminToPam;
 }
 
-
 export async function checkBeforeRedirectToApi(request: express.Request, securityName: string, scopes?: string[]): Promise<any> {
+	const tokenInfo: any = await checkAndGetTokenInfo(request);
 
+	// get profile Node
+	let profileId = tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId || tokenInfo.profile.appProfileBosConfigId;
+	if (!profileId) throw new AuthError(SECURITY_MESSAGES.NO_PROFILE_FOUND);
 
-    const tokenInfo: any = await checkAndGetTokenInfo(request);
+	let profileNode = (await AppProfileService.getInstance()._getAppProfileNode(profileId)) || (await UserProfileService.getInstance()._getUserProfileNode(profileId));
+	if (!profileNode) throw new AuthError(SECURITY_MESSAGES.NO_PROFILE_FOUND);
 
-    // get profile Node
-    let profileId = tokenInfo.profile.profileId || tokenInfo.profile.userProfileBosConfigId || tokenInfo.profile.appProfileBosConfigId;
-    if (!profileId) throw new AuthError(SECURITY_MESSAGES.NO_PROFILE_FOUND);
+	// Check if profile has access to api route
+	if (profileNode.info.type.get() === APP_PROFILE_TYPE) {
+		const apiUrl = request.url;
+		const method = request.method;
+		const isAuthorized = await profileHasAccessToApi(profileNode, apiUrl, method);
+		if (!isAuthorized) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
+	}
 
-    let profileNode = await AppProfileService.getInstance()._getAppProfileNode(profileId) || await UserProfileService.getInstance()._getUserProfileNode(profileId)
-    if (!profileNode) throw new AuthError(SECURITY_MESSAGES.NO_PROFILE_FOUND);
+	(<any>request).profileId = profileId;
 
-
-    // Check if profile has access to api route
-    if (profileNode.info.type.get() === APP_PROFILE_TYPE) {
-        const apiUrl = request.url;
-        const method = request.method;
-        const isAuthorized = await profileHasAccessToApi(profileNode, apiUrl, method);
-        if (!isAuthorized) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
-    }
-
-    (<any>request).profileId = profileId;
-
-    return tokenInfo;
+	return tokenInfo;
 }

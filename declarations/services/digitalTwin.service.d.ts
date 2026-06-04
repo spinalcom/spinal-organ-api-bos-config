@@ -3,7 +3,7 @@ export declare class DigitalTwinService {
     private static instance;
     private _actualDigitalTwin;
     private attrName;
-    context: SpinalContext;
+    context: SpinalContext | undefined;
     private constructor();
     static getInstance(): DigitalTwinService;
     init(): Promise<SpinalContext>;
@@ -14,7 +14,7 @@ export declare class DigitalTwinService {
      * @returns A promise that resolves to the corresponding SpinalGraph.
      * @throws Will throw an error if the retrieval fails.
      */
-    getDigitalTwinGraph(digitalTwin: SpinalNode): Promise<SpinalGraph>;
+    getDigitalTwinGraph(digitalTwin: SpinalNode): Promise<SpinalGraph | undefined>;
     /**
      * Retrieves the list of contexts associated with a digital twin.
      *
@@ -33,7 +33,7 @@ export declare class DigitalTwinService {
      * @param contextId - The unique identifier of the context to find.
      * @returns A promise that resolves to the found `SpinalContext` if it exists, or `undefined` if not found.
      */
-    findContextInDigitalTwin(digitalTwinId: string, contextId: string): Promise<SpinalContext>;
+    findContextInDigitalTwin(digitalTwinId: string, contextId: string): Promise<SpinalContext | undefined>;
     /**
      * Creates a new digital twin node and its associated graph file.
      *
@@ -73,7 +73,7 @@ export declare class DigitalTwinService {
     editDigitalTwin(digitalTwinId: string, newData: {
         name?: string;
         url?: string;
-    }): Promise<SpinalNode>;
+    }): Promise<SpinalNode | undefined>;
     /**
      * Removes a digital twin from the graph by its ID.
      *
@@ -102,7 +102,7 @@ export declare class DigitalTwinService {
      * @param createIfNotExist - Whether to create the digital twin node if it does not exist. Defaults to `false`.
      * @returns A promise that resolves with the `SpinalNode` representing the digital twin, or `undefined` if not found and not created.
      */
-    getActualDigitalTwin(createIfNotExist?: boolean): Promise<SpinalNode>;
+    getActualDigitalTwin(createIfNotExist?: boolean): Promise<SpinalNode | undefined>;
     /**
      * Removes the current actual (default) digital twin association from the context.
      *
