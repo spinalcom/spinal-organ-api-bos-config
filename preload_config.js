@@ -34,4 +34,14 @@ module.exports = {
   // array of server_id (STEP) to preload ticket list details
   runTicketLists: [
   ],
+  inventories: [
+    // {
+    //   ids: [],             // Floor dynamic ids (server_id)
+    //   context: '',         // Group context name (or use contextId)
+    //   category: '',        // Category name (or use categoryId)
+    //   groups: [],          // Group names to filter on (empty = every group of the category)
+    //   staticDetails: false // preload static details of the resulting items
+    // },
+  ],
+
 };
