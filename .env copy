@@ -32,15 +32,10 @@ ENABLE_REDIS_CACHE=1 # 0 or 1
 REDIS_URL="" # by default it use 'redis://localhost:6379'
 
 
-# /BIM/file local mode: when set to the spinalhub's `viewerForgeFiles` directory,
-# BIM/viewer files are served directly from disk instead of being proxied to the
-# hub (faster, offloads the hub). Files missing locally fall back to the proxy.
-BIM_FILE_LOCAL_PATH=".../nerve-center/memory/viewerForgeFiles"
 
-# /BIM/file caching (applies to both local and proxy modes).
-# A viewer folder id embeds the model path + upload timestamp, so a given URL is
-# immutable (re-publishing a model creates a new id). 31536000s = 1 year +
-# `immutable` means browsers never re-request cached viewer files -> big offload.
+#BIM_FILE_LOCAL_PATH=".../nerve-center/memory/viewerForgeFiles"
+
+
 # Set BIM_FILE_CACHE_MAXAGE=0 (or remove it) to disable caching.
 BIM_FILE_CACHE_MAXAGE=31536000
 # BIM_FILE_CACHE_IMMUTABLE=1   # default on when a max-age is set; set to 0 to drop `immutable`
