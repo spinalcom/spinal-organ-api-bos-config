@@ -26,6 +26,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.useHubProxy = useHubProxy;
 exports.useClientMiddleWare = useClientMiddleWare;
 exports.initSwagger = initSwagger;
+exports.injectAdminRoutesIntoApiDocs = injectAdminRoutesIntoApiDocs;
 exports.useApiMiddleWare = useApiMiddleWare;
 exports.errorHandler = errorHandler;
 exports._formatValidationError = _formatValidationError;
@@ -94,6 +95,52 @@ function initSwagger(app) {
     app.use("/admin_docs", swaggerUi.serve, async (req, res, next) => {
         return swaggerUi.setup(await Promise.resolve().then(() => require("../swagger/swagger.json")), swaggerOption)(req, res, next);
     });
+}
+/**
+ * Inject selected admin routes (from the local tsoa `swagger.json`) into the
+ * `spinal-organ-api-server` OpenAPI document served at `/spinalcom-api-docs`.
+ *
+ * Call this once, after `runServerRest()`.
+ *
+ */
+function injectAdminRoutesIntoApiDocs(routeKeys = ["/api/v1/auth"]) {
+    let getSwaggerDocs;
+    try {
+        ({ getSwaggerDocs } = require("spinal-organ-api-server/build/swagger"));
+    }
+    catch (err) {
+        console.warn("[swagger] spinal-organ-api-server swagger docs unavailable; skipping admin route injection", err);
+        return;
+    }
+    const target = getSwaggerDocs();
+    const source = swaggerJSON;
+    if (!target || typeof target !== "object")
+        return;
+    target.paths ??= {};
+    target.components ??= {};
+    target.components.schemas ??= {};
+    const copyReferencedSchemas = (obj) => {
+        if (!obj || typeof obj !== "object")
+            return;
+        if (Array.isArray(obj))
+            return obj.forEach(copyReferencedSchemas);
+        for (const [key, value] of Object.entries(obj)) {
+            const name = key === "$ref" && typeof value === "string" && value.match(/^#\/components\/schemas\/(.+)$/)?.[1];
+            if (name && source.components?.schemas?.[name])
+                target.components.schemas[name] ??= source.components.schemas[name];
+            else
+                copyReferencedSchemas(value);
+        }
+    };
+    for (const routeKey of routeKeys) {
+        const path = source.paths?.[routeKey];
+        if (!path) {
+            console.warn(`[swagger] admin route "${routeKey}" not found in swagger.json; skipping`);
+            continue;
+        }
+        target.paths[routeKey] = path;
+        copyReferencedSchemas(path);
+    }
 }
 function useApiMiddleWare(app) {
     app.use(cors({ origin: "*", exposedHeaders: ["X-API-Version", "X-API-BOS-CONFIG-Version"] }));

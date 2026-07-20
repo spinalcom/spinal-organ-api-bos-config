@@ -39,6 +39,7 @@ const spinal_lib_organ_monitoring_1 = require("spinal-lib-organ-monitoring");
 // import { runStartupTask } from './bootstrap';
 const adminProfile_service_1 = require("./services/adminProfile.service");
 const spinal_organ_api_server_2 = require("spinal-organ-api-server");
+const expressMiddleware_1 = require("./middlewares/expressMiddleware");
 const preload_config = require("../preload_config");
 const connect_opt = process.env.HUB_PORT ? `${process.env.HUB_PROTOCOL}://${process.env.USER_ID}:${process.env.USER_MDP}@${process.env.HUB_HOST}:${process.env.HUB_PORT}/` : `${process.env.HUB_PROTOCOL}://${process.env.USER_ID}:${process.env.USER_MDP}@${process.env.HUB_HOST}/`;
 const conn = spinal_core_connectorjs_type_1.spinalCore.connect(connect_opt);
@@ -68,6 +69,7 @@ configFile_service_1.configServiceInstance
     }
     const server = (0, server_1.initServer)(app);
     const { io } = await (0, spinal_organ_api_server_1.runServerRest)(server, app, spinalAPIMiddleware, spinalIOMiddleware, log_body);
+    (0, expressMiddleware_1.injectAdminRoutesIntoApiDocs)(["/api/v1/auth"]);
     services_1.WebsocketLogsService.getInstance().setIo(io);
     await spinal_lib_organ_monitoring_1.default.init(conn, process.env.ORGAN_NAME, "BOS_CONFIG_API", process.env.HUB_HOST, parseInt(process.env.HUB_PORT));
 })

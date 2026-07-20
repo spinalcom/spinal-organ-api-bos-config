@@ -39,6 +39,7 @@ import ConfigFile from "spinal-lib-organ-monitoring";
 // import { runStartupTask } from './bootstrap';
 import { AdminProfileService } from "./services/adminProfile.service";
 import { preloadingScript } from "spinal-organ-api-server";
+import { injectAdminRoutesIntoApiDocs } from "./middlewares/expressMiddleware";
 
 const preload_config = require("../preload_config");
 
@@ -77,6 +78,8 @@ configServiceInstance
 
     const server = initServer(app);
     const { io } = await runServerRest(server, app, spinalAPIMiddleware, spinalIOMiddleware, log_body);
+
+    injectAdminRoutesIntoApiDocs(["/api/v1/auth"]);
 
     WebsocketLogsService.getInstance().setIo(io);
     await ConfigFile.init(conn, process.env.ORGAN_NAME, "BOS_CONFIG_API", process.env.HUB_HOST, parseInt(process.env.HUB_PORT));
