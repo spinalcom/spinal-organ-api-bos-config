@@ -74,14 +74,14 @@
   "spinalDependencies": {
     "spinal-env-viewer-graph-service": "Spinal-Graph-Service",
     "spinal-env-viewer-plugin-control-endpoint-service": "spinal-env-viewer-plugin-control-endpoint-service",
-    "spinal-env-viewer-plugin-documentation-service": "spinal-env-viewer-plugin-documentation-service",
+    "spinal-env-viewer-plugin-documentation-service": "spinal-env-viewer-plugin-documentation-service@documentary",
     "spinal-env-viewer-plugin-excel-manager-service": "spinal-env-viewer-plugin-excel-manager-service",
     "spinal-env-viewer-plugin-nomenclature-service": "spinal-env-viewer-plugin-nomenclature-service",
     "spinal-env-viewer-task-service": "spinal-env-viewer-task-service",
     "spinal-lib-organ-monitoring": "spinal-lib-organ-monitoring",
     "spinal-model-timeseries": "spinal-model-timeseries",
     "spinal-organ-api-pubsub": "spinal-organ-api-pubsub",
-    "spinal-organ-api-server": "spinal-organ-api-server",
+    "spinal-organ-api-server": "spinal-organ-api-server@documentary",
     "spinal-service-pubsub-logs": "spinal-service-pubsub-logs",
     "spinal-service-ticket": "spinal-service-ticket"
   }
