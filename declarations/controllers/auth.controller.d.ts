@@ -33,6 +33,11 @@ export declare class AuthController extends Controller {
     syncDataToAdmin(req: express.Request): Promise<{
         message: string;
     }>;
+    updateUserPassword(req: express.Request, data: {
+        username: string;
+        newPassword: string;
+        lastPassword: string;
+    }): Promise<any>;
     tokenIsValid(data: {
         token: string;
     }): Promise<{

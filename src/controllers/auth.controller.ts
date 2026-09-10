@@ -29,6 +29,7 @@ import { Body, Route, Tags, Controller, Post, Get, Put, Delete, Security, Reques
 import { IAdmin, IAdminCredential, IAppCredential, IApplicationToken, IOAuth2Credential, IBosCredential, IUserCredential, IUserToken } from "../interfaces";
 import { AuthError } from "../security/AuthError";
 import { checkIfItIsAdmin, checkIfItIsAuthPlateform, isAdminOrHasAccessToAdminApp } from "../security/authentication";
+import { getToken } from "../security/utils";
 import SpinalRedisMiddleware from "../middlewares/SpinalRedisMiddleware";
 import * as ADMIN_APPS from "../defaultApps/adminApps.json";
 
@@ -182,6 +183,25 @@ export class AuthController extends Controller {
 			const resp = await serviceInstance.sendBosInfoToAuth(true);
 			this.setStatus(HTTP_CODES.OK);
 			return { message: "updated" };
+		} catch (error: Error | any) {
+			this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
+			return { message: error.message };
+		}
+	}
+
+	@Security(SECURITY_NAME.bearerAuth)
+	@Put("/update_user_password")
+	public async updateUserPassword(@Request() req: express.Request, @Body() data: { username: string; newPassword: string; lastPassword: string }): Promise<any> {
+		try {
+			const token = getToken(req);
+			if (!token) throw new AuthError(SECURITY_MESSAGES.INVALID_TOKEN);
+
+			const tokenIsValid = await tokenService.tokenIsValid(token);
+			if (!tokenIsValid) throw new AuthError(SECURITY_MESSAGES.INVALID_TOKEN);
+
+			const response = await serviceInstance.updateUserPassword(<string>token, data);
+			this.setStatus(response?.code || HTTP_CODES.OK);
+			return response;
 		} catch (error: Error | any) {
 			this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
 			return { message: error.message };

@@ -10,6 +10,11 @@ export declare class AuthentificationService {
         code: number;
         data: string | IApplicationToken | IUserToken;
     }>;
+    updateUserPassword(token: string, data: {
+        username: string;
+        newPassword: string;
+        lastPassword: string;
+    }): Promise<any>;
     /**
      * Registers the client to the admin authentication server.
      *

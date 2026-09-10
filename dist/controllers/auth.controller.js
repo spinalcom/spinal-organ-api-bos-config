@@ -42,6 +42,7 @@ const constant_1 = require("../constant");
 const tsoa_1 = require("tsoa");
 const AuthError_1 = require("../security/AuthError");
 const authentication_1 = require("../security/authentication");
+const utils_1 = require("../security/utils");
 const SpinalRedisMiddleware_1 = require("../middlewares/SpinalRedisMiddleware");
 const ADMIN_APPS = require("../defaultApps/adminApps.json");
 const redisServiceInstance = SpinalRedisMiddleware_1.default.getInstance();
@@ -178,6 +179,23 @@ let AuthController = class AuthController extends tsoa_1.Controller {
             return { message: error.message };
         }
     }
+    async updateUserPassword(req, data) {
+        try {
+            const token = (0, utils_1.getToken)(req);
+            if (!token)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.INVALID_TOKEN);
+            const tokenIsValid = await tokenService.tokenIsValid(token);
+            if (!tokenIsValid)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.INVALID_TOKEN);
+            const response = await serviceInstance.updateUserPassword(token, data);
+            this.setStatus(response?.code || constant_1.HTTP_CODES.OK);
+            return response;
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
     async tokenIsValid(data) {
         try {
             const token = await tokenService.tokenIsValid(data.token);
@@ -258,6 +276,15 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "syncDataToAdmin", null);
+__decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
+    (0, tsoa_1.Put)("/update_user_password"),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "updateUserPassword", null);
 __decorate([
     (0, tsoa_1.Security)(constant_1.SECURITY_NAME.all),
     (0, tsoa_1.Post)("/getTokenData"),

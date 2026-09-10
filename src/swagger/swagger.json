@@ -3211,6 +3211,56 @@
 				"parameters": []
 			}
 		},
+		"/api/v1/update_user_password": {
+			"put": {
+				"operationId": "UpdateUserPassword",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Auth"
+				],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"lastPassword": {
+										"type": "string"
+									},
+									"newPassword": {
+										"type": "string"
+									},
+									"username": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"lastPassword",
+									"newPassword",
+									"username"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/api/v1/getTokenData": {
 			"post": {
 				"operationId": "TokenIsValid",

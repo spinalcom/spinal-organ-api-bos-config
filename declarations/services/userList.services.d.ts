@@ -116,6 +116,7 @@ export declare class UserListService {
     authenticateAdmin(user: IUserCredential): Promise<{
         code: number;
         data: any | string;
+        isAdmin: boolean;
     }>;
     /**
      * Authenticates a user via the external authentication platform.

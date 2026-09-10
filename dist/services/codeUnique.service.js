@@ -28,7 +28,9 @@ class SpinalCodeUniqueService {
         const bosCredential = await authentification_service_1.AuthentificationService.getInstance().getBosToAdminCredential();
         if (!bosCredential)
             throw new AuthError_1.OtherError(constant_1.HTTP_CODES.NOT_FOUND, `No auth found for code ${code}`);
-        return axios_1.default.post(`${bosCredential.urlAdmin}/codes/consume/${code}`, {}, { headers: { "Content-Type": "application/json" } }).then(async (result) => {
+        return axios_1.default
+            .post(`${bosCredential.urlAdmin}/codes/consume/${code}`, {}, { headers: { "Content-Type": "application/json" } })
+            .then(async (result) => {
             let data = result.data;
             data.profile = await this._getProfileInfo(data.token, bosCredential);
             data.userInfo = await this._getCodeInfo(code, bosCredential, data.token);
@@ -37,6 +39,11 @@ class SpinalCodeUniqueService {
             const node = await this._addUserToContext(info);
             await token_service_1.TokenService.getInstance().addTokenToContext(data.token, data);
             return data;
+        })
+            .catch((error) => {
+            const statusCode = error?.response?.status || constant_1.HTTP_CODES.BAD_REQUEST;
+            const message = error?.response?.data?.message || error?.message || "Unable to consume code";
+            throw new AuthError_1.OtherError(statusCode, message);
         });
     }
     _getProfileInfo(userToken, adminCredential) {

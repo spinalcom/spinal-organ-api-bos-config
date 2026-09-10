@@ -62,6 +62,21 @@ class AuthentificationService {
         let infoFormatted = this._formatInfo(info);
         return appList_services_1.AppListService.getInstance().authenticateApplication(infoFormatted);
     }
+    async updateUserPassword(token, data) {
+        let pamCredentials = await this.getBosToAdminCredential();
+        if (!pamCredentials)
+            throw new AuthError_1.OtherError(constant_1.HTTP_CODES.UNAUTHORIZED, "No BOS to admin registered");
+        const { urlAdmin, tokenBosToAdmin } = pamCredentials;
+        const url = `${urlAdmin}/users/${data.username}/updatePassword`;
+        return axios_1.default
+            .put(url, { userLastPassword: data.lastPassword, newPassword: data.newPassword }, { headers: { "Content-Type": "application/json", "x-access-token": tokenBosToAdmin } })
+            .then((result) => result.data)
+            .catch((error) => {
+            const statusCode = error?.response?.status || constant_1.HTTP_CODES.BAD_REQUEST;
+            const message = error?.response?.data?.message || error?.message || "Unable to update user password";
+            throw new AuthError_1.OtherError(statusCode, message);
+        });
+    }
     /**
      * Registers the client to the admin authentication server.
      *
@@ -93,9 +108,11 @@ class AuthentificationService {
             this.authPlatformIsConnected = true;
             return this._editBosCredential(result.data);
         })
-            .catch((e) => {
+            .catch((error) => {
             this.authPlatformIsConnected = false;
-            throw new Error(e.message);
+            const statusCode = error?.response?.status || constant_1.HTTP_CODES.BAD_REQUEST;
+            const message = error?.response?.data?.message || error?.message || "Unable to update user password";
+            throw new AuthError_1.OtherError(statusCode, message);
         });
     }
     /**

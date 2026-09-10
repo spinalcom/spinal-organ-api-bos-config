@@ -69,44 +69,15 @@ export class UserListService {
 	 * @returns An object with code and data (token or error message)
 	 */
 	public async authenticateUser(user: IUserCredential): Promise<{ code: number; data: string | IUserToken }> {
-		return this.authenticateAdmin(user);
-
+		const adminResponse = await this.authenticateAdmin(user);
+		// if (adminResponse.isAdmin) return adminResponse;
+		return adminResponse;
 		/**
 		 * If the user is not an admin, we will try to authenticate the user via the Auth platform.
 		 * commented because user authentication is now handled by authentication platform
 		 */
 
-		// let isAdmin = true;
-		// if (data.code === HTTP_CODES.INTERNAL_ERROR) {
-		//   data = await this.authenticateUserViaAuthPlateform(user);
-		//   isAdmin = false;
-		// }
-
-		// if (response.code !== HTTP_CODES.OK) return response;
-
-		// const responseData = response.data;
-
-		// // const type = isAdmin ? USER_TYPES.ADMIN : USER_TYPES.USER;
-		// const type = USER_TYPES.ADMIN;
-
-		// const info = {
-		// name: user.userName,
-		// userName: user.userName,
-		// type,
-		// userType: type,
-		// userId: responseData.userId
-		// };
-
-		// const { password, ...userInfoWithoutPassword } = responseData.userInfo; // Destructure to remove password
-
-		// responseData.userInfo = userInfoWithoutPassword; // Update responseData to exclude password
-
-		// const token = responseData.token;
-		// const node = await _addUserToContext(this.context, info);
-
-		// await TokenService.getInstance().addUserToken(node, token, responseData);
-
-		// return response;
+		// return this.authenticateUserViaAuthPlateform(user);
 	}
 
 	/**
@@ -277,18 +248,18 @@ export class UserListService {
 	 * @param user - The admin user's credentials (username and password).
 	 * @returns An object containing the HTTP code and either the user data or an error message.
 	 */
-	public async authenticateAdmin(user: IUserCredential): Promise<{ code: number; data: any | string }> {
+	public async authenticateAdmin(user: IUserCredential): Promise<{ code: number; data: any | string; isAdmin: boolean }> {
 		const adminNodeFound = await this.getAdminUser(user.userName);
 
-		if (!adminNodeFound) return { code: HTTP_CODES.UNAUTHORIZED, data: "bad username and/or password" };
+		if (!adminNodeFound) return { code: HTTP_CODES.UNAUTHORIZED, data: "bad username and/or password", isAdmin: false };
 
 		const nodeElement = await adminNodeFound.getElement(true);
 
 		const passwordMatch = await _comparePassword(user.password, nodeElement.password.get());
-		if (!passwordMatch) return { code: HTTP_CODES.UNAUTHORIZED, data: "bad username and/or password" };
+		if (!passwordMatch) return { code: HTTP_CODES.UNAUTHORIZED, data: "bad username and/or password", isAdmin: true };
 
 		const tokenpayload = await TokenService.getInstance().generateTokenForAdmin(adminNodeFound);
-		return { code: HTTP_CODES.OK, data: tokenpayload };
+		return { code: HTTP_CODES.OK, data: tokenpayload, isAdmin: true };
 	}
 
 	/**

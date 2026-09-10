@@ -31,19 +31,26 @@ export class SpinalCodeUniqueService {
 		const bosCredential = await AuthentificationService.getInstance().getBosToAdminCredential();
 		if (!bosCredential) throw new OtherError(HTTP_CODES.NOT_FOUND, `No auth found for code ${code}`);
 
-		return axios.post(`${bosCredential.urlAdmin}/codes/consume/${code}`, {}, { headers: { "Content-Type": "application/json" } }).then(async (result) => {
-			let data = result.data;
-			data.profile = await this._getProfileInfo(data.token, bosCredential);
-			data.userInfo = await this._getCodeInfo(code, bosCredential, data.token);
+		return axios
+			.post(`${bosCredential.urlAdmin}/codes/consume/${code}`, {}, { headers: { "Content-Type": "application/json" } })
+			.then(async (result) => {
+				let data = result.data;
+				data.profile = await this._getProfileInfo(data.token, bosCredential);
+				data.userInfo = await this._getCodeInfo(code, bosCredential, data.token);
 
-			const type = "code";
-			const info = { name: data.userInfo?.name || code, applicationId: data.userInfo?.applicationId, userId: data.userInfo?.userId, type, userType: type };
+				const type = "code";
+				const info = { name: data.userInfo?.name || code, applicationId: data.userInfo?.applicationId, userId: data.userInfo?.userId, type, userType: type };
 
-			const node = await this._addUserToContext(info);
-			await TokenService.getInstance().addTokenToContext(data.token, data);
+				const node = await this._addUserToContext(info);
+				await TokenService.getInstance().addTokenToContext(data.token, data);
 
-			return data;
-		});
+				return data;
+			})
+			.catch((error) => {
+				const statusCode = error?.response?.status || HTTP_CODES.BAD_REQUEST;
+				const message = error?.response?.data?.message || error?.message || "Unable to consume code";
+				throw new OtherError(statusCode, message);
+			});
 	}
 
 	private _getProfileInfo(userToken: string, adminCredential: IBosCredential) {
