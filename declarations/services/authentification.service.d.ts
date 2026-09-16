@@ -13,7 +13,7 @@ export declare class AuthentificationService {
     updateUserPassword(token: string, data: {
         username: string;
         newPassword: string;
-        lastPassword: string;
+        oldPassword: string;
     }): Promise<any>;
     /**
      * Registers the client to the admin authentication server.
@@ -95,7 +95,7 @@ export declare class AuthentificationService {
      * @returns A promise resolving to the Axios response of the PUT request.
      * @throws Error if no admin is registered.
      */
-    sendBosInfoToAuth(update?: boolean): any;
+    sendBosInfoToAuth(): any;
     /**
      * Retrieves the admin credentials if they exist, or optionally creates them if they do not.
      *

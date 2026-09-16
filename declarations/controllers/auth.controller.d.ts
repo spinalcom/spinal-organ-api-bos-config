@@ -36,7 +36,7 @@ export declare class AuthController extends Controller {
     updateUserPassword(req: express.Request, data: {
         username: string;
         newPassword: string;
-        lastPassword: string;
+        oldPassword: string;
     }): Promise<any>;
     tokenIsValid(data: {
         token: string;
@@ -48,6 +48,9 @@ export declare class AuthController extends Controller {
         code: HTTP_CODES;
         message: string;
         data?: undefined;
+    }>;
+    revokeToken(req: express.Request): Promise<{
+        message: string;
     }>;
 }
 declare const _default: AuthController;

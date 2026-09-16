@@ -87,7 +87,7 @@ let AuthController = class AuthController extends tsoa_1.Controller {
             if (!hasAccess)
                 throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
             const registeredData = await serviceInstance.registerToAdmin(data.urlAdmin, data.clientId, data.clientSecret);
-            await serviceInstance.sendBosInfoToAuth();
+            await serviceInstance.sendBosInfoToAuth().catch((e) => console.error("first sync with auth platform failed"));
             this.setStatus(constant_1.HTTP_CODES.OK);
             return registeredData;
         }
@@ -170,7 +170,7 @@ let AuthController = class AuthController extends tsoa_1.Controller {
                 if (!isAuthPlatform)
                     throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
             }
-            const resp = await serviceInstance.sendBosInfoToAuth(true);
+            const resp = await serviceInstance.sendBosInfoToAuth();
             this.setStatus(constant_1.HTTP_CODES.OK);
             return { message: "updated" };
         }
@@ -208,6 +208,20 @@ let AuthController = class AuthController extends tsoa_1.Controller {
         catch (error) {
             this.setStatus(constant_1.HTTP_CODES.UNAUTHORIZED);
             return { code: constant_1.HTTP_CODES.UNAUTHORIZED, message: "Token is expired or invalid" };
+        }
+    }
+    async revokeToken(req) {
+        try {
+            const token = (0, utils_1.getToken)(req);
+            if (!token)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.INVALID_TOKEN);
+            const deleted = await tokenService.revokeToken(token);
+            this.setStatus(deleted ? constant_1.HTTP_CODES.OK : constant_1.HTTP_CODES.UNAUTHORIZED);
+            return { message: deleted ? "Token revoked" : constant_1.SECURITY_MESSAGES.INVALID_TOKEN };
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.UNAUTHORIZED);
+            return { message: error.code ? error.message : constant_1.SECURITY_MESSAGES.INVALID_TOKEN };
         }
     }
 };
@@ -293,6 +307,14 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "tokenIsValid", null);
+__decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
+    (0, tsoa_1.Post)("/revokeToken"),
+    __param(0, (0, tsoa_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "revokeToken", null);
 exports.AuthController = AuthController = __decorate([
     (0, tsoa_1.Route)("/api/v1"),
     (0, tsoa_1.Tags)("Auth"),

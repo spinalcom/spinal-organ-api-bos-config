@@ -86,7 +86,7 @@ export class AuthController extends Controller {
 			if (!hasAccess) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
 			const registeredData = await serviceInstance.registerToAdmin(data.urlAdmin, data.clientId, data.clientSecret);
-			await serviceInstance.sendBosInfoToAuth();
+			await serviceInstance.sendBosInfoToAuth().catch((e) => console.error("first sync with auth platform failed"));
 			this.setStatus(HTTP_CODES.OK);
 			return registeredData;
 		} catch (error: Error | any) {
@@ -180,7 +180,7 @@ export class AuthController extends Controller {
 				const isAuthPlatform = await checkIfItIsAuthPlateform(req);
 				if (!isAuthPlatform) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 			}
-			const resp = await serviceInstance.sendBosInfoToAuth(true);
+			const resp = await serviceInstance.sendBosInfoToAuth();
 			this.setStatus(HTTP_CODES.OK);
 			return { message: "updated" };
 		} catch (error: Error | any) {
@@ -191,7 +191,7 @@ export class AuthController extends Controller {
 
 	@Security(SECURITY_NAME.bearerAuth)
 	@Put("/update_user_password")
-	public async updateUserPassword(@Request() req: express.Request, @Body() data: { username: string; newPassword: string; lastPassword: string }): Promise<any> {
+	public async updateUserPassword(@Request() req: express.Request, @Body() data: { username: string; newPassword: string; oldPassword: string }): Promise<any> {
 		try {
 			const token = getToken(req);
 			if (!token) throw new AuthError(SECURITY_MESSAGES.INVALID_TOKEN);
@@ -222,6 +222,23 @@ export class AuthController extends Controller {
 		} catch (error) {
 			this.setStatus(HTTP_CODES.UNAUTHORIZED);
 			return { code: HTTP_CODES.UNAUTHORIZED, message: "Token is expired or invalid" };
+		}
+	}
+
+	@Security(SECURITY_NAME.bearerAuth)
+	@Post("/revokeToken")
+	public async revokeToken(@Request() req: express.Request): Promise<{ message: string }> {
+		try {
+			const token = getToken(req);
+			if (!token) throw new AuthError(SECURITY_MESSAGES.INVALID_TOKEN);
+
+			const deleted = await tokenService.revokeToken(token);
+
+			this.setStatus(deleted ? HTTP_CODES.OK : HTTP_CODES.UNAUTHORIZED);
+			return { message: deleted ? "Token revoked" : SECURITY_MESSAGES.INVALID_TOKEN };
+		} catch (error: Error | any) {
+			this.setStatus(error.code || HTTP_CODES.UNAUTHORIZED);
+			return { message: error.code ? error.message : SECURITY_MESSAGES.INVALID_TOKEN };
 		}
 	}
 }

@@ -3239,7 +3239,7 @@
 						"application/json": {
 							"schema": {
 								"properties": {
-									"lastPassword": {
+									"oldPassword": {
 										"type": "string"
 									},
 									"newPassword": {
@@ -3250,7 +3250,7 @@
 									}
 								},
 								"required": [
-									"lastPassword",
+									"oldPassword",
 									"newPassword",
 									"username"
 								],
@@ -3343,6 +3343,40 @@
 						}
 					}
 				}
+			}
+		},
+		"/api/v1/revokeToken": {
+			"post": {
+				"operationId": "RevokeToken",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"message": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"message"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Auth"
+				],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
+				"parameters": []
 			}
 		},
 		"/api/v1/add_digitaltwin": {
