@@ -10,7 +10,7 @@ export declare class AuthentificationService {
         code: number;
         data: string | IApplicationToken | IUserToken;
     }>;
-    updateUserPassword(token: string, data: {
+    updateUserPassword(data: {
         username: string;
         newPassword: string;
         oldPassword: string;

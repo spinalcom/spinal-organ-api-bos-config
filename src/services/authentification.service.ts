@@ -69,7 +69,7 @@ export class AuthentificationService {
 		return AppListService.getInstance().authenticateApplication(infoFormatted);
 	}
 
-	public async updateUserPassword(token: string, data: { username: string; newPassword: string; oldPassword: string }): Promise<any> {
+	public async updateUserPassword(data: { username: string; newPassword: string; oldPassword: string }): Promise<any> {
 		let pamCredentials = await this.getBosToAdminCredential();
 		if (!pamCredentials) throw new OtherError(HTTP_CODES.UNAUTHORIZED, "No BOS to admin registered");
 

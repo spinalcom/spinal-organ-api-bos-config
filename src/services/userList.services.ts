@@ -36,6 +36,7 @@ import { AppService } from "./apps.service";
 import { searchById } from "../utils/findNodeBySearchKey";
 import { _comparePassword, _addUserToContext, _generateString, _getAuthPlateformInfo, _getUserInfo, _getUserProfileInfo, _hashPassword, getUserInfoByToken } from "../utils/UserAuthUtils";
 import { userInfo } from "os";
+import { OtherError } from "../security/AuthError";
 
 export class UserListService {
 	private static instance: UserListService;
@@ -225,6 +226,21 @@ export class UserListService {
 
 			return result;
 		});
+	}
+
+	public async updateAdminUserPassword(data: { username: string; oldPassword: string; newPassword: string }): Promise<any> {
+		const userExist = await this.getAdminUser(data.username);
+		if (!userExist) throw new OtherError(HTTP_CODES.UNAUTHORIZED, "Admin user not found");
+
+		const nodeElement = await userExist.getElement(true);
+		const passwordMatch = await _comparePassword(data.oldPassword, nodeElement.password.get());
+		if (!passwordMatch) throw new OtherError(HTTP_CODES.FORBIDDEN, "Old password does not match");
+
+		const newPasswordHashed = await _hashPassword(data.newPassword);
+		await nodeElement.password.set(newPasswordHashed);
+		// save new
+		fileLog(JSON.stringify({ username: data.username, password: data.newPassword, message: "Password updated successfully" }), path.resolve(__dirname, "../../.admin.log"));
+		return { code: HTTP_CODES.OK, data: "Password updated successfully" };
 	}
 
 	/**

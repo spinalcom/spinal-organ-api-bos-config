@@ -22,7 +22,7 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
-import { AuthentificationService, TokenService } from "../services";
+import { AuthentificationService, TokenService, UserListService } from "../services";
 import * as express from "express";
 import { HTTP_CODES, SECURITY_MESSAGES, SECURITY_NAME } from "../constant";
 import { Body, Route, Tags, Controller, Post, Get, Put, Delete, Security, Request } from "tsoa";
@@ -194,12 +194,18 @@ export class AuthController extends Controller {
 	public async updateUserPassword(@Request() req: express.Request, @Body() data: { username: string; newPassword: string; oldPassword: string }): Promise<any> {
 		try {
 			const token = getToken(req);
-			if (!token) throw new AuthError(SECURITY_MESSAGES.INVALID_TOKEN);
-
 			const tokenIsValid = await tokenService.tokenIsValid(token);
 			if (!tokenIsValid) throw new AuthError(SECURITY_MESSAGES.INVALID_TOKEN);
 
-			const response = await serviceInstance.updateUserPassword(<string>token, data);
+			const isAdmin = await checkIfItIsAdmin(req);
+			let response;
+
+			if (isAdmin) {
+				response = await UserListService.getInstance().updateAdminUserPassword(data as any);
+			} else {
+				response = await serviceInstance.updateUserPassword(data);
+			}
+
 			this.setStatus(response?.code || HTTP_CODES.OK);
 			return response;
 		} catch (error: Error | any) {

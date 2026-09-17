@@ -182,12 +182,17 @@ let AuthController = class AuthController extends tsoa_1.Controller {
     async updateUserPassword(req, data) {
         try {
             const token = (0, utils_1.getToken)(req);
-            if (!token)
-                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.INVALID_TOKEN);
             const tokenIsValid = await tokenService.tokenIsValid(token);
             if (!tokenIsValid)
                 throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.INVALID_TOKEN);
-            const response = await serviceInstance.updateUserPassword(token, data);
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            let response;
+            if (isAdmin) {
+                response = await services_1.UserListService.getInstance().updateAdminUserPassword(data);
+            }
+            else {
+                response = await serviceInstance.updateUserPassword(data);
+            }
             this.setStatus(response?.code || constant_1.HTTP_CODES.OK);
             return response;
         }

@@ -36,6 +36,7 @@ const userProfile_service_1 = require("./userProfile.service");
 const apps_service_1 = require("./apps.service");
 const findNodeBySearchKey_1 = require("../utils/findNodeBySearchKey");
 const UserAuthUtils_1 = require("../utils/UserAuthUtils");
+const AuthError_1 = require("../security/AuthError");
 class UserListService {
     static instance;
     context;
@@ -208,6 +209,20 @@ class UserListService {
             fileLog(JSON.stringify({ userName, password }), path.resolve(__dirname, "../../.admin.log"));
             return result;
         });
+    }
+    async updateAdminUserPassword(data) {
+        const userExist = await this.getAdminUser(data.username);
+        if (!userExist)
+            throw new AuthError_1.OtherError(constant_1.HTTP_CODES.UNAUTHORIZED, "Admin user not found");
+        const nodeElement = await userExist.getElement(true);
+        const passwordMatch = await (0, UserAuthUtils_1._comparePassword)(data.oldPassword, nodeElement.password.get());
+        if (!passwordMatch)
+            throw new AuthError_1.OtherError(constant_1.HTTP_CODES.FORBIDDEN, "Old password does not match");
+        const newPasswordHashed = await (0, UserAuthUtils_1._hashPassword)(data.newPassword);
+        await nodeElement.password.set(newPasswordHashed);
+        // save new
+        fileLog(JSON.stringify({ username: data.username, password: data.newPassword, message: "Password updated successfully" }), path.resolve(__dirname, "../../.admin.log"));
+        return { code: constant_1.HTTP_CODES.OK, data: "Password updated successfully" };
     }
     /**
      * Retrieves an admin user node by its username.

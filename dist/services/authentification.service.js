@@ -62,7 +62,7 @@ class AuthentificationService {
         let infoFormatted = this._formatInfo(info);
         return appList_services_1.AppListService.getInstance().authenticateApplication(infoFormatted);
     }
-    async updateUserPassword(token, data) {
+    async updateUserPassword(data) {
         let pamCredentials = await this.getBosToAdminCredential();
         if (!pamCredentials)
             throw new AuthError_1.OtherError(constant_1.HTTP_CODES.UNAUTHORIZED, "No BOS to admin registered");

@@ -1,19 +1,19 @@
 /*
  * Copyright 2022 SpinalCom - www.spinalcom.com
- * 
+ *
  * This file is part of SpinalCore.
- * 
+ *
  * Please read all of the following terms and conditions
  * of the Free Software license Agreement ("Agreement")
  * carefully.
- * 
+ *
  * This Agreement is a legally binding contract between
  * the Licensee (as defined below) and SpinalCom that
  * sets forth the terms and conditions that govern your
  * use of the Program. By installing and/or using the
  * Program, you agree to abide by all the terms and
  * conditions stated or referenced herein.
- * 
+ *
  * If you do not agree to abide by these terms and
  * conditions, do not demonstrate your acceptance and do
  * not install or use the Program.
@@ -27,9 +27,7 @@ import * as UTILS from "./constants";
 
 const chalk = require("chalk");
 
-
 export class Utils {
-
 	private static getDuplicateError(errmsg: string): string {
 		if (errmsg.includes("username") || errmsg.includes("email")) {
 			return "ERROR-DUPLICATE_ENTRY_EMAIL";
@@ -106,7 +104,6 @@ export class Utils {
 	public static logger(sType = "log", ...aMsg: any[]) {
 		const now = new Date();
 		let loggerTime: string;
-		// TODO: Determine if legger should be permanent or only in dev env.
 		// if (process.env.NODE_ENV === "dev") {
 		switch (sType) {
 			case "debug":
@@ -127,13 +124,11 @@ export class Utils {
 	}
 
 	public static preg_quote(str, delimiter) {
-		return (str + "")
-			.replace(new RegExp("[.\\\\+?\\[\\^\\]$(){}=!<>|:\\" + (delimiter || "") + "-]", "g"), "\\$&");
+		return (str + "").replace(new RegExp("[.\\\\+?\\[\\^\\]$(){}=!<>|:\\" + (delimiter || "") + "-]", "g"), "\\$&");
 	}
 
 	public static strpos(haystack: string, needle: string, offset?: number) {
-		const i = (haystack + "")
-			.indexOf(needle, (offset || 0));
+		const i = (haystack + "").indexOf(needle, offset || 0);
 		return i === -1 ? false : i;
 	}
 
