@@ -28,6 +28,7 @@ const spinal_core_connectorjs_1 = require("spinal-core-connectorjs");
 const spinal_env_viewer_graph_service_1 = require("spinal-env-viewer-graph-service");
 const constant_1 = require("../constant");
 const services_1 = require("../services");
+const parseTime_1 = require("../utils/parseTime");
 class SpinalAPIMiddleware {
     config = {
         spinalConnector: {
@@ -43,6 +44,13 @@ class SpinalAPIMiddleware {
         file: {
             path: process.env.CONFIG_DIRECTORY_PATH,
         },
+        preload: {
+            workHoursStart: (0, parseTime_1.parseTimeOfDay)(process.env.WORK_HOURS_START, 8 * 60),
+            workHoursEnd: (0, parseTime_1.parseTimeOfDay)(process.env.WORK_HOURS_END, 19 * 60),
+            idleDelay: (0, parseTime_1.parseDuration)(process.env.PRELOAD_IDLE_DELAY, 2000),
+            batchSize: (0, parseTime_1.parseDuration)(process.env.PRELOAD_BATCH_SIZE, 20) || 20,
+            batchDelay: (0, parseTime_1.parseDuration)(process.env.PRELOAD_BATCH_DELAY, 50),
+        }
     };
     conn;
     loadedPtr = new Map();
