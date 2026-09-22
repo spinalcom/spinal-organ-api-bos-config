@@ -60,12 +60,11 @@ configFile_service_1.configServiceInstance
     // create server + listen
     if (process.env.RUN_STARTUP_TASK === "1") {
         const adminId = adminProfile_service_1.AdminProfileService.getInstance().adminNode.getId().get();
-        try {
-            await (0, spinal_organ_api_server_2.preloadingScript)(spinalAPIMiddleware, adminId, preload_config);
-        }
-        catch (error) {
-            console.error("Error during preloading script:", error);
-        }
+        // picks its strategy from the time of day : during the work hours the
+        // node snapshot is loaded in the background, in the idle time between
+        // requests ; otherwise the preloading script runs and is awaited.
+        // The nodes are loaded as the admin profile, like the script.
+        await (0, spinal_organ_api_server_2.runPreloading)(spinalAPIMiddleware, adminId, preload_config);
     }
     const server = (0, server_1.initServer)(app);
     const { io } = await (0, spinal_organ_api_server_1.runServerRest)(server, app, spinalAPIMiddleware, spinalIOMiddleware, log_body);

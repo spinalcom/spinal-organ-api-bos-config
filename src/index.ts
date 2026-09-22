@@ -38,7 +38,7 @@ import SpinalIOMiddleware from "./middlewares/SpinalIOMiddleware";
 import ConfigFile from "spinal-lib-organ-monitoring";
 // import { runStartupTask } from './bootstrap';
 import { AdminProfileService } from "./services/adminProfile.service";
-import { preloadingScript } from "spinal-organ-api-server";
+import { runPreloading } from "spinal-organ-api-server";
 import { injectAdminRoutesIntoApiDocs } from "./middlewares/expressMiddleware";
 
 const preload_config = require("../preload_config");
@@ -69,11 +69,11 @@ configServiceInstance
     // create server + listen
     if (process.env.RUN_STARTUP_TASK === "1") {
       const adminId = AdminProfileService.getInstance().adminNode.getId().get();
-      try {
-        await preloadingScript(spinalAPIMiddleware, adminId, preload_config);
-      } catch (error) {
-        console.error("Error during preloading script:", error);
-      }
+      // picks its strategy from the time of day : during the work hours the
+      // node snapshot is loaded in the background, in the idle time between
+      // requests ; otherwise the preloading script runs and is awaited.
+      // The nodes are loaded as the admin profile, like the script.
+      await runPreloading(spinalAPIMiddleware, adminId, preload_config);
     }
 
     const server = initServer(app);
