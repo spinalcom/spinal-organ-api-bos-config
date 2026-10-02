@@ -84,6 +84,6 @@
     "spinal-organ-api-server": "spinal-organ-api-server",
     "spinal-service-pubsub-logs": "spinal-service-pubsub-logs",
     "spinal-service-ticket": "spinal-service-ticket",
-    "spinal-core-connectorjs": "spinal-core-connectorjs@dev"
+    "spinal-core-connectorjs": "spinal-core-connectorjs"
   }
 }
