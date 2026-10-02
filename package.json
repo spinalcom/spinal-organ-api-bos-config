@@ -1,6 +1,6 @@
 {
   "name": "spinal-organ-api-bos-config",
-  "version": "2.6.0",
+  "version": "2.7.0",
   "description": "",
   "main": "dist/index.js",
   "keywords": [],
@@ -83,6 +83,7 @@
     "spinal-organ-api-pubsub": "spinal-organ-api-pubsub",
     "spinal-organ-api-server": "spinal-organ-api-server@documentary",
     "spinal-service-pubsub-logs": "spinal-service-pubsub-logs",
-    "spinal-service-ticket": "spinal-service-ticket"
+    "spinal-service-ticket": "spinal-service-ticket",
+    "spinal-core-connectorjs": "spinal-core-connectorjs"
   }
 }

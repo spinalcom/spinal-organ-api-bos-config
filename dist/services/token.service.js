@@ -153,6 +153,7 @@ class TokenService {
      * @memberof TokenService
      */
     async deleteToken(token) {
+        const tokenName = token instanceof spinal_env_viewer_graph_service_1.SpinalNode ? token.getName().get() : token;
         if (!(token instanceof spinal_env_viewer_graph_service_1.SpinalNode))
             token = await this.getTokenNode(token);
         if (!token)
@@ -162,6 +163,8 @@ class TokenService {
             for (const parent of parents) {
                 await parent.removeChild(token, constant_1.TOKEN_RELATION_NAME, constant_1.PTR_LST_TYPE);
             }
+            await redisInstance.delete(tokenName);
+            globalCache.delete(tokenName);
             return true;
         }
         catch (error) {
@@ -192,6 +195,9 @@ class TokenService {
                     this.deleteToken(token);
                 throw new Error("Token expired");
             }
+            if (!(await this.getTokenNode(token)))
+                throw new Error("Token revoked or invalid");
+            redisInstance.set(token, tokenData);
             return tokenData;
         }
         catch (error) {
@@ -277,9 +283,35 @@ class TokenService {
                     return reject(err);
                 }
                 decoded = Object.assign(decoded, { token, createdToken: decoded.iat, expieredToken: decoded.exp }); // Add token and timestamps to the decoded data for caching
-                redisInstance.set(token, decoded);
                 resolve(decoded);
             });
+        });
+    }
+    async revokeToken(token) {
+        try {
+            const tokenIsAdmin = await this.verifyTokenForAdmin(token);
+            const tokenNode = await this.getTokenNode(token);
+            if (tokenNode) {
+                await tokenNode.removeFromGraph();
+                return true;
+            }
+            return false;
+        }
+        catch (error) {
+            return this.revokeTokenInAuthPlatform(token);
+        }
+    }
+    async revokeTokenInAuthPlatform(token) {
+        const bosCredential = await authentification_service_1.AuthentificationService.getInstance().getBosToAdminCredential();
+        if (!bosCredential || !bosCredential.urlAdmin)
+            throw new Error("Invalid Token");
+        return axios_1.default
+            .post(`${bosCredential.urlAdmin}/tokens/revokeToken`, { token })
+            .then((result) => {
+            return true;
+        })
+            .catch((error) => {
+            return false;
         });
     }
     /**

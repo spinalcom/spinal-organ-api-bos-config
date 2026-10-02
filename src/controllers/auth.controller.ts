@@ -22,13 +22,14 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
-import { AuthentificationService, TokenService } from "../services";
+import { AuthentificationService, TokenService, UserListService } from "../services";
 import * as express from "express";
 import { HTTP_CODES, SECURITY_MESSAGES, SECURITY_NAME } from "../constant";
 import { Body, Route, Tags, Controller, Post, Get, Put, Delete, Security, Request } from "tsoa";
 import { IAdmin, IAdminCredential, IAppCredential, IApplicationToken, IOAuth2Credential, IBosCredential, IUserCredential, IUserToken } from "../interfaces";
 import { AuthError } from "../security/AuthError";
 import { checkIfItIsAdmin, checkIfItIsAuthPlateform, isAdminOrHasAccessToAdminApp } from "../security/authentication";
+import { getToken } from "../security/utils";
 import SpinalRedisMiddleware from "../middlewares/SpinalRedisMiddleware";
 import * as ADMIN_APPS from "../defaultApps/adminApps.json";
 
@@ -85,7 +86,7 @@ export class AuthController extends Controller {
 			if (!hasAccess) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 
 			const registeredData = await serviceInstance.registerToAdmin(data.urlAdmin, data.clientId, data.clientSecret);
-			await serviceInstance.sendBosInfoToAuth();
+			await serviceInstance.sendBosInfoToAuth().catch((e) => console.error("first sync with auth platform failed"));
 			this.setStatus(HTTP_CODES.OK);
 			return registeredData;
 		} catch (error: Error | any) {
@@ -179,9 +180,34 @@ export class AuthController extends Controller {
 				const isAuthPlatform = await checkIfItIsAuthPlateform(req);
 				if (!isAuthPlatform) throw new AuthError(SECURITY_MESSAGES.UNAUTHORIZED);
 			}
-			const resp = await serviceInstance.sendBosInfoToAuth(true);
+			const resp = await serviceInstance.sendBosInfoToAuth();
 			this.setStatus(HTTP_CODES.OK);
 			return { message: "updated" };
+		} catch (error: Error | any) {
+			this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
+			return { message: error.message };
+		}
+	}
+
+	@Security(SECURITY_NAME.bearerAuth)
+	@Put("/update_user_password")
+	public async updateUserPassword(@Request() req: express.Request, @Body() data: { username: string; newPassword: string; oldPassword: string }): Promise<any> {
+		try {
+			const token = getToken(req);
+			const tokenIsValid = await tokenService.tokenIsValid(token);
+			if (!tokenIsValid) throw new AuthError(SECURITY_MESSAGES.INVALID_TOKEN);
+
+			const isAdmin = await checkIfItIsAdmin(req);
+			let response;
+
+			if (isAdmin) {
+				response = await UserListService.getInstance().updateAdminUserPassword(data as any);
+			} else {
+				response = await serviceInstance.updateUserPassword(data);
+			}
+
+			this.setStatus(response?.code || HTTP_CODES.OK);
+			return response;
 		} catch (error: Error | any) {
 			this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
 			return { message: error.message };
@@ -202,6 +228,23 @@ export class AuthController extends Controller {
 		} catch (error) {
 			this.setStatus(HTTP_CODES.UNAUTHORIZED);
 			return { code: HTTP_CODES.UNAUTHORIZED, message: "Token is expired or invalid" };
+		}
+	}
+
+	@Security(SECURITY_NAME.bearerAuth)
+	@Post("/revokeToken")
+	public async revokeToken(@Request() req: express.Request): Promise<{ message: string }> {
+		try {
+			const token = getToken(req);
+			if (!token) throw new AuthError(SECURITY_MESSAGES.INVALID_TOKEN);
+
+			const deleted = await tokenService.revokeToken(token);
+
+			this.setStatus(deleted ? HTTP_CODES.OK : HTTP_CODES.UNAUTHORIZED);
+			return { message: deleted ? "Token revoked" : SECURITY_MESSAGES.INVALID_TOKEN };
+		} catch (error: Error | any) {
+			this.setStatus(error.code || HTTP_CODES.UNAUTHORIZED);
+			return { message: error.code ? error.message : SECURITY_MESSAGES.INVALID_TOKEN };
 		}
 	}
 }

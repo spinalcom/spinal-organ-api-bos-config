@@ -36,8 +36,8 @@ import { UserListService } from "./userList.services";
 import { OtherError } from "../security/AuthError";
 import { SpinalCodeUniqueService } from "./codeUnique.service";
 import { AppListService } from "./appList.services";
-
-const tokenKey = "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d";
+import { _getAuthPlateformInfo } from "../utils/UserAuthUtils";
+import { TokenService } from "./token.service";
 
 export class AuthentificationService {
 	private static instance: AuthentificationService;
@@ -67,6 +67,24 @@ export class AuthentificationService {
 		if (isUser) return UserListService.getInstance().authenticateUser(<IUserCredential>info);
 		let infoFormatted = this._formatInfo(info as IAppCredential | IOAuth2Credential);
 		return AppListService.getInstance().authenticateApplication(infoFormatted);
+	}
+
+	public async updateUserPassword(data: { username: string; newPassword: string; oldPassword: string }): Promise<any> {
+		let pamCredentials = await this.getBosToAdminCredential();
+		if (!pamCredentials) throw new OtherError(HTTP_CODES.UNAUTHORIZED, "No BOS to admin registered");
+
+		const { urlAdmin, tokenBosToAdmin } = pamCredentials;
+
+		const url = `${urlAdmin}/users/${data.username}/updatePassword`;
+
+		return axios
+			.put(url, { userLastPassword: data.oldPassword, newPassword: data.newPassword }, { headers: { "Content-Type": "application/json", "x-access-token": tokenBosToAdmin } })
+			.then((result) => result.data)
+			.catch((error) => {
+				const statusCode = error?.response?.status || HTTP_CODES.BAD_REQUEST;
+				const message = error?.response?.data?.message || error?.message || "Unable to update user password";
+				throw new OtherError(statusCode, message);
+			});
 	}
 
 	/**
@@ -99,9 +117,11 @@ export class AuthentificationService {
 				this.authPlatformIsConnected = true;
 				return this._editBosCredential(result.data);
 			})
-			.catch((e) => {
+			.catch((error) => {
 				this.authPlatformIsConnected = false;
-				throw new Error(e.message);
+				const statusCode = error?.response?.status || HTTP_CODES.BAD_REQUEST;
+				const message = error?.response?.data?.message || error?.message || "Unable to update user password";
+				throw new OtherError(statusCode, message);
 			});
 	}
 
@@ -211,6 +231,8 @@ export class AuthentificationService {
 	 * @returns A promise that resolves to the newly created admin credential object.
 	 */
 	public createAdminCredential(): Promise<IAdminCredential> {
+		const tokenKey = TokenService.getInstance().getOrGenerateTokenKey();
+
 		const clientId = uuidv4();
 		const token = jwt.sign({ clientId, type: "ADMIN SERVER" }, tokenKey);
 
@@ -252,7 +274,7 @@ export class AuthentificationService {
 	 * @returns A promise resolving to the Axios response of the PUT request.
 	 * @throws Error if no admin is registered.
 	 */
-	public async sendBosInfoToAuth(update: boolean = false) {
+	public async sendBosInfoToAuth() {
 		const bosCredential = await this.getBosToAdminCredential();
 		if (!bosCredential) throw new Error("No admin registered, register an admin and retry !");
 
@@ -261,7 +283,7 @@ export class AuthentificationService {
 
 		// const endpoint = "register";
 
-		const data = await this._getRequestBody(update, bosCredential, adminCredential);
+		const data = await this._getRequestBody(bosCredential, adminCredential);
 		if (bosCredential.urlAdmin?.endsWith("/")) bosCredential.urlAdmin = bosCredential.urlAdmin.replace(/\/$/, "");
 
 		return axios
@@ -273,7 +295,7 @@ export class AuthentificationService {
 			.catch(async (err) => {
 				if (err.response?.status === HTTP_CODES.UNAUTHORIZED) {
 					await this.updateBosTokenInAuthPlatform();
-					return this.sendBosInfoToAuth(update);
+					return this.sendBosInfoToAuth();
 				}
 
 				throw err;
@@ -317,16 +339,13 @@ export class AuthentificationService {
 		};
 	}
 
-	private async _getRequestBody(update: boolean, bosCredential: IBosCredential, adminCredential: IAdminCredential) {
+	private async _getRequestBody(bosCredential: IBosCredential, adminCredential: IAdminCredential) {
 		return JSON.stringify({
 			TokenBosAdmin: bosCredential.tokenBosToAdmin,
 			platformId: bosCredential.idPlateform,
 			jsonData: await this.getJsonData(),
-			...(!update && {
-				URLBos: `http://localhost:8060`,
-				TokenAdminBos: adminCredential.TokenAdminToPam,
-				idPlatformOfAdmin: adminCredential.idPlatformOfAdmin,
-			}),
+			TokenAdminBos: adminCredential.TokenAdminToPam,
+			idPlatformOfAdmin: adminCredential.idPlatformOfAdmin,
 		});
 	}
 

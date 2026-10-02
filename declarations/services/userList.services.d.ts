@@ -96,6 +96,11 @@ export declare class UserListService {
      * @returns A promise that resolves to the created SpinalNode, or undefined if the user already exists.
      */
     createAdminUser(userInfo?: IUserInfo): Promise<SpinalNode | undefined>;
+    updateAdminUserPassword(data: {
+        username: string;
+        oldPassword: string;
+        newPassword: string;
+    }): Promise<any>;
     /**
      * Retrieves an admin user node by its username.
      *
@@ -116,6 +121,7 @@ export declare class UserListService {
     authenticateAdmin(user: IUserCredential): Promise<{
         code: number;
         data: any | string;
+        isAdmin: boolean;
     }>;
     /**
      * Authenticates a user via the external authentication platform.

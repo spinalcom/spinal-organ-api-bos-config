@@ -103,6 +103,8 @@ export declare class TokenService {
      * @memberof TokenService
      */
     verifyTokenForAdmin(token: string, ignoreExpiration?: boolean): Promise<any>;
+    revokeToken(token: string): Promise<boolean>;
+    revokeTokenInAuthPlatform(token: string): Promise<boolean>;
     /**
      * Check if the token is an application token.
      *

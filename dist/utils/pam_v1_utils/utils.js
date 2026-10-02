@@ -99,7 +99,6 @@ class Utils {
     static logger(sType = "log", ...aMsg) {
         const now = new Date();
         let loggerTime;
-        // TODO: Determine if legger should be permanent or only in dev env.
         // if (process.env.NODE_ENV === "dev") {
         switch (sType) {
             case "debug":
@@ -119,12 +118,10 @@ class Utils {
         // }
     }
     static preg_quote(str, delimiter) {
-        return (str + "")
-            .replace(new RegExp("[.\\\\+?\\[\\^\\]$(){}=!<>|:\\" + (delimiter || "") + "-]", "g"), "\\$&");
+        return (str + "").replace(new RegExp("[.\\\\+?\\[\\^\\]$(){}=!<>|:\\" + (delimiter || "") + "-]", "g"), "\\$&");
     }
     static strpos(haystack, needle, offset) {
-        const i = (haystack + "")
-            .indexOf(needle, (offset || 0));
+        const i = (haystack + "").indexOf(needle, offset || 0);
         return i === -1 ? false : i;
     }
     static isOnGoing(begin, end) {

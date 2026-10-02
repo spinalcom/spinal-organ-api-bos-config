@@ -1,5 +1,5 @@
-import { IAppCredential, IApplicationToken, IOAuth2Credential } from '../interfaces';
-import { SpinalContext, SpinalNode } from 'spinal-env-viewer-graph-service';
+import { IAppCredential, IApplicationToken, IOAuth2Credential } from "../interfaces";
+import { SpinalContext, SpinalNode } from "spinal-env-viewer-graph-service";
 export declare function authenticateApplication(urlAdmin: string, idPlateform: string, application: IAppCredential | IOAuth2Credential, context: SpinalContext): Promise<{
     code: number;
     data: string | IApplicationToken;

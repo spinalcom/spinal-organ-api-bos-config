@@ -11,7 +11,8 @@ const redisServiceInstance = SpinalRedisMiddleware_1.default.getInstance();
 function authenticateApplication(urlAdmin, idPlateform, application, context) {
     //  throw new AuthError(`This authentication method is deprecated. Please use the new authentication method.`);
     const url = `${urlAdmin}/applications/login`;
-    return axios_1.default.post(url, application)
+    return axios_1.default
+        .post(url, application)
         .then(async (result) => {
         const data = result.data;
         data.profile = await _getProfileInfo(data.token, urlAdmin, idPlateform);
@@ -26,9 +27,11 @@ function authenticateApplication(urlAdmin, idPlateform, application, context) {
         return { code: constant_1.HTTP_CODES.OK, data };
     })
         .catch((err) => {
+        const statusCode = err?.response?.status || constant_1.HTTP_CODES.BAD_REQUEST;
+        const message = err?.response?.data?.message || err?.message || "Unable to update user password";
         return {
-            code: constant_1.HTTP_CODES.UNAUTHORIZED,
-            data: "bad credential",
+            code: statusCode,
+            data: message,
         };
     });
 }
@@ -58,7 +61,8 @@ function _getApplicationInfo(applicationId, adminUrl, userToken) {
             "x-access-token": userToken,
         },
     };
-    return axios_1.default.get(`${adminUrl}/applications/${applicationId}`, config)
+    return axios_1.default
+        .get(`${adminUrl}/applications/${applicationId}`, config)
         .then((result) => {
         return result.data;
     })

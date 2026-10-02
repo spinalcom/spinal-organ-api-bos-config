@@ -168,6 +168,7 @@ export class TokenService {
 	 * @memberof TokenService
 	 */
 	public async deleteToken(token: SpinalNode | string): Promise<boolean> {
+		const tokenName = token instanceof SpinalNode ? token.getName().get() : token;
 		if (!(token instanceof SpinalNode)) token = await this.getTokenNode(token);
 		if (!token) return false;
 
@@ -176,6 +177,8 @@ export class TokenService {
 			for (const parent of parents) {
 				await parent.removeChild(token, TOKEN_RELATION_NAME, PTR_LST_TYPE);
 			}
+			await redisInstance.delete(tokenName);
+			globalCache.delete(tokenName);
 			return true;
 		} catch (error) {
 			return false;
@@ -209,6 +212,9 @@ export class TokenService {
 				if (deleteIfExpired) this.deleteToken(token);
 				throw new Error("Token expired");
 			}
+
+			if (!(await this.getTokenNode(token))) throw new Error("Token revoked or invalid");
+			redisInstance.set(token, tokenData);
 
 			return tokenData;
 		} catch (error) {
@@ -305,10 +311,37 @@ export class TokenService {
 
 				decoded = Object.assign(decoded, { token, createdToken: decoded.iat, expieredToken: decoded.exp }); // Add token and timestamps to the decoded data for caching
 
-				redisInstance.set(token, decoded);
 				resolve(decoded);
 			});
 		});
+	}
+
+	public async revokeToken(token: string): Promise<boolean> {
+		try {
+			const tokenIsAdmin = await this.verifyTokenForAdmin(token);
+			const tokenNode = await this.getTokenNode(token);
+			if (tokenNode) {
+				await tokenNode.removeFromGraph();
+				return true;
+			}
+			return false;
+		} catch (error) {
+			return this.revokeTokenInAuthPlatform(token);
+		}
+	}
+
+	public async revokeTokenInAuthPlatform(token: string): Promise<boolean> {
+		const bosCredential = await AuthentificationService.getInstance().getBosToAdminCredential();
+		if (!bosCredential || !bosCredential.urlAdmin) throw new Error("Invalid Token");
+
+		return axios
+			.post(`${bosCredential.urlAdmin}/tokens/revokeToken`, { token })
+			.then((result) => {
+				return true;
+			})
+			.catch((error) => {
+				return false;
+			});
 	}
 
 	/**

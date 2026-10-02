@@ -42,6 +42,7 @@ const constant_1 = require("../constant");
 const tsoa_1 = require("tsoa");
 const AuthError_1 = require("../security/AuthError");
 const authentication_1 = require("../security/authentication");
+const utils_1 = require("../security/utils");
 const SpinalRedisMiddleware_1 = require("../middlewares/SpinalRedisMiddleware");
 const ADMIN_APPS = require("../defaultApps/adminApps.json");
 const redisServiceInstance = SpinalRedisMiddleware_1.default.getInstance();
@@ -86,7 +87,7 @@ let AuthController = class AuthController extends tsoa_1.Controller {
             if (!hasAccess)
                 throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
             const registeredData = await serviceInstance.registerToAdmin(data.urlAdmin, data.clientId, data.clientSecret);
-            await serviceInstance.sendBosInfoToAuth();
+            await serviceInstance.sendBosInfoToAuth().catch((e) => console.error("first sync with auth platform failed"));
             this.setStatus(constant_1.HTTP_CODES.OK);
             return registeredData;
         }
@@ -169,9 +170,31 @@ let AuthController = class AuthController extends tsoa_1.Controller {
                 if (!isAuthPlatform)
                     throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.UNAUTHORIZED);
             }
-            const resp = await serviceInstance.sendBosInfoToAuth(true);
+            const resp = await serviceInstance.sendBosInfoToAuth();
             this.setStatus(constant_1.HTTP_CODES.OK);
             return { message: "updated" };
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
+            return { message: error.message };
+        }
+    }
+    async updateUserPassword(req, data) {
+        try {
+            const token = (0, utils_1.getToken)(req);
+            const tokenIsValid = await tokenService.tokenIsValid(token);
+            if (!tokenIsValid)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.INVALID_TOKEN);
+            const isAdmin = await (0, authentication_1.checkIfItIsAdmin)(req);
+            let response;
+            if (isAdmin) {
+                response = await services_1.UserListService.getInstance().updateAdminUserPassword(data);
+            }
+            else {
+                response = await serviceInstance.updateUserPassword(data);
+            }
+            this.setStatus(response?.code || constant_1.HTTP_CODES.OK);
+            return response;
         }
         catch (error) {
             this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
@@ -190,6 +213,20 @@ let AuthController = class AuthController extends tsoa_1.Controller {
         catch (error) {
             this.setStatus(constant_1.HTTP_CODES.UNAUTHORIZED);
             return { code: constant_1.HTTP_CODES.UNAUTHORIZED, message: "Token is expired or invalid" };
+        }
+    }
+    async revokeToken(req) {
+        try {
+            const token = (0, utils_1.getToken)(req);
+            if (!token)
+                throw new AuthError_1.AuthError(constant_1.SECURITY_MESSAGES.INVALID_TOKEN);
+            const deleted = await tokenService.revokeToken(token);
+            this.setStatus(deleted ? constant_1.HTTP_CODES.OK : constant_1.HTTP_CODES.UNAUTHORIZED);
+            return { message: deleted ? "Token revoked" : constant_1.SECURITY_MESSAGES.INVALID_TOKEN };
+        }
+        catch (error) {
+            this.setStatus(error.code || constant_1.HTTP_CODES.UNAUTHORIZED);
+            return { message: error.code ? error.message : constant_1.SECURITY_MESSAGES.INVALID_TOKEN };
         }
     }
 };
@@ -259,6 +296,15 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "syncDataToAdmin", null);
 __decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
+    (0, tsoa_1.Put)("/update_user_password"),
+    __param(0, (0, tsoa_1.Request)()),
+    __param(1, (0, tsoa_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "updateUserPassword", null);
+__decorate([
     (0, tsoa_1.Security)(constant_1.SECURITY_NAME.all),
     (0, tsoa_1.Post)("/getTokenData"),
     __param(0, (0, tsoa_1.Body)()),
@@ -266,6 +312,14 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "tokenIsValid", null);
+__decorate([
+    (0, tsoa_1.Security)(constant_1.SECURITY_NAME.bearerAuth),
+    (0, tsoa_1.Post)("/revokeToken"),
+    __param(0, (0, tsoa_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "revokeToken", null);
 exports.AuthController = AuthController = __decorate([
     (0, tsoa_1.Route)("/api/v1"),
     (0, tsoa_1.Tags)("Auth"),

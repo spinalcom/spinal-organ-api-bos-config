@@ -27,6 +27,8 @@ import { SpinalContext, SpinalGraph, SpinalGraphService, SpinalNode } from "spin
 import { IConfig, ISpinalAPIMiddleware } from "spinal-organ-api-server";
 import { EXCLUDES_TYPES, HTTP_CODES } from "../constant";
 import { AppProfileService, AppService, DigitalTwinService, UserProfileService } from "../services";
+import { parseTimeOfDay, parseDuration } from "../utils/parseTime";
+
 
 export default class SpinalAPIMiddleware implements ISpinalAPIMiddleware {
 	config: IConfig = {
@@ -43,6 +45,13 @@ export default class SpinalAPIMiddleware implements ISpinalAPIMiddleware {
 		file: {
 			path: process.env.CONFIG_DIRECTORY_PATH,
 		},
+		preload: {
+			workHoursStart: parseTimeOfDay(process.env.WORK_HOURS_START, 8 * 60),
+			workHoursEnd: parseTimeOfDay(process.env.WORK_HOURS_END, 19 * 60),
+			idleDelay: parseDuration(process.env.PRELOAD_IDLE_DELAY, 2000),
+			batchSize: parseDuration(process.env.PRELOAD_BATCH_SIZE, 20) || 20,
+			batchDelay: parseDuration(process.env.PRELOAD_BATCH_DELAY, 50),
+		}
 	};
 	conn: FileSystem | undefined;
 
@@ -52,7 +61,7 @@ export default class SpinalAPIMiddleware implements ISpinalAPIMiddleware {
 	private static instance: SpinalAPIMiddleware;
 	graph: SpinalGraph | undefined;
 
-	private constructor() {}
+	private constructor() { }
 
 	static getInstance(): SpinalAPIMiddleware {
 		if (!this.instance) this.instance = new SpinalAPIMiddleware();

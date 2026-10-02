@@ -35,7 +35,7 @@ const userList_services_1 = require("./userList.services");
 const AuthError_1 = require("../security/AuthError");
 const codeUnique_service_1 = require("./codeUnique.service");
 const appList_services_1 = require("./appList.services");
-const tokenKey = "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d";
+const token_service_1 = require("./token.service");
 class AuthentificationService {
     static instance;
     authPlatformIsConnected = false;
@@ -61,6 +61,21 @@ class AuthentificationService {
             return userList_services_1.UserListService.getInstance().authenticateUser(info);
         let infoFormatted = this._formatInfo(info);
         return appList_services_1.AppListService.getInstance().authenticateApplication(infoFormatted);
+    }
+    async updateUserPassword(data) {
+        let pamCredentials = await this.getBosToAdminCredential();
+        if (!pamCredentials)
+            throw new AuthError_1.OtherError(constant_1.HTTP_CODES.UNAUTHORIZED, "No BOS to admin registered");
+        const { urlAdmin, tokenBosToAdmin } = pamCredentials;
+        const url = `${urlAdmin}/users/${data.username}/updatePassword`;
+        return axios_1.default
+            .put(url, { userLastPassword: data.oldPassword, newPassword: data.newPassword }, { headers: { "Content-Type": "application/json", "x-access-token": tokenBosToAdmin } })
+            .then((result) => result.data)
+            .catch((error) => {
+            const statusCode = error?.response?.status || constant_1.HTTP_CODES.BAD_REQUEST;
+            const message = error?.response?.data?.message || error?.message || "Unable to update user password";
+            throw new AuthError_1.OtherError(statusCode, message);
+        });
     }
     /**
      * Registers the client to the admin authentication server.
@@ -93,9 +108,11 @@ class AuthentificationService {
             this.authPlatformIsConnected = true;
             return this._editBosCredential(result.data);
         })
-            .catch((e) => {
+            .catch((error) => {
             this.authPlatformIsConnected = false;
-            throw new Error(e.message);
+            const statusCode = error?.response?.status || constant_1.HTTP_CODES.BAD_REQUEST;
+            const message = error?.response?.data?.message || error?.message || "Unable to update user password";
+            throw new AuthError_1.OtherError(statusCode, message);
         });
     }
     /**
@@ -191,6 +208,7 @@ class AuthentificationService {
      * @returns A promise that resolves to the newly created admin credential object.
      */
     createAdminCredential() {
+        const tokenKey = token_service_1.TokenService.getInstance().getOrGenerateTokenKey();
         const clientId = (0, uuid_1.v4)();
         const token = jwt.sign({ clientId, type: "ADMIN SERVER" }, tokenKey);
         return this.editAdminCredential({
@@ -228,7 +246,7 @@ class AuthentificationService {
      * @returns A promise resolving to the Axios response of the PUT request.
      * @throws Error if no admin is registered.
      */
-    async sendBosInfoToAuth(update = false) {
+    async sendBosInfoToAuth() {
         const bosCredential = await this.getBosToAdminCredential();
         if (!bosCredential)
             throw new Error("No admin registered, register an admin and retry !");
@@ -236,7 +254,7 @@ class AuthentificationService {
         if (!adminCredential)
             throw new Error("No admin registered, register an admin and retry !");
         // const endpoint = "register";
-        const data = await this._getRequestBody(update, bosCredential, adminCredential);
+        const data = await this._getRequestBody(bosCredential, adminCredential);
         if (bosCredential.urlAdmin?.endsWith("/"))
             bosCredential.urlAdmin = bosCredential.urlAdmin.replace(/\/$/, "");
         return axios_1.default
@@ -248,7 +266,7 @@ class AuthentificationService {
             .catch(async (err) => {
             if (err.response?.status === constant_1.HTTP_CODES.UNAUTHORIZED) {
                 await this.updateBosTokenInAuthPlatform();
-                return this.sendBosInfoToAuth(update);
+                return this.sendBosInfoToAuth();
             }
             throw err;
         });
@@ -289,16 +307,13 @@ class AuthentificationService {
             // appList: await this._formatAppList()
         };
     }
-    async _getRequestBody(update, bosCredential, adminCredential) {
+    async _getRequestBody(bosCredential, adminCredential) {
         return JSON.stringify({
             TokenBosAdmin: bosCredential.tokenBosToAdmin,
             platformId: bosCredential.idPlateform,
             jsonData: await this.getJsonData(),
-            ...(!update && {
-                URLBos: `http://localhost:8060`,
-                TokenAdminBos: adminCredential.TokenAdminToPam,
-                idPlatformOfAdmin: adminCredential.idPlatformOfAdmin,
-            }),
+            TokenAdminBos: adminCredential.TokenAdminToPam,
+            idPlatformOfAdmin: adminCredential.idPlatformOfAdmin,
         });
     }
     async _editBosCredential(bosCredential) {
