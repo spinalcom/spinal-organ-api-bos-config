@@ -21,7 +21,31 @@ export default class SpinalAPIMiddleware implements ISpinalAPIMiddleware {
     setGraph(actualDigitalTwin?: SpinalNode): Promise<SpinalGraph<any>>;
     private _loadNewGraph;
     private _loadwithConnect;
+    /**
+     * Returns the model if the profile can access it :
+     * - a node must belong to an authorized context (see _nodeIsBelongUserContext) ;
+     * - a file (or document) must be linked to a node accessible to the profile (see _fileIsAccessible).
+     * Any other model (Lst, Ptr, Path, FileVersion...) is refused.
+     * A refused model rejects the returned promise with a { code, message } error.
+     */
+    private _checkModelAccess;
+    private _toHttpError;
     private _nodeIsBelongUserContext;
+    private _nodeBelongsToContexts;
+    /**
+     * Walks up the parents of a document node through the directories (DirectoryhasFiles, DirectoryhasDirectory)
+     * up to the root directory and its owner (hasFiles).
+     * A directory is authorized if it belongs to an authorized context ; an owner (room, equipment, ticket...)
+     * is authorized with the same rule as any other node and is not walked through.
+     */
+    private _documentNodeIsLinkedToUserContext;
+    /**
+     * A file is accessible if the node it refers to (SpinalDocument or file converted by the documentation service)
+     * is accessible. A file that can't be attached to any node (e.g. an old Drive file) is reserved to the admin profile.
+     */
+    private _fileIsAccessible;
+    private _getFileNode;
+    private _isAdminProfile;
     private _getProfileContexts;
 }
 export { SpinalAPIMiddleware };
