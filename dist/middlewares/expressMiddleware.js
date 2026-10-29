@@ -99,6 +99,7 @@ function initSwagger(app) {
 /**
  * Inject selected admin routes (from the local tsoa `swagger.json`) into the
  * `spinal-organ-api-server` OpenAPI document served at `/spinalcom-api-docs`.
+ * Display the injected routes' tags before the existing API sections.
  *
  * Call this once, after `runServerRest()`.
  *
@@ -132,6 +133,7 @@ function injectAdminRoutesIntoApiDocs(routeKeys = ["/api/v1/auth"]) {
                 copyReferencedSchemas(value);
         }
     };
+    const injectedTags = new Set();
     for (const routeKey of routeKeys) {
         const path = source.paths?.[routeKey];
         if (!path) {
@@ -140,7 +142,16 @@ function injectAdminRoutesIntoApiDocs(routeKeys = ["/api/v1/auth"]) {
         }
         target.paths[routeKey] = path;
         copyReferencedSchemas(path);
+        for (const method of ["get", "put", "post", "delete", "options", "head", "patch", "trace"]) {
+            for (const tag of path[method]?.tags ?? [])
+                injectedTags.add(tag);
+        }
     }
+    const existingTags = target.tags ?? [];
+    target.tags = [
+        ...Array.from(injectedTags, (name) => existingTags.find((tag) => tag.name === name) ?? source.tags?.find((tag) => tag.name === name) ?? { name }),
+        ...existingTags.filter((tag) => !injectedTags.has(tag.name)),
+    ];
 }
 function useApiMiddleWare(app) {
     app.use(cors({ origin: "*", exposedHeaders: ["X-API-Version", "X-API-BOS-CONFIG-Version"] }));

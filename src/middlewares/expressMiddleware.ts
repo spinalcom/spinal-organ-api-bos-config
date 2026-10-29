@@ -101,6 +101,7 @@ export function initSwagger(app: express.Express) {
 /**
  * Inject selected admin routes (from the local tsoa `swagger.json`) into the
  * `spinal-organ-api-server` OpenAPI document served at `/spinalcom-api-docs`.
+ * Display the injected routes' tags before the existing API sections.
  *
  * Call this once, after `runServerRest()`.
  *
@@ -132,6 +133,7 @@ export function injectAdminRoutesIntoApiDocs(routeKeys: string[] = ["/api/v1/aut
 		}
 	};
 
+	const injectedTags = new Set<string>();
 	for (const routeKey of routeKeys) {
 		const path = source.paths?.[routeKey];
 		if (!path) {
@@ -140,7 +142,18 @@ export function injectAdminRoutesIntoApiDocs(routeKeys: string[] = ["/api/v1/aut
 		}
 		target.paths[routeKey] = path;
 		copyReferencedSchemas(path);
+		for (const method of ["get", "put", "post", "delete", "options", "head", "patch", "trace"]) {
+			for (const tag of path[method]?.tags ?? []) injectedTags.add(tag);
+		}
 	}
+
+	const existingTags: { name: string; [key: string]: unknown }[] = target.tags ?? [];
+	target.tags = [
+		...Array.from(injectedTags, (name) =>
+			existingTags.find((tag) => tag.name === name) ?? source.tags?.find((tag) => tag.name === name) ?? { name }
+		),
+		...existingTags.filter((tag) => !injectedTags.has(tag.name)),
+	];
 }
 
 export function useApiMiddleWare(app: express.Express) {

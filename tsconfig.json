@@ -1,32 +1,43 @@
 {
   "compilerOptions": {
+    "rootDir": "./src",
     "target": "ES2022",
-    "module": "CommonJS",
-    "moduleResolution": "node",
+    "module": "commonjs",
     "noImplicitAny": false,
     "noImplicitReturns": false,
     "noImplicitThis": true,
     "sourceMap": true,
     "declaration": true,
-    "declarationDir": "declarations",
+    "declarationDir": "./declarations",
+    "outDir": "./dist",
     "resolveJsonModule": true,
-    "downlevelIteration": true,
-    "baseUrl": "server",
-    "outDir": "dist",
     "skipLibCheck": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "noEmitOnError": true,
-    "lib": ["ES2022"]
+    "lib": [
+      "ES2022"
+    ]
   },
   "hooks": [
     "copy-files"
   ],
-  "exclude": ["node_modules", "client"],
-  "include": ["./src/**/*"],
+  "exclude": [
+    "node_modules",
+    "client"
+  ],
+  "include": [
+    "./src/**/*"
+  ],
   "paths": {
-    "@/*": ["src/*"],
-    "/@/*": ["src/*"],
-    "/@/img/*": ["src/assets/img/*"]
+    "@/*": [
+      "src/*"
+    ],
+    "/@/*": [
+      "src/*"
+    ],
+    "/@/img/*": [
+      "src/assets/img/*"
+    ]
   }
 }
