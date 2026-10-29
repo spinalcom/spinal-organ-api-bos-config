@@ -63,7 +63,11 @@ configServiceInstance
     // it is important to call this method after setting the connection to the middlewares
     // otherwise the digital twin will not be initialized correctly
     await DigitalTwinService.getInstance().getActualDigitalTwin(true);
-    await spinalAPIMiddleware.getGraph();
+    try {
+      await spinalAPIMiddleware.getGraph();
+    } catch (err) {
+      console.error("Error getting graph:", err);
+    }
     const log_body = Number(process.env.LOG_BODY) == 1 ? true : false;
 
     // create server + listen
