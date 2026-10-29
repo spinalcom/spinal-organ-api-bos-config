@@ -186,7 +186,7 @@ function _formatValidationError(err) {
     };
 }
 function authenticateRequest(app) {
-    app.all(/\/api\/v1\/*/, async (req, res, next) => {
+    const authenticateMiddleware = async (req, res, next) => {
         let err;
         try {
             const isAdmin = isAdminRoute(req.url);
@@ -198,7 +198,9 @@ function authenticateRequest(app) {
             err = error;
         }
         next(err);
-    });
+    };
+    app.all(/\/api\/v1\/*/, authenticateMiddleware);
+    app.all(/\/api\/v2\/*/, authenticateMiddleware);
 }
 function isAdminRoute(apiRoute) {
     const route = apiRoute.includes("?") ? apiRoute.substring(0, apiRoute.indexOf("?")) : apiRoute;

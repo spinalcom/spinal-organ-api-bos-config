@@ -56,6 +56,7 @@ configFile_service_1.configServiceInstance
     // it is important to call this method after setting the connection to the middlewares
     // otherwise the digital twin will not be initialized correctly
     await services_1.DigitalTwinService.getInstance().getActualDigitalTwin(true);
+    await spinalAPIMiddleware.getGraph();
     const log_body = Number(process.env.LOG_BODY) == 1 ? true : false;
     // create server + listen
     if (process.env.RUN_STARTUP_TASK === "1") {

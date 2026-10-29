@@ -197,18 +197,24 @@ export function _formatValidationError(err: ValidateError) {
 }
 
 export function authenticateRequest(app: express.Application) {
-	app.all(/\/api\/v1\/*/, async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-		let err;
-		try {
-			const isAdmin = isAdminRoute(req.url);
-			if (isAdmin) return next();
+	const authenticateMiddleware = async (
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction
+  ) => {
+    let err;
+    try {
+      const isAdmin = isAdminRoute(req.url);
+      if (isAdmin) return next();
 
-			await checkBeforeRedirectToApi(req, SECURITY_NAME.profile);
-		} catch (error) {
-			err = error;
-		}
-		next(err);
-	});
+      await checkBeforeRedirectToApi(req, SECURITY_NAME.profile);
+    } catch (error) {
+      err = error;
+    }
+    next(err);
+  };
+	app.all(/\/api\/v1\/*/, authenticateMiddleware);
+	app.all(/\/api\/v2\/*/, authenticateMiddleware);
 }
 
 function isAdminRoute(apiRoute: string): boolean {
