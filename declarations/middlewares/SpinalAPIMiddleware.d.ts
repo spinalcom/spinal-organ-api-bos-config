@@ -1,6 +1,7 @@
 import { FileSystem, Model } from "spinal-core-connectorjs";
 import { SpinalGraph, SpinalNode } from "spinal-env-viewer-graph-service";
 import { IConfig, ISpinalAPIMiddleware } from "spinal-organ-api-server";
+import { Request, Response, NextFunction } from "express";
 export default class SpinalAPIMiddleware implements ISpinalAPIMiddleware {
     config: IConfig;
     conn: FileSystem | undefined;
@@ -23,5 +24,6 @@ export default class SpinalAPIMiddleware implements ISpinalAPIMiddleware {
     private _loadwithConnect;
     private _nodeIsBelongUserContext;
     private _getProfileContexts;
+    checkMonitoringToken(req: Request, res: Response, next: NextFunction): void | Response<any, Record<string, any>>;
 }
 export { SpinalAPIMiddleware };

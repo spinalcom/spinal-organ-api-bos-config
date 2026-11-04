@@ -30,6 +30,7 @@ exports.injectAdminRoutesIntoApiDocs = injectAdminRoutesIntoApiDocs;
 exports.useApiMiddleWare = useApiMiddleWare;
 exports.errorHandler = errorHandler;
 exports._formatValidationError = _formatValidationError;
+exports.authenticateMiddleware = authenticateMiddleware;
 exports.authenticateRequest = authenticateRequest;
 const cors = require("cors");
 const express = require("express");
@@ -148,10 +149,7 @@ function injectAdminRoutesIntoApiDocs(routeKeys = ["/api/v1/auth"]) {
         }
     }
     const existingTags = target.tags ?? [];
-    target.tags = [
-        ...Array.from(injectedTags, (name) => existingTags.find((tag) => tag.name === name) ?? source.tags?.find((tag) => tag.name === name) ?? { name }),
-        ...existingTags.filter((tag) => !injectedTags.has(tag.name)),
-    ];
+    target.tags = [...Array.from(injectedTags, (name) => existingTags.find((tag) => tag.name === name) ?? source.tags?.find((tag) => tag.name === name) ?? { name }), ...existingTags.filter((tag) => !injectedTags.has(tag.name))];
 }
 function useApiMiddleWare(app) {
     app.use(cors({ origin: "*", exposedHeaders: ["X-API-Version", "X-API-BOS-CONFIG-Version"] }));
@@ -185,20 +183,22 @@ function _formatValidationError(err) {
         details: err?.fields,
     };
 }
+async function authenticateMiddleware(req, res, next, isFromMonitoring) {
+    let err;
+    try {
+        const isAdmin = isAdminRoute(req.url);
+        if (isAdmin)
+            return next();
+        await (0, authentication_1.checkBeforeRedirectToApi)(req, constant_1.SECURITY_NAME.profile);
+    }
+    catch (error) {
+        if (isFromMonitoring)
+            return res.status(401).json({ error: `Unauthorized` });
+        err = error;
+    }
+    next(err);
+}
 function authenticateRequest(app) {
-    const authenticateMiddleware = async (req, res, next) => {
-        let err;
-        try {
-            const isAdmin = isAdminRoute(req.url);
-            if (isAdmin)
-                return next();
-            await (0, authentication_1.checkBeforeRedirectToApi)(req, constant_1.SECURITY_NAME.profile);
-        }
-        catch (error) {
-            err = error;
-        }
-        next(err);
-    };
     app.all(/\/api\/v1\/*/, authenticateMiddleware);
     app.all(/\/api\/v2\/*/, authenticateMiddleware);
 }

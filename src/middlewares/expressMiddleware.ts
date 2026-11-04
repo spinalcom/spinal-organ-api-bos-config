@@ -148,12 +148,7 @@ export function injectAdminRoutesIntoApiDocs(routeKeys: string[] = ["/api/v1/aut
 	}
 
 	const existingTags: { name: string; [key: string]: unknown }[] = target.tags ?? [];
-	target.tags = [
-		...Array.from(injectedTags, (name) =>
-			existingTags.find((tag) => tag.name === name) ?? source.tags?.find((tag) => tag.name === name) ?? { name }
-		),
-		...existingTags.filter((tag) => !injectedTags.has(tag.name)),
-	];
+	target.tags = [...Array.from(injectedTags, (name) => existingTags.find((tag) => tag.name === name) ?? source.tags?.find((tag) => tag.name === name) ?? { name }), ...existingTags.filter((tag) => !injectedTags.has(tag.name))];
 }
 
 export function useApiMiddleWare(app: express.Express) {
@@ -196,23 +191,21 @@ export function _formatValidationError(err: ValidateError) {
 	};
 }
 
-export function authenticateRequest(app: express.Application) {
-	const authenticateMiddleware = async (
-    req: express.Request,
-    res: express.Response,
-    next: express.NextFunction
-  ) => {
-    let err;
-    try {
-      const isAdmin = isAdminRoute(req.url);
-      if (isAdmin) return next();
+export async function authenticateMiddleware(req: express.Request, res: express.Response, next: express.NextFunction, isFromMonitoring?: boolean) {
+	let err;
+	try {
+		const isAdmin = isAdminRoute(req.url);
+		if (isAdmin) return next();
 
-      await checkBeforeRedirectToApi(req, SECURITY_NAME.profile);
-    } catch (error) {
-      err = error;
-    }
-    next(err);
-  };
+		await checkBeforeRedirectToApi(req, SECURITY_NAME.profile);
+	} catch (error) {
+		if (isFromMonitoring) return res.status(401).json({ error: `Unauthorized` });
+		err = error;
+	}
+	next(err);
+}
+
+export function authenticateRequest(app: express.Application) {
 	app.all(/\/api\/v1\/*/, authenticateMiddleware);
 	app.all(/\/api\/v2\/*/, authenticateMiddleware);
 }
