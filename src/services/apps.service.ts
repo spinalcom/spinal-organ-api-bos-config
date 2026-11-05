@@ -207,7 +207,7 @@ export class AppService {
 		if (!groupNode) return [];
 
 		const children = await groupNode.getChildren([APP_RELATION_NAME]);
-		const res: SpinalNode[] = [];
+		const res: SpinalNode[] = [...children];
 
 		for (const app of children) {
 			const subApps = await app.getChildren([SUB_APP_RELATION_NAME]);
@@ -332,8 +332,11 @@ export class AppService {
 	 * @returns {Promise<SpinalNode[]>} A promise that resolves to an array of all SpinalNodes.
 	 */
 	public async getAllApps(): Promise<{ apps: SpinalNode[]; adminApps: SpinalNode[] }> {
+		const appsAndSubApps = await this.getAllBuildingAppsAndSubApp();
+		const apps = appsAndSubApps.filter((app) => app.info.type.get() === BUILDING_APP_TYPE);
+
 		return {
-			apps: await this.getAllBuildingAppsAndSubApp(),
+			apps,
 			adminApps: await this.getAllAdminApps(),
 		};
 	}
