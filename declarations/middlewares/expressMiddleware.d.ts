@@ -18,5 +18,5 @@ export declare function _formatValidationError(err: ValidateError): {
     message: string;
     details: import("tsoa").FieldErrors;
 };
-export declare function authenticateMiddleware(req: express.Request, res: express.Response, next: express.NextFunction, isFromMonitoring?: boolean): Promise<void | express.Response<any, Record<string, any>>>;
+export declare function authenticateMiddleware(req: express.Request, res: express.Response, next: express.NextFunction): Promise<void | express.Response<any, Record<string, any>>>;
 export declare function authenticateRequest(app: express.Application): void;

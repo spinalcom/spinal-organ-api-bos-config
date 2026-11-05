@@ -211,7 +211,8 @@ class SpinalAPIMiddleware {
             const urlStartWithSlash = originalUrl.startsWith("/") ? originalUrl : `/${originalUrl}`;
             if (urlStartWithSlash.startsWith(start) || urlStartWithSlash.startsWith("/monitoring/health"))
                 return next();
-            (0, expressMiddleware_1.authenticateMiddleware)(req, res, next, true);
+            req.isFromMonitoring = true;
+            (0, expressMiddleware_1.authenticateMiddleware)(req, res, next);
         }
         catch (error) {
             return res.status(401).json({ error: `Unauthorized` });

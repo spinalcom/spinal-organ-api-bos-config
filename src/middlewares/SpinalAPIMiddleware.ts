@@ -234,7 +234,9 @@ export default class SpinalAPIMiddleware implements ISpinalAPIMiddleware {
 
 			if (urlStartWithSlash.startsWith(start) || urlStartWithSlash.startsWith("/monitoring/health")) return next();
 
-			authenticateMiddleware(req, res, next, true);
+			(req as any).isFromMonitoring = true;
+
+			authenticateMiddleware(req, res, next);
 		} catch (error) {
 			return res.status(401).json({ error: `Unauthorized` });
 		}

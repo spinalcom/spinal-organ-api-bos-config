@@ -205,12 +205,16 @@ export class AppService {
 	public async getAllBuildingAppsAndSubApp(): Promise<SpinalNode[]> {
 		const groupNode = await this._getApplicationGroupNode(BUILDING_APPS_GROUP_NAME, BUILDING_APPS_GROUP_TYPE);
 		if (!groupNode) return [];
+
 		const children = await groupNode.getChildren([APP_RELATION_NAME]);
-		const res: SpinalNode[] = [...children];
+		const res: SpinalNode[] = [];
+
 		for (const app of children) {
 			const subApps = await app.getChildren([SUB_APP_RELATION_NAME]);
+
 			res.push(...subApps);
 		}
+
 		return res;
 	}
 

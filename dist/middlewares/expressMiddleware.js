@@ -183,7 +183,7 @@ function _formatValidationError(err) {
         details: err?.fields,
     };
 }
-async function authenticateMiddleware(req, res, next, isFromMonitoring) {
+async function authenticateMiddleware(req, res, next) {
     let err;
     try {
         const isAdmin = isAdminRoute(req.url);
@@ -192,7 +192,7 @@ async function authenticateMiddleware(req, res, next, isFromMonitoring) {
         await (0, authentication_1.checkBeforeRedirectToApi)(req, constant_1.SECURITY_NAME.profile);
     }
     catch (error) {
-        if (isFromMonitoring)
+        if (req.isFromMonitoring)
             return res.status(401).json({ error: `Unauthorized` });
         err = error;
     }

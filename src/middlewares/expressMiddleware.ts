@@ -191,7 +191,7 @@ export function _formatValidationError(err: ValidateError) {
 	};
 }
 
-export async function authenticateMiddleware(req: express.Request, res: express.Response, next: express.NextFunction, isFromMonitoring?: boolean) {
+export async function authenticateMiddleware(req: express.Request, res: express.Response, next: express.NextFunction) {
 	let err;
 	try {
 		const isAdmin = isAdminRoute(req.url);
@@ -199,7 +199,7 @@ export async function authenticateMiddleware(req: express.Request, res: express.
 
 		await checkBeforeRedirectToApi(req, SECURITY_NAME.profile);
 	} catch (error) {
-		if (isFromMonitoring) return res.status(401).json({ error: `Unauthorized` });
+		if ((req as any).isFromMonitoring) return res.status(401).json({ error: `Unauthorized` });
 		err = error;
 	}
 	next(err);

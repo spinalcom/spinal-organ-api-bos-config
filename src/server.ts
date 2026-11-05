@@ -21,74 +21,62 @@
  * with this file. If not, see
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
-import * as express from 'express';
-import * as morgan from 'morgan';
-import { type Application } from 'express';
-import { RegisterRoutes } from './routes';
-import { createServer } from 'https';
-import { readFileSync } from 'fs';
-import {
-  useHubProxy,
-  useClientMiddleWare,
-  initSwagger,
-  useApiMiddleWare,
-  errorHandler,
-  _formatValidationError,
-  authenticateRequest,
-} from './middlewares/expressMiddleware';
+import * as express from "express";
+import * as morgan from "morgan";
+import { type Application } from "express";
+import { RegisterRoutes } from "./routes";
+import { createServer } from "https";
+import { readFileSync } from "fs";
+import { useHubProxy, useClientMiddleWare, initSwagger, useApiMiddleWare, errorHandler, _formatValidationError, authenticateRequest } from "./middlewares/expressMiddleware";
 
-import { useLoginProxy } from './proxy/login';
-import type { Server } from 'http';
+import { useLoginProxy } from "./proxy/login";
+import type { Server } from "http";
 
-const apiServerVersion = require('spinal-organ-api-server/package.json').version;
-const bosConfigVersion = require('../package.json').version;
+const apiServerVersion = require("spinal-organ-api-server/package.json").version;
+const bosConfigVersion = require("../package.json").version;
 
 export async function initExpress() {
-  var app = express();
+	var app = express();
 
-  app.use((_req, res, next) => {
-    res.setHeader('X-API-Version', apiServerVersion);
-    res.setHeader('X-API-BOS-CONFIG-Version', bosConfigVersion);
+	app.use((_req, res, next) => {
+		res.setHeader("X-API-Version", apiServerVersion);
+		res.setHeader("X-API-BOS-CONFIG-Version", bosConfigVersion);
 
-    next();
-  });
+		next();
+	});
 
-  app.use(morgan('dev'));
+	app.use(morgan("dev"));
 
-  useApiMiddleWare(app);
+	useApiMiddleWare(app);
 
-  useHubProxy(app);
-  useLoginProxy(app);
+	useHubProxy(app);
+	useLoginProxy(app);
 
-  useClientMiddleWare(app);
-  initSwagger(app);
-  useLoginProxy(app);
-  authenticateRequest(app);
-  RegisterRoutes(app);
+	useClientMiddleWare(app);
+	initSwagger(app);
+	// useLoginProxy(app);
+	authenticateRequest(app);
+	RegisterRoutes(app);
 
-  app.use(errorHandler);
+	app.use(errorHandler);
 
-  return app;
+	return app;
 }
 
 export function initServer(app: Application): Server {
-  const serverProtocol = process.env.SERVER_PROTOCOL || 'http'; // Default to http if not set
-  const serverPort = process.env.SERVER_PORT || 2022;
-  let server;
-  // const server = app.listen(server_port, () => console.log(`api server listening on port ${server_port}!`));
-  if (serverProtocol === 'https') {
-    // If using HTTPS, ensure SSL_KEY_PATH and SSL_CERT_PATH are set in the environment variables
-    const sslOptions = {
-      key: readFileSync(process.env.SSL_KEY_PATH),
-      cert: readFileSync(process.env.SSL_CERT_PATH),
-    };
-    server = createServer(sslOptions, app).listen(serverPort, () =>
-      console.log(`app listening at https://localhost:${serverPort} ....`)
-    );
-  } else if (serverProtocol === 'http') {
-    server = app.listen(serverPort, () =>
-      console.log(`app listening at http://localhost:${serverPort} ....`)
-    );
-  }
-  return server;
+	const serverProtocol = process.env.SERVER_PROTOCOL || "http"; // Default to http if not set
+	const serverPort = process.env.SERVER_PORT || 2022;
+	let server;
+	// const server = app.listen(server_port, () => console.log(`api server listening on port ${server_port}!`));
+	if (serverProtocol === "https") {
+		// If using HTTPS, ensure SSL_KEY_PATH and SSL_CERT_PATH are set in the environment variables
+		const sslOptions = {
+			key: readFileSync(process.env.SSL_KEY_PATH),
+			cert: readFileSync(process.env.SSL_CERT_PATH),
+		};
+		server = createServer(sslOptions, app).listen(serverPort, () => console.log(`app listening at https://localhost:${serverPort} ....`));
+	} else if (serverProtocol === "http") {
+		server = app.listen(serverPort, () => console.log(`app listening at http://localhost:${serverPort} ....`));
+	}
+	return server;
 }

@@ -195,7 +195,7 @@ class AppService {
         if (!groupNode)
             return [];
         const children = await groupNode.getChildren([constant_1.APP_RELATION_NAME]);
-        const res = [...children];
+        const res = [];
         for (const app of children) {
             const subApps = await app.getChildren([constant_1.SUB_APP_RELATION_NAME]);
             res.push(...subApps);
