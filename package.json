@@ -81,7 +81,7 @@
 		"spinal-lib-organ-monitoring": "spinal-lib-organ-monitoring",
 		"spinal-model-timeseries": "spinal-model-timeseries",
 		"spinal-organ-api-pubsub": "spinal-organ-api-pubsub",
-		"spinal-organ-api-server": "spinal-organ-api-server@documentary",
+		"spinal-organ-api-server": "spinal-organ-api-server",
 		"spinal-service-pubsub-logs": "spinal-service-pubsub-logs",
 		"spinal-service-ticket": "spinal-service-ticket",
 		"spinal-core-connectorjs": "spinal-core-connectorjs"
