@@ -101,8 +101,9 @@ export default class AuthorizationService {
 				const relationName = app.getType().get() === ADMIN_APP_TYPE ? PROFILE_TO_AUTHORIZED_ADMIN_APP : PROFILE_TO_AUTHORIZED_APP;
 				// add catch to avoid error
 				await profile.addChild(app, relationName, PTR_LST_TYPE).catch(() => null);
-				appsNodes.push(app);
 			}
+
+			appsNodes.push(app);
 		}
 
 		return appsNodes;
