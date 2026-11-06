@@ -28,7 +28,8 @@ import { IConfig, ISpinalAPIMiddleware } from "spinal-organ-api-server";
 import { EXCLUDES_TYPES, HTTP_CODES } from "../constant";
 import { AppProfileService, AppService, DigitalTwinService, UserProfileService } from "../services";
 import { parseTimeOfDay, parseDuration } from "../utils/parseTime";
-
+import { Request, Response, NextFunction } from "express";
+import { authenticateMiddleware } from "./expressMiddleware";
 
 export default class SpinalAPIMiddleware implements ISpinalAPIMiddleware {
 	config: IConfig = {
@@ -51,8 +52,9 @@ export default class SpinalAPIMiddleware implements ISpinalAPIMiddleware {
 			idleDelay: parseDuration(process.env.PRELOAD_IDLE_DELAY, 2000),
 			batchSize: parseDuration(process.env.PRELOAD_BATCH_SIZE, 20) || 20,
 			batchDelay: parseDuration(process.env.PRELOAD_BATCH_DELAY, 50),
-		}
+		},
 	};
+
 	conn: FileSystem | undefined;
 
 	loadedPtr: Map<number, any> = new Map();
@@ -61,7 +63,7 @@ export default class SpinalAPIMiddleware implements ISpinalAPIMiddleware {
 	private static instance: SpinalAPIMiddleware;
 	graph: SpinalGraph | undefined;
 
-	private constructor() { }
+	private constructor() {}
 
 	static getInstance(): SpinalAPIMiddleware {
 		if (!this.instance) this.instance = new SpinalAPIMiddleware();
@@ -222,6 +224,22 @@ export default class SpinalAPIMiddleware implements ISpinalAPIMiddleware {
 			SpinalGraphService._addNode(context);
 			return context;
 		});
+	}
+
+	checkMonitoringToken(req: Request, res: Response, next: NextFunction) {
+		try {
+			const start = "/monitoring/api-docs";
+			const originalUrl = (req.url || "").replace(/\/+$/, "");
+			const urlStartWithSlash = originalUrl.startsWith("/") ? originalUrl : `/${originalUrl}`;
+
+			if (urlStartWithSlash.startsWith(start) || urlStartWithSlash.startsWith("/monitoring/health")) return next();
+
+			(req as any).isFromMonitoring = true;
+
+			authenticateMiddleware(req, res, next);
+		} catch (error) {
+			return res.status(401).json({ error: `Unauthorized` });
+		}
 	}
 }
 

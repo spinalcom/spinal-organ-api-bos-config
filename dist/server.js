@@ -32,33 +32,33 @@ const https_1 = require("https");
 const fs_1 = require("fs");
 const expressMiddleware_1 = require("./middlewares/expressMiddleware");
 const login_1 = require("./proxy/login");
-const apiServerVersion = require('spinal-organ-api-server/package.json').version;
-const bosConfigVersion = require('../package.json').version;
+const apiServerVersion = require("spinal-organ-api-server/package.json").version;
+const bosConfigVersion = require("../package.json").version;
 async function initExpress() {
     var app = express();
     app.use((_req, res, next) => {
-        res.setHeader('X-API-Version', apiServerVersion);
-        res.setHeader('X-API-BOS-CONFIG-Version', bosConfigVersion);
+        res.setHeader("X-API-Version", apiServerVersion);
+        res.setHeader("X-API-BOS-CONFIG-Version", bosConfigVersion);
         next();
     });
-    app.use(morgan('dev'));
+    app.use(morgan("dev"));
     (0, expressMiddleware_1.useApiMiddleWare)(app);
     (0, expressMiddleware_1.useHubProxy)(app);
     (0, login_1.useLoginProxy)(app);
     (0, expressMiddleware_1.useClientMiddleWare)(app);
     (0, expressMiddleware_1.initSwagger)(app);
-    (0, login_1.useLoginProxy)(app);
+    // useLoginProxy(app);
     (0, expressMiddleware_1.authenticateRequest)(app);
     (0, routes_1.RegisterRoutes)(app);
     app.use(expressMiddleware_1.errorHandler);
     return app;
 }
 function initServer(app) {
-    const serverProtocol = process.env.SERVER_PROTOCOL || 'http'; // Default to http if not set
+    const serverProtocol = process.env.SERVER_PROTOCOL || "http"; // Default to http if not set
     const serverPort = process.env.SERVER_PORT || 2022;
     let server;
     // const server = app.listen(server_port, () => console.log(`api server listening on port ${server_port}!`));
-    if (serverProtocol === 'https') {
+    if (serverProtocol === "https") {
         // If using HTTPS, ensure SSL_KEY_PATH and SSL_CERT_PATH are set in the environment variables
         const sslOptions = {
             key: (0, fs_1.readFileSync)(process.env.SSL_KEY_PATH),
@@ -66,7 +66,7 @@ function initServer(app) {
         };
         server = (0, https_1.createServer)(sslOptions, app).listen(serverPort, () => console.log(`app listening at https://localhost:${serverPort} ....`));
     }
-    else if (serverProtocol === 'http') {
+    else if (serverProtocol === "http") {
         server = app.listen(serverPort, () => console.log(`app listening at http://localhost:${serverPort} ....`));
     }
     return server;

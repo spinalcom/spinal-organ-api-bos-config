@@ -29,6 +29,7 @@ const spinal_env_viewer_graph_service_1 = require("spinal-env-viewer-graph-servi
 const constant_1 = require("../constant");
 const services_1 = require("../services");
 const parseTime_1 = require("../utils/parseTime");
+const expressMiddleware_1 = require("./expressMiddleware");
 class SpinalAPIMiddleware {
     config = {
         spinalConnector: {
@@ -50,7 +51,7 @@ class SpinalAPIMiddleware {
             idleDelay: (0, parseTime_1.parseDuration)(process.env.PRELOAD_IDLE_DELAY, 2000),
             batchSize: (0, parseTime_1.parseDuration)(process.env.PRELOAD_BATCH_SIZE, 20) || 20,
             batchDelay: (0, parseTime_1.parseDuration)(process.env.PRELOAD_BATCH_DELAY, 50),
-        }
+        },
     };
     conn;
     loadedPtr = new Map();
@@ -202,6 +203,20 @@ class SpinalAPIMiddleware {
             spinal_env_viewer_graph_service_1.SpinalGraphService._addNode(context);
             return context;
         });
+    }
+    checkMonitoringToken(req, res, next) {
+        try {
+            const start = "/monitoring/api-docs";
+            const originalUrl = (req.url || "").replace(/\/+$/, "");
+            const urlStartWithSlash = originalUrl.startsWith("/") ? originalUrl : `/${originalUrl}`;
+            if (urlStartWithSlash.startsWith(start) || urlStartWithSlash.startsWith("/monitoring/health"))
+                return next();
+            req.isFromMonitoring = true;
+            (0, expressMiddleware_1.authenticateMiddleware)(req, res, next);
+        }
+        catch (error) {
+            return res.status(401).json({ error: `Unauthorized` });
+        }
     }
 }
 exports.default = SpinalAPIMiddleware;

@@ -6,6 +6,7 @@ export declare function initSwagger(app: express.Express): void;
 /**
  * Inject selected admin routes (from the local tsoa `swagger.json`) into the
  * `spinal-organ-api-server` OpenAPI document served at `/spinalcom-api-docs`.
+ * Display the injected routes' tags before the existing API sections.
  *
  * Call this once, after `runServerRest()`.
  *
@@ -17,4 +18,5 @@ export declare function _formatValidationError(err: ValidateError): {
     message: string;
     details: import("tsoa").FieldErrors;
 };
+export declare function authenticateMiddleware(req: express.Request, res: express.Response, next: express.NextFunction): Promise<void | express.Response<any, Record<string, any>>>;
 export declare function authenticateRequest(app: express.Application): void;
