@@ -208,6 +208,7 @@ export async function authenticateMiddleware(req: express.Request, res: express.
 export function authenticateRequest(app: express.Application) {
 	app.all(/\/api\/v1\/*/, authenticateMiddleware);
 	app.all(/\/api\/v2\/*/, authenticateMiddleware);
+	app.all(/\/BIM\/file\/*/, authenticateMiddleware);
 }
 
 function isAdminRoute(apiRoute: string): boolean {
