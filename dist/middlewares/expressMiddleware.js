@@ -201,7 +201,6 @@ async function authenticateMiddleware(req, res, next) {
 function authenticateRequest(app) {
     app.all(/\/api\/v1\/*/, authenticateMiddleware);
     app.all(/\/api\/v2\/*/, authenticateMiddleware);
-    // apply to /BIM/file/*
     app.all(/\/BIM\/file\/*/, authenticateMiddleware);
 }
 function isAdminRoute(apiRoute) {
