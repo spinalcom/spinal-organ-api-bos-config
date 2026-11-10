@@ -93,8 +93,8 @@ class AuthorizationService {
                 const relationName = app.getType().get() === constant_1.ADMIN_APP_TYPE ? constant_1.PROFILE_TO_AUTHORIZED_ADMIN_APP : constant_1.PROFILE_TO_AUTHORIZED_APP;
                 // add catch to avoid error
                 await profile.addChild(app, relationName, constant_1.PTR_LST_TYPE).catch(() => null);
-                appsNodes.push(app);
             }
+            appsNodes.push(app);
         }
         return appsNodes;
         // return appIds.reduce(async (prom, appId) => {

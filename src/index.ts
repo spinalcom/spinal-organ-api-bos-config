@@ -45,7 +45,6 @@ const preload_config = require("../preload_config");
 
 const connect_opt = process.env.HUB_PORT ? `${process.env.HUB_PROTOCOL}://${process.env.USER_ID}:${process.env.USER_MDP}@${process.env.HUB_HOST}:${process.env.HUB_PORT}/` : `${process.env.HUB_PROTOCOL}://${process.env.USER_ID}:${process.env.USER_MDP}@${process.env.HUB_HOST}/`;
 const conn = spinalCore.connect(connect_opt);
-console.log(connect_opt);
 
 configServiceInstance
   .init(conn)
