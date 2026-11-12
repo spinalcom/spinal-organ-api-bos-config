@@ -25,6 +25,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.useHubProxy = useHubProxy;
 exports.useClientMiddleWare = useClientMiddleWare;
+exports.useDocsAuthentication = useDocsAuthentication;
 exports.initSwagger = initSwagger;
 exports.injectAdminRoutesIntoApiDocs = injectAdminRoutesIntoApiDocs;
 exports.useApiMiddleWare = useApiMiddleWare;
@@ -43,6 +44,10 @@ const AuthError_1 = require("../security/AuthError");
 const authentication_1 = require("../security/authentication");
 const swaggerJSON = require("../swagger/swagger.json");
 const bodyParser = require("body-parser");
+const docsAuth_1 = require("../security/docsAuth");
+const services_1 = require("../services");
+const adminProfile_service_1 = require("../services/adminProfile.service");
+const SpinalRedisMiddleware_1 = require("./SpinalRedisMiddleware");
 const adminRoutes = Object.keys(swaggerJSON.paths);
 const swaggerOption = {
     swaggerOptions: {
@@ -80,6 +85,47 @@ function useClientMiddleWare(app) {
     app.get("/", (req, res) => {
         res.redirect("/spinalcom-api-docs");
     });
+}
+/**
+ * Puts a login in front of the documentation pages and of the swagger files
+ * they are built from : any valid login for the API documentation, the admin
+ * only for the documentation of the admin routes.
+ *
+ * Call this before the documentation routes are registered (initSwagger,
+ * the static folder and runServerRest of spinal-organ-api-server).
+ */
+function useDocsAuthentication(app) {
+    (0, docsAuth_1.useDocsAuth)(app, {
+        login: loginToDocs,
+        getProfileId: async (token) => {
+            const tokenInfo = await services_1.TokenService.getInstance().tokenIsValid(token);
+            const profile = tokenInfo?.profile;
+            return profile?.profileId || profile?.userProfileBosConfigId || profile?.appProfileBosConfigId || null;
+        },
+        isAdminProfile: (profileId) => adminProfile_service_1.AdminProfileService.getInstance().adminNode.getId().get() === profileId,
+    });
+}
+/**
+ * The same login as POST /api/v1/auth (the admin account), then the users of
+ * the authentication platform when one is registered.
+ */
+async function loginToDocs(userName, password) {
+    const credential = { userName, password };
+    let data = (await services_1.AuthentificationService.getInstance().authenticate(credential)).data;
+    if (!data?.token) {
+        try {
+            const result = await services_1.UserListService.getInstance().authenticateUserViaAuthPlateform(credential);
+            data = await result.data;
+        }
+        catch (error) {
+            // no authentication platform registered
+            data = null;
+        }
+    }
+    if (!data?.token)
+        return null;
+    SpinalRedisMiddleware_1.default.getInstance().set(data.token, data);
+    return { token: data.token, expiresAt: data.expieredToken };
 }
 function initSwagger(app) {
     app.use("/admin/swagger.json", (req, res) => {

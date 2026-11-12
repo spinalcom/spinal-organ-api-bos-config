@@ -174,6 +174,16 @@ export declare class UserProfileService {
      */
     profileHasAccessToApp(searchKeys: TAppSearch, userProfile: string | SpinalNode, appId: string): Promise<SpinalNode | undefined>;
     /**
+     * Checks if a user profile has access to an admin app. Only the admin apps
+     * count : a building app with the same name gives no access.
+     *
+     * @param searchKeys - The search criteria used to locate the admin app.
+     * @param userProfile - The user profile identifier or a SpinalNode representing the profile.
+     * @param appNameOrId - The name or ID of the admin app.
+     * @returns A promise that resolves to the SpinalNode of the admin app if access is granted.
+     */
+    profileHasAccessToAdminApp(searchKeys: TAppSearch, userProfile: string | SpinalNode, appNameOrId: string): Promise<SpinalNode | undefined>;
+    /**
      * Checks if a user profile has access to a specific sub-application within an application.
      *
      * @param searchKeys - The search criteria used to locate the application.

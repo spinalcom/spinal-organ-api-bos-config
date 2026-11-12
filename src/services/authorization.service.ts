@@ -388,6 +388,23 @@ export default class AuthorizationService {
 		return contexts.flat().find(isNodeMatchSearchKey.bind(null, searchKeys, appNameId));
 	}
 
+	/**
+	 * The admin app, when the profile was given access to it.
+	 *
+	 * Unlike profileHasAccessToApp, only the admin apps count : the app is
+	 * first found among the admin apps of the BOS, then looked for (by its id)
+	 * in the admin apps of the profile. A building app or a sub app that has
+	 * the name of an admin app, or its type, gives no access.
+	 */
+	public async profileHasAccessToAdminApp(searchKeys: TAppSearch, profile: SpinalNode, appNameId: string): Promise<SpinalNode | undefined> {
+		const adminApp = await AppService.getInstance().getAdminApp(searchKeys, appNameId);
+		if (!adminApp) return undefined;
+
+		const adminAppId = adminApp.getId().get();
+		const authorized = await this.getAuthorizedAdminApps(profile);
+		return authorized.find((app) => app.getId().get() === adminAppId);
+	}
+
 	public async profileHasAccessToSubApp(searchKeys: TAppSearch, profile: SpinalNode, appId: string, subAppId: string): Promise<SpinalNode | undefined> {
 		const [subApp, subAppsFromProfile] = await Promise.all([
 			// subApp from context App

@@ -43,6 +43,8 @@ async function initExpress() {
     });
     app.use(morgan("dev"));
     (0, expressMiddleware_1.useApiMiddleWare)(app);
+    // before every route that serves the documentation
+    (0, expressMiddleware_1.useDocsAuthentication)(app);
     (0, expressMiddleware_1.useHubProxy)(app);
     (0, login_1.useLoginProxy)(app);
     (0, expressMiddleware_1.useClientMiddleWare)(app);

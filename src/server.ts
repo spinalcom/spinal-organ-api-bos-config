@@ -27,7 +27,7 @@ import { type Application } from "express";
 import { RegisterRoutes } from "./routes";
 import { createServer } from "https";
 import { readFileSync } from "fs";
-import { useHubProxy, useClientMiddleWare, initSwagger, useApiMiddleWare, errorHandler, _formatValidationError, authenticateRequest } from "./middlewares/expressMiddleware";
+import { useHubProxy, useClientMiddleWare, initSwagger, useApiMiddleWare, useDocsAuthentication, errorHandler, _formatValidationError, authenticateRequest } from "./middlewares/expressMiddleware";
 
 import { useLoginProxy } from "./proxy/login";
 import type { Server } from "http";
@@ -48,6 +48,9 @@ export async function initExpress() {
 	app.use(morgan("dev"));
 
 	useApiMiddleWare(app);
+
+	// before every route that serves the documentation
+	useDocsAuthentication(app);
 
 	useHubProxy(app);
 	useLoginProxy(app);

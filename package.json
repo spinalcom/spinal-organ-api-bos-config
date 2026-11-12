@@ -15,7 +15,9 @@
     "dev": "concurrently \"nodemon\" \"nodemon -x tsoa spec-and-routes\"",
     "clean": "rm -rf dist declarations",
     "swagger": "tsoa spec && tsoa routes",
-    "test:auth": "node --test test/api-auth.test.js"
+    "test:auth": "node --test test/api-auth.test.js",
+    "test:docs-auth": "node --test test/docs-auth.test.js",
+    "test:admin-access": "node --test test/admin-app-access.test.js"
   },
   "dependencies": {
     "async-iterator-to-array": "0.0.1",

@@ -2,6 +2,15 @@ import * as express from "express";
 import { ValidateError } from "tsoa";
 export declare function useHubProxy(app: express.Express): void;
 export declare function useClientMiddleWare(app: express.Express): void;
+/**
+ * Puts a login in front of the documentation pages and of the swagger files
+ * they are built from : any valid login for the API documentation, the admin
+ * only for the documentation of the admin routes.
+ *
+ * Call this before the documentation routes are registered (initSwagger,
+ * the static folder and runServerRest of spinal-organ-api-server).
+ */
+export declare function useDocsAuthentication(app: express.Express): void;
 export declare function initSwagger(app: express.Express): void;
 /**
  * Inject selected admin routes (from the local tsoa `swagger.json`) into the

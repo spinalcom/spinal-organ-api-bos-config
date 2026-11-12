@@ -21,6 +21,15 @@ export default class AuthorizationService {
     unauthorizeProfileToAccessApis(profile: SpinalNode, apiIds: string | string[]): Promise<SpinalNode[]>;
     profileHasAccessToContext(profile: SpinalNode, digitalTwinId: string, contextId: string): Promise<SpinalNode | undefined>;
     profileHasAccessToApp(searchKeys: TAppSearch, profile: SpinalNode, appNameId: string): Promise<SpinalNode | undefined>;
+    /**
+     * The admin app, when the profile was given access to it.
+     *
+     * Unlike profileHasAccessToApp, only the admin apps count : the app is
+     * first found among the admin apps of the BOS, then looked for (by its id)
+     * in the admin apps of the profile. A building app or a sub app that has
+     * the name of an admin app, or its type, gives no access.
+     */
+    profileHasAccessToAdminApp(searchKeys: TAppSearch, profile: SpinalNode, appNameId: string): Promise<SpinalNode | undefined>;
     profileHasAccessToSubApp(searchKeys: TAppSearch, profile: SpinalNode, appId: string, subAppId: string): Promise<SpinalNode | undefined>;
     profileHasAccessToApi(profile: SpinalNode, apiId: string): Promise<SpinalNode | undefined>;
     private _createNodeReference;

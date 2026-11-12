@@ -33,6 +33,10 @@ import { AuthError } from "../security/AuthError";
 import { checkBeforeRedirectToApi } from "../security/authentication";
 import * as swaggerJSON from "../swagger/swagger.json";
 import * as bodyParser from "body-parser";
+import { IDocsLogin, useDocsAuth } from "../security/docsAuth";
+import { AuthentificationService, TokenService, UserListService } from "../services";
+import { AdminProfileService } from "../services/adminProfile.service";
+import SpinalRedisMiddleware from "./SpinalRedisMiddleware";
 
 const adminRoutes = Object.keys(swaggerJSON.paths);
 
@@ -76,6 +80,49 @@ export function useClientMiddleWare(app: express.Express) {
 	app.get("/", (req, res) => {
 		res.redirect("/spinalcom-api-docs");
 	});
+}
+
+/**
+ * Puts a login in front of the documentation pages and of the swagger files
+ * they are built from : any valid login for the API documentation, the admin
+ * only for the documentation of the admin routes.
+ *
+ * Call this before the documentation routes are registered (initSwagger,
+ * the static folder and runServerRest of spinal-organ-api-server).
+ */
+export function useDocsAuthentication(app: express.Express) {
+	useDocsAuth(app, {
+		login: loginToDocs,
+		getProfileId: async (token) => {
+			const tokenInfo: any = await TokenService.getInstance().tokenIsValid(token);
+			const profile = tokenInfo?.profile;
+			return profile?.profileId || profile?.userProfileBosConfigId || profile?.appProfileBosConfigId || null;
+		},
+		isAdminProfile: (profileId) => AdminProfileService.getInstance().adminNode.getId().get() === profileId,
+	});
+}
+
+/**
+ * The same login as POST /api/v1/auth (the admin account), then the users of
+ * the authentication platform when one is registered.
+ */
+async function loginToDocs(userName: string, password: string): Promise<IDocsLogin | null> {
+	const credential = { userName, password };
+	let data: any = (await AuthentificationService.getInstance().authenticate(credential)).data;
+
+	if (!data?.token) {
+		try {
+			const result = await UserListService.getInstance().authenticateUserViaAuthPlateform(credential);
+			data = await result.data;
+		} catch (error) {
+			// no authentication platform registered
+			data = null;
+		}
+	}
+	if (!data?.token) return null;
+
+	SpinalRedisMiddleware.getInstance().set(data.token, data);
+	return { token: data.token, expiresAt: data.expieredToken };
 }
 
 export function initSwagger(app: express.Express) {

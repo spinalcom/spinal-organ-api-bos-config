@@ -52,7 +52,7 @@ async function profileHasAccessToAdminApp(request: express.Request, adminAppName
 	let profileId = await getProfileId(request);
 
 	for (const appName of adminAppName) {
-		const appNode = await UserProfileService.getInstance().profileHasAccessToApp(searchByName, profileId, appName);
+		const appNode = await UserProfileService.getInstance().profileHasAccessToAdminApp(searchByName, profileId, appName);
 		if (appNode) return true;
 	}
 
