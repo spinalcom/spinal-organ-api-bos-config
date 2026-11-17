@@ -26,10 +26,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.SpinalAPIMiddleware = void 0;
 const spinal_core_connectorjs_1 = require("spinal-core-connectorjs");
 const spinal_env_viewer_graph_service_1 = require("spinal-env-viewer-graph-service");
+const spinal_model_graph_1 = require("spinal-model-graph");
 const constant_1 = require("../constant");
 const services_1 = require("../services");
 const parseTime_1 = require("../utils/parseTime");
 const expressMiddleware_1 = require("./expressMiddleware");
+function isSpinalRelation(model) {
+    return model instanceof spinal_model_graph_1.SpinalRelationRef || model instanceof spinal_model_graph_1.SpinalRelationLstPtr || model instanceof spinal_model_graph_1.SpinalRelationPtrLst;
+}
 class SpinalAPIMiddleware {
     config = {
         spinalConnector: {
@@ -94,14 +98,16 @@ class SpinalAPIMiddleware {
             return Promise.reject({ code: constant_1.HTTP_CODES.UNAUTHORIZED, message: "Unauthorized" });
         let node = spinal_core_connectorjs_1.FileSystem._objects[server_id];
         if (!node)
-            return this._loadwithConnect(server_id, profileId);
+            node = await this._loadwithConnect(server_id);
         if (node instanceof spinal_core_connectorjs_1.File)
             return node;
         const found = await this._nodeIsBelongUserContext(node, profileId);
         if (!found)
             return Promise.reject({ code: constant_1.HTTP_CODES.UNAUTHORIZED, message: "Unauthorized" });
+        // SpinalGraphService keeps nodes only (it reads node.info.id): a relation has no info
         // @ts-ignore
-        spinal_env_viewer_graph_service_1.SpinalGraphService._addNode(node);
+        if (!isSpinalRelation(node))
+            spinal_env_viewer_graph_service_1.SpinalGraphService._addNode(node);
         // @ts-ignore
         return Promise.resolve(node);
     }
@@ -161,26 +167,25 @@ class SpinalAPIMiddleware {
             });
         });
     }
-    _loadwithConnect(server_id, profileId) {
+    // Loads only: the access check is done by load, out of the load_ptr callback where its errors were lost.
+    _loadwithConnect(server_id) {
         return new Promise((resolve, reject) => {
             if (!this.conn)
                 return reject(new Error("No connection available"));
-            this.conn.load_ptr(server_id, async (model) => {
+            this.conn.load_ptr(server_id, (model) => {
                 if (!model)
                     return reject({ code: 404, message: "Node is not found" });
-                if (model instanceof spinal_core_connectorjs_1.File)
-                    return resolve(model);
-                const contextFound = await this._nodeIsBelongUserContext(model, profileId);
-                if (!contextFound)
-                    return reject({ code: 401, message: "Unauthorized" });
-                // @ts-ignore
-                spinal_env_viewer_graph_service_1.SpinalGraphService._addNode(model);
-                // @ts-ignore
-                return resolve(model);
+                resolve(model);
             });
         });
     }
     async _nodeIsBelongUserContext(node, profileId) {
+        // A relation's getType() is its kind (Ref, LstPtr, PtrLst), not a node type:
+        // the profile can read a relation when it can read the relation's parent node.
+        if (isSpinalRelation(node)) {
+            const parent = await node.getParent();
+            return parent ? this._nodeIsBelongUserContext(parent, profileId) : false;
+        }
         const type = node.getType().get();
         if (constant_1.EXCLUDES_TYPES.indexOf(type) !== -1)
             return true;

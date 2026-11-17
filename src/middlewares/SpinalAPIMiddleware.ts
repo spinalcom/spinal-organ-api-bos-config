@@ -24,12 +24,18 @@
 
 import { FileSystem, Model, spinalCore, File as SpinalFile } from "spinal-core-connectorjs";
 import { SpinalContext, SpinalGraph, SpinalGraphService, SpinalNode } from "spinal-env-viewer-graph-service";
+import { SpinalRelationLstPtr, SpinalRelationPtrLst, SpinalRelationRef } from "spinal-model-graph";
+import type { AnySpinalRelation } from "spinal-model-graph";
 import { IConfig, ISpinalAPIMiddleware } from "spinal-organ-api-server";
 import { EXCLUDES_TYPES, HTTP_CODES } from "../constant";
 import { AppProfileService, AppService, DigitalTwinService, UserProfileService } from "../services";
 import { parseTimeOfDay, parseDuration } from "../utils/parseTime";
 import { Request, Response, NextFunction } from "express";
 import { authenticateMiddleware } from "./expressMiddleware";
+
+function isSpinalRelation(model: unknown): model is AnySpinalRelation {
+	return model instanceof SpinalRelationRef || model instanceof SpinalRelationLstPtr || model instanceof SpinalRelationPtrLst;
+}
 
 export default class SpinalAPIMiddleware implements ISpinalAPIMiddleware {
 	config: IConfig = {
@@ -63,7 +69,7 @@ export default class SpinalAPIMiddleware implements ISpinalAPIMiddleware {
 	private static instance: SpinalAPIMiddleware;
 	graph: SpinalGraph | undefined;
 
-	private constructor() {}
+	private constructor() { }
 
 	static getInstance(): SpinalAPIMiddleware {
 		if (!this.instance) this.instance = new SpinalAPIMiddleware();
@@ -102,14 +108,15 @@ export default class SpinalAPIMiddleware implements ISpinalAPIMiddleware {
 		if (!profileId) return Promise.reject({ code: HTTP_CODES.UNAUTHORIZED, message: "Unauthorized" });
 
 		let node = FileSystem._objects[server_id];
-		if (!node) return this._loadwithConnect(server_id, profileId);
+		if (!node) node = await this._loadwithConnect(server_id);
 
 		if (node instanceof SpinalFile) return <any>node;
 		const found = await this._nodeIsBelongUserContext(<SpinalNode>node, profileId);
 		if (!found) return Promise.reject({ code: HTTP_CODES.UNAUTHORIZED, message: "Unauthorized" });
 
+		// SpinalGraphService keeps nodes only (it reads node.info.id): a relation has no info
 		// @ts-ignore
-		SpinalGraphService._addNode(node);
+		if (!isSpinalRelation(node)) SpinalGraphService._addNode(node);
 		// @ts-ignore
 		return Promise.resolve(node);
 	}
@@ -179,27 +186,26 @@ export default class SpinalAPIMiddleware implements ISpinalAPIMiddleware {
 		});
 	}
 
-	private _loadwithConnect<T extends spinal.Model>(server_id: number, profileId: string): Promise<T> {
+	// Loads only: the access check is done by load, out of the load_ptr callback where its errors were lost.
+	private _loadwithConnect<T extends spinal.Model>(server_id: number): Promise<T> {
 		return new Promise((resolve, reject) => {
 			if (!this.conn) return reject(new Error("No connection available"));
 
-			this.conn.load_ptr(server_id, async (model: T) => {
+			this.conn.load_ptr(server_id, (model: T) => {
 				if (!model) return reject({ code: 404, message: "Node is not found" });
-
-				if (model instanceof SpinalFile) return resolve(model);
-
-				const contextFound = await this._nodeIsBelongUserContext(<any>model, profileId);
-				if (!contextFound) return reject({ code: 401, message: "Unauthorized" });
-
-				// @ts-ignore
-				SpinalGraphService._addNode(model);
-				// @ts-ignore
-				return resolve(model);
+				resolve(model);
 			});
 		});
 	}
 
-	private async _nodeIsBelongUserContext(node: SpinalNode<any>, profileId: string): Promise<boolean> {
+	private async _nodeIsBelongUserContext(node: SpinalNode<any> | AnySpinalRelation, profileId: string): Promise<boolean> {
+		// A relation's getType() is its kind (Ref, LstPtr, PtrLst), not a node type:
+		// the profile can read a relation when it can read the relation's parent node.
+		if (isSpinalRelation(node)) {
+			const parent = await node.getParent();
+			return parent ? this._nodeIsBelongUserContext(parent, profileId) : false;
+		}
+
 		const type = node.getType().get();
 		if (EXCLUDES_TYPES.indexOf(type) !== -1) return true;
 
