@@ -1,6 +1,7 @@
 import { FileSystem, Model } from "spinal-core-connectorjs";
 import { SpinalGraph, SpinalNode } from "spinal-env-viewer-graph-service";
 import { IConfig, ISpinalAPIMiddleware } from "spinal-organ-api-server";
+import { Request, Response, NextFunction } from "express";
 export default class SpinalAPIMiddleware implements ISpinalAPIMiddleware {
     config: IConfig;
     conn: FileSystem | undefined;
@@ -24,6 +25,7 @@ export default class SpinalAPIMiddleware implements ISpinalAPIMiddleware {
     /**
      * Returns the model if the profile can access it :
      * - a node must belong to an authorized context (see _nodeIsBelongUserContext) ;
+     * - a relation is accessible if its parent node is accessible ;
      * - a file (or document) must be linked to a node accessible to the profile (see _fileIsAccessible).
      * Any other model (Lst, Ptr, Path, FileVersion...) is refused.
      * A refused model rejects the returned promise with a { code, message } error.
@@ -47,5 +49,6 @@ export default class SpinalAPIMiddleware implements ISpinalAPIMiddleware {
     private _getFileNode;
     private _isAdminProfile;
     private _getProfileContexts;
+    checkMonitoringToken(req: Request, res: Response, next: NextFunction): void | Response<any, Record<string, any>>;
 }
 export { SpinalAPIMiddleware };

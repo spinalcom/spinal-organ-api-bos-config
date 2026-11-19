@@ -312,8 +312,10 @@ class AppService {
      * @returns {Promise<SpinalNode[]>} A promise that resolves to an array of all SpinalNodes.
      */
     async getAllApps() {
+        const appsAndSubApps = await this.getAllBuildingAppsAndSubApp();
+        const apps = appsAndSubApps.filter((app) => app.info.type.get() === constant_1.BUILDING_APP_TYPE);
         return {
-            apps: await this.getAllBuildingAppsAndSubApp(),
+            apps,
             adminApps: await this.getAllAdminApps(),
         };
     }

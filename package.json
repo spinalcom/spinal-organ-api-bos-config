@@ -1,6 +1,6 @@
 {
   "name": "spinal-organ-api-bos-config",
-  "version": "2.7.0",
+  "version": "2.8.0",
   "description": "",
   "main": "dist/index.js",
   "keywords": [],
@@ -14,7 +14,11 @@
     "prebuild": "npm run swagger",
     "dev": "concurrently \"nodemon\" \"nodemon -x tsoa spec-and-routes\"",
     "clean": "rm -rf dist declarations",
-    "swagger": "tsoa spec && tsoa routes"
+    "swagger": "tsoa spec && tsoa routes",
+    "test:auth": "node --test test/api-auth.test.js",
+    "test:docs-auth": "node --test test/docs-auth.test.js",
+    "test:admin-access": "node --test test/admin-app-access.test.js",
+    "test:relation-access": "node --test test/relation-access.test.js"
   },
   "dependencies": {
     "async-iterator-to-array": "0.0.1",

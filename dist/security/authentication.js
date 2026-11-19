@@ -57,7 +57,7 @@ async function profileHasAccessToAdminApp(request, adminAppName) {
         adminAppName = [adminAppName];
     let profileId = await getProfileId(request);
     for (const appName of adminAppName) {
-        const appNode = await services_1.UserProfileService.getInstance().profileHasAccessToApp(findNodeBySearchKey_1.searchByName, profileId, appName);
+        const appNode = await services_1.UserProfileService.getInstance().profileHasAccessToAdminApp(findNodeBySearchKey_1.searchByName, profileId, appName);
         if (appNode)
             return true;
     }

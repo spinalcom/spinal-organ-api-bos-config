@@ -24,12 +24,16 @@
 
 import { FileSystem, Model, spinalCore, File as SpinalFile } from "spinal-core-connectorjs";
 import { SpinalContext, SpinalGraph, SpinalGraphService, SpinalNode } from "spinal-env-viewer-graph-service";
+import { SpinalRelationLstPtr, SpinalRelationPtrLst, SpinalRelationRef } from "spinal-model-graph";
+import type { AnySpinalRelation } from "spinal-model-graph";
 import { IConfig, ISpinalAPIMiddleware } from "spinal-organ-api-server";
 import { EXCLUDES_TYPES, HTTP_CODES } from "../constant";
 import { AppProfileService, AppService, DigitalTwinService, UserProfileService } from "../services";
 import { AdminProfileService } from "../services/adminProfile.service";
 import { DIRECTORY_NODE_TYPE, FILE_NODE_TYPE, TO_FILE_RELATION, TO_FOLDER_RELATION, TO_ROOT_DIRECTORY_RELATION } from "spinal-env-viewer-plugin-documentation-service/dist/Models/constants";
 import { parseTimeOfDay, parseDuration } from "../utils/parseTime";
+import { Request, Response, NextFunction } from "express";
+import { authenticateMiddleware } from "./expressMiddleware";
 
 // node types of the documents (files and directories) of the documentation service
 const DOCUMENT_NODE_TYPES = [FILE_NODE_TYPE, DIRECTORY_NODE_TYPE];
@@ -38,6 +42,9 @@ const DOCUMENT_PARENT_RELATIONS = [TO_FILE_RELATION, TO_FOLDER_RELATION, TO_ROOT
 // upper bound of nodes visited while looking for an authorized parent of a document
 const MAX_DOCUMENT_PARENTS_VISITED = 500;
 
+function isSpinalRelation(model: unknown): model is AnySpinalRelation {
+	return model instanceof SpinalRelationRef || model instanceof SpinalRelationLstPtr || model instanceof SpinalRelationPtrLst;
+}
 
 export default class SpinalAPIMiddleware implements ISpinalAPIMiddleware {
 	config: IConfig = {
@@ -60,8 +67,9 @@ export default class SpinalAPIMiddleware implements ISpinalAPIMiddleware {
 			idleDelay: parseDuration(process.env.PRELOAD_IDLE_DELAY, 2000),
 			batchSize: parseDuration(process.env.PRELOAD_BATCH_SIZE, 20) || 20,
 			batchDelay: parseDuration(process.env.PRELOAD_BATCH_DELAY, 50),
-		}
+		},
 	};
+
 	conn: FileSystem | undefined;
 
 	loadedPtr: Map<number, any> = new Map();
@@ -108,8 +116,8 @@ export default class SpinalAPIMiddleware implements ISpinalAPIMiddleware {
 
 		if (!profileId) return Promise.reject({ code: HTTP_CODES.UNAUTHORIZED, message: "Unauthorized" });
 
-		const model = FileSystem._objects[server_id];
-		if (!model) return this._loadwithConnect(server_id, profileId);
+		let model = FileSystem._objects[server_id];
+		if (!model) model = await this._loadwithConnect(server_id);
 
 		return this._checkModelAccess<T>(model, server_id, profileId);
 	}
@@ -179,7 +187,8 @@ export default class SpinalAPIMiddleware implements ISpinalAPIMiddleware {
 		});
 	}
 
-	private _loadwithConnect<T extends spinal.Model>(server_id: number, profileId: string): Promise<T> {
+	// Loads only: the access check is done by load, out of the load_ptr callback where its errors were lost.
+	private _loadwithConnect<T extends spinal.Model>(server_id: number): Promise<T> {
 		return new Promise((resolve, reject) => {
 			if (!this.conn) return reject(new Error("No connection available"));
 
@@ -187,8 +196,7 @@ export default class SpinalAPIMiddleware implements ISpinalAPIMiddleware {
 				// the connector does not handle the callback result : it must never throw nor return a rejected promise
 				this.conn.load_ptr(server_id, (model: T) => {
 					if (!model) return reject({ code: HTTP_CODES.NOT_FOUND, message: "Node is not found" });
-
-					this._checkModelAccess<T>(model, server_id, profileId).then(resolve, reject);
+					resolve(model);
 				});
 			} catch (error) {
 				reject(this._toHttpError(error));
@@ -199,6 +207,7 @@ export default class SpinalAPIMiddleware implements ISpinalAPIMiddleware {
 	/**
 	 * Returns the model if the profile can access it :
 	 * - a node must belong to an authorized context (see _nodeIsBelongUserContext) ;
+	 * - a relation is accessible if its parent node is accessible ;
 	 * - a file (or document) must be linked to a node accessible to the profile (see _fileIsAccessible).
 	 * Any other model (Lst, Ptr, Path, FileVersion...) is refused.
 	 * A refused model rejects the returned promise with a { code, message } error.
@@ -211,10 +220,13 @@ export default class SpinalAPIMiddleware implements ISpinalAPIMiddleware {
 				authorized = await this._nodeIsBelongUserContext(model, profileId);
 				// @ts-ignore
 				if (authorized) SpinalGraphService._addNode(model);
+			} else if (isSpinalRelation(model)) {
+				// SpinalGraphService keeps nodes only (it reads node.info.id): a relation is not added
+				authorized = await this._nodeIsBelongUserContext(model, profileId);
 			} else if (model instanceof SpinalFile) {
 				authorized = await this._fileIsAccessible(model, profileId);
 			} else {
-				return Promise.reject({ code: HTTP_CODES.BAD_REQUEST, message: `The id ${server_id} does not refer to a node nor a file` });
+				return Promise.reject({ code: HTTP_CODES.BAD_REQUEST, message: `The id ${server_id} does not refer to a node, a relation nor a file` });
 			}
 		} catch (error) {
 			return Promise.reject(this._toHttpError(error));
@@ -229,7 +241,14 @@ export default class SpinalAPIMiddleware implements ISpinalAPIMiddleware {
 		return { code: HTTP_CODES.INTERNAL_ERROR, message: error?.message || String(error) };
 	}
 
-	private async _nodeIsBelongUserContext(node: SpinalNode<any>, profileId: string): Promise<boolean> {
+	private async _nodeIsBelongUserContext(node: SpinalNode<any> | AnySpinalRelation, profileId: string): Promise<boolean> {
+		// A relation's getType() is its kind (Ref, LstPtr, PtrLst), not a node type:
+		// the profile can read a relation when it can read the relation's parent node.
+		if (isSpinalRelation(node)) {
+			const parent = await node.getParent();
+			return parent ? this._nodeIsBelongUserContext(parent, profileId) : false;
+		}
+
 		const type = node.getType().get();
 		if (EXCLUDES_TYPES.indexOf(type) !== -1) return true;
 
@@ -336,6 +355,22 @@ export default class SpinalAPIMiddleware implements ISpinalAPIMiddleware {
 			SpinalGraphService._addNode(context);
 			return context;
 		});
+	}
+
+	checkMonitoringToken(req: Request, res: Response, next: NextFunction) {
+		try {
+			const start = "/monitoring/api-docs";
+			const originalUrl = (req.url || "").replace(/\/+$/, "");
+			const urlStartWithSlash = originalUrl.startsWith("/") ? originalUrl : `/${originalUrl}`;
+
+			if (urlStartWithSlash.startsWith(start) || urlStartWithSlash.startsWith("/monitoring/health")) return next();
+
+			(req as any).isFromMonitoring = true;
+
+			authenticateMiddleware(req, res, next);
+		} catch (error) {
+			return res.status(401).json({ error: `Unauthorized` });
+		}
 	}
 }
 

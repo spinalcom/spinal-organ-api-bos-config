@@ -25,11 +25,13 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.useHubProxy = useHubProxy;
 exports.useClientMiddleWare = useClientMiddleWare;
+exports.useDocsAuthentication = useDocsAuthentication;
 exports.initSwagger = initSwagger;
 exports.injectAdminRoutesIntoApiDocs = injectAdminRoutesIntoApiDocs;
 exports.useApiMiddleWare = useApiMiddleWare;
 exports.errorHandler = errorHandler;
 exports._formatValidationError = _formatValidationError;
+exports.authenticateMiddleware = authenticateMiddleware;
 exports.authenticateRequest = authenticateRequest;
 const cors = require("cors");
 const express = require("express");
@@ -42,6 +44,10 @@ const AuthError_1 = require("../security/AuthError");
 const authentication_1 = require("../security/authentication");
 const swaggerJSON = require("../swagger/swagger.json");
 const bodyParser = require("body-parser");
+const docsAuth_1 = require("../security/docsAuth");
+const services_1 = require("../services");
+const adminProfile_service_1 = require("../services/adminProfile.service");
+const SpinalRedisMiddleware_1 = require("./SpinalRedisMiddleware");
 const adminRoutes = Object.keys(swaggerJSON.paths);
 const swaggerOption = {
     swaggerOptions: {
@@ -80,6 +86,47 @@ function useClientMiddleWare(app) {
         res.redirect("/spinalcom-api-docs");
     });
 }
+/**
+ * Puts a login in front of the documentation pages and of the swagger files
+ * they are built from : any valid login for the API documentation, the admin
+ * only for the documentation of the admin routes.
+ *
+ * Call this before the documentation routes are registered (initSwagger,
+ * the static folder and runServerRest of spinal-organ-api-server).
+ */
+function useDocsAuthentication(app) {
+    (0, docsAuth_1.useDocsAuth)(app, {
+        login: loginToDocs,
+        getProfileId: async (token) => {
+            const tokenInfo = await services_1.TokenService.getInstance().tokenIsValid(token);
+            const profile = tokenInfo?.profile;
+            return profile?.profileId || profile?.userProfileBosConfigId || profile?.appProfileBosConfigId || null;
+        },
+        isAdminProfile: (profileId) => adminProfile_service_1.AdminProfileService.getInstance().adminNode.getId().get() === profileId,
+    });
+}
+/**
+ * The same login as POST /api/v1/auth (the admin account), then the users of
+ * the authentication platform when one is registered.
+ */
+async function loginToDocs(userName, password) {
+    const credential = { userName, password };
+    let data = (await services_1.AuthentificationService.getInstance().authenticate(credential)).data;
+    if (!data?.token) {
+        try {
+            const result = await services_1.UserListService.getInstance().authenticateUserViaAuthPlateform(credential);
+            data = await result.data;
+        }
+        catch (error) {
+            // no authentication platform registered
+            data = null;
+        }
+    }
+    if (!data?.token)
+        return null;
+    SpinalRedisMiddleware_1.default.getInstance().set(data.token, data);
+    return { token: data.token, expiresAt: data.expieredToken };
+}
 function initSwagger(app) {
     app.use("/admin/swagger.json", (req, res) => {
         res.sendFile(path.resolve(__dirname, "../swagger/swagger.json"));
@@ -99,6 +146,7 @@ function initSwagger(app) {
 /**
  * Inject selected admin routes (from the local tsoa `swagger.json`) into the
  * `spinal-organ-api-server` OpenAPI document served at `/spinalcom-api-docs`.
+ * Display the injected routes' tags before the existing API sections.
  *
  * Call this once, after `runServerRest()`.
  *
@@ -132,6 +180,7 @@ function injectAdminRoutesIntoApiDocs(routeKeys = ["/api/v1/auth"]) {
                 copyReferencedSchemas(value);
         }
     };
+    const injectedTags = new Set();
     for (const routeKey of routeKeys) {
         const path = source.paths?.[routeKey];
         if (!path) {
@@ -140,7 +189,13 @@ function injectAdminRoutesIntoApiDocs(routeKeys = ["/api/v1/auth"]) {
         }
         target.paths[routeKey] = path;
         copyReferencedSchemas(path);
+        for (const method of ["get", "put", "post", "delete", "options", "head", "patch", "trace"]) {
+            for (const tag of path[method]?.tags ?? [])
+                injectedTags.add(tag);
+        }
     }
+    const existingTags = target.tags ?? [];
+    target.tags = [...Array.from(injectedTags, (name) => existingTags.find((tag) => tag.name === name) ?? source.tags?.find((tag) => tag.name === name) ?? { name }), ...existingTags.filter((tag) => !injectedTags.has(tag.name))];
 }
 function useApiMiddleWare(app) {
     app.use(cors({ origin: "*", exposedHeaders: ["X-API-Version", "X-API-BOS-CONFIG-Version"] }));
@@ -174,20 +229,25 @@ function _formatValidationError(err) {
         details: err?.fields,
     };
 }
+async function authenticateMiddleware(req, res, next) {
+    let err;
+    try {
+        const isAdmin = isAdminRoute(req.url);
+        if (isAdmin)
+            return next();
+        await (0, authentication_1.checkBeforeRedirectToApi)(req, constant_1.SECURITY_NAME.profile);
+    }
+    catch (error) {
+        if (req.isFromMonitoring)
+            return res.status(401).json({ error: `Unauthorized` });
+        err = error;
+    }
+    next(err);
+}
 function authenticateRequest(app) {
-    app.all(/\/api\/v1\/*/, async (req, res, next) => {
-        let err;
-        try {
-            const isAdmin = isAdminRoute(req.url);
-            if (isAdmin)
-                return next();
-            await (0, authentication_1.checkBeforeRedirectToApi)(req, constant_1.SECURITY_NAME.profile);
-        }
-        catch (error) {
-            err = error;
-        }
-        next(err);
-    });
+    app.all(/\/api\/v1\/*/, authenticateMiddleware);
+    app.all(/\/api\/v2\/*/, authenticateMiddleware);
+    app.all(/\/BIM\/file\/*/, authenticateMiddleware);
 }
 function isAdminRoute(apiRoute) {
     const route = apiRoute.includes("?") ? apiRoute.substring(0, apiRoute.indexOf("?")) : apiRoute;

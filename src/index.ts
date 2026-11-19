@@ -45,7 +45,6 @@ const preload_config = require("../preload_config");
 
 const connect_opt = process.env.HUB_PORT ? `${process.env.HUB_PROTOCOL}://${process.env.USER_ID}:${process.env.USER_MDP}@${process.env.HUB_HOST}:${process.env.HUB_PORT}/` : `${process.env.HUB_PROTOCOL}://${process.env.USER_ID}:${process.env.USER_MDP}@${process.env.HUB_HOST}/`;
 const conn = spinalCore.connect(connect_opt);
-console.log(connect_opt);
 
 configServiceInstance
   .init(conn)
@@ -63,7 +62,11 @@ configServiceInstance
     // it is important to call this method after setting the connection to the middlewares
     // otherwise the digital twin will not be initialized correctly
     await DigitalTwinService.getInstance().getActualDigitalTwin(true);
-
+    try {
+      await spinalAPIMiddleware.getGraph();
+    } catch (err) {
+      console.error("Error getting graph:", err);
+    }
     const log_body = Number(process.env.LOG_BODY) == 1 ? true : false;
 
     // create server + listen
