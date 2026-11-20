@@ -1,5 +1,5 @@
 import * as express from "express";
-import { AuthentificationService, UserListService } from "../../services";
+import { AuthentificationService, TokenService, UserListService } from "../../services";
 import { HTTP_CODES } from "../../constant";
 import * as globalCache from "global-cache";
 import { v4 as uuidv4 } from "uuid";
@@ -61,9 +61,14 @@ export async function useLoginProxy(app: express.Application) {
 			const cookiesId = uuidv4();
 			const dataToCache = { uri: vue_client_uri, profileId, token, user };
 
+			const redisCache = SpinalRedisMiddleware.getInstance();
+
 			// Store the data in Redis with an expiration time of 30 seconds
-			SpinalRedisMiddleware.getInstance().set(cookiesId, dataToCache, { expiration: { type: "EX", value: 30 } }); //store data for 30seconds
-			globalCache.set(cookiesId, dataToCache, 30 * 1000); //store data for 30seconds
+			if (redisCache.isEnabled()) {
+				redisCache.set(cookiesId, dataToCache, { expiration: { type: "EX", value: 30 } }); //store data for 30seconds
+			} else {
+				TokenService.getInstance().addTokenToCache(cookiesId, dataToCache);
+			}
 
 			let endpoint = vue_client_uri!.endsWith("/") ? "login" : "/login";
 
@@ -96,15 +101,20 @@ export async function useLoginProxy(app: express.Application) {
 
 		if (!cookiesId) return res.status(HTTP_CODES.BAD_REQUEST).send({ status: HTTP_CODES.BAD_REQUEST, message: "No id provided" });
 
-		const dataFromRedis = await SpinalRedisMiddleware.getInstance().get(cookiesId);
-		const data = dataFromRedis || globalCache.get(cookiesId); // Retrieve the data from the cache using the cookiesId
+		let dataFromRedis = await SpinalRedisMiddleware.getInstance().get(cookiesId);
 
-		if (!data) return res.status(HTTP_CODES.NOT_FOUND).send({ status: HTTP_CODES.NOT_FOUND, message: "No found" });
+		if (dataFromRedis) {
+			await SpinalRedisMiddleware.getInstance().delete(cookiesId);
 
-		// Clear the cache after retrieving the data
-		globalCache.delete(cookiesId);
-		await SpinalRedisMiddleware.getInstance().delete(cookiesId);
+			return res.status(HTTP_CODES.OK).send(dataFromRedis);
+		}
 
-		return res.status(HTTP_CODES.OK).send(data);
+		const dataFromGraph = TokenService.getInstance().getTokenFromCache(cookiesId); // Retrieve the data from the cache using the cookiesId
+
+		if (!dataFromGraph) return res.status(HTTP_CODES.NOT_FOUND).send({ status: HTTP_CODES.NOT_FOUND, message: "No found" });
+
+		await TokenService.getInstance().deleteTokenFromCache(cookiesId);
+
+		return res.status(HTTP_CODES.OK).send(dataFromGraph);
 	});
 }

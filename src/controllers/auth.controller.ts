@@ -209,8 +209,8 @@ export class AuthController extends Controller {
 			this.setStatus(response?.code || HTTP_CODES.OK);
 			return response;
 		} catch (error: Error | any) {
-			this.setStatus(error.code || HTTP_CODES.INTERNAL_ERROR);
-			return { message: error.message };
+			this.setStatus(HTTP_CODES.UNAUTHORIZED);
+			return { message: SECURITY_MESSAGES.INVALID_TOKEN };
 		}
 	}
 

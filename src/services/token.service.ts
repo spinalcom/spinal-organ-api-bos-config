@@ -23,7 +23,7 @@
  */
 
 import { SpinalContext, SpinalGraph, SpinalNode } from "spinal-env-viewer-graph-service";
-import { TOKEN_LIST_CONTEXT_TYPE, TOKEN_LIST_CONTEXT_NAME, TOKEN_TYPE, PTR_LST_TYPE, TOKEN_RELATION_NAME } from "../constant";
+import { TOKEN_LIST_CONTEXT_TYPE, TOKEN_LIST_CONTEXT_NAME, TOKEN_TYPE, PTR_LST_TYPE, TOKEN_RELATION_NAME, SECURITY_MESSAGES } from "../constant";
 import { Model } from "spinal-core-connectorjs_type";
 import { AdminProfileService } from "./adminProfile.service";
 import * as jwt from "jsonwebtoken";
@@ -34,12 +34,14 @@ import { AuthentificationService } from "./authentification.service";
 import axios from "axios";
 import { configServiceInstance } from "./configFile.service";
 import SpinalRedisMiddleware from "../middlewares/SpinalRedisMiddleware";
+import { AuthError } from "../security/AuthError";
 
 const redisInstance = SpinalRedisMiddleware.getInstance();
 
 export class TokenService {
 	private static instance: TokenService;
 	public context: SpinalContext | undefined;
+	private TOKEN_CACHED_KEYS: string = "tokenCached";
 
 	private constructor() {}
 
@@ -50,12 +52,15 @@ export class TokenService {
 
 	public async init(): Promise<SpinalContext> {
 		this.context = await configServiceInstance.getContext(TOKEN_LIST_CONTEXT_NAME);
+
 		if (!this.context) {
 			this.context = await configServiceInstance.addContext(TOKEN_LIST_CONTEXT_NAME, TOKEN_LIST_CONTEXT_TYPE);
 			this.getOrGenerateTokenKey(); // Ensure the token key is set in the context
 		}
 
 		await this._scheduleTokenPurge();
+
+		this._generateTokenCachedKey();
 		return this.context;
 	}
 
@@ -210,10 +215,10 @@ export class TokenService {
 
 			if (tokenExpired) {
 				if (deleteIfExpired) this.deleteToken(token);
-				throw new Error("Token expired");
+				throw new AuthError(SECURITY_MESSAGES.INVALID_TOKEN);
 			}
 
-			if (!(await this.getTokenNode(token))) throw new Error("Token revoked or invalid");
+			if (!(await this.getTokenNode(token))) throw new AuthError(SECURITY_MESSAGES.INVALID_TOKEN);
 			redisInstance.set(token, tokenData);
 
 			return tokenData;
@@ -275,12 +280,12 @@ export class TokenService {
 			if (valid) return data;
 
 			// If it exists but not valid, it means it's expired
-			throw new Error("Token expired");
+			throw new AuthError(SECURITY_MESSAGES.INVALID_TOKEN);
 		}
 
 		// If not in cache, verify with auth platform
 		const bosCredential = await AuthentificationService.getInstance().getBosToAdminCredential();
-		if (!bosCredential || !bosCredential.urlAdmin) throw new Error("Invalid Token");
+		if (!bosCredential || !bosCredential.urlAdmin) throw new AuthError(SECURITY_MESSAGES.INVALID_TOKEN);
 
 		return axios
 			.post(`${bosCredential.urlAdmin}/tokens/verifyToken`, { tokenParam: token, platformId: bosCredential.idPlateform, actor })
@@ -290,7 +295,7 @@ export class TokenService {
 			})
 			.catch((error) => {
 				console.error("Error verifying token in auth platform:", error.response?.data || error.message || error);
-				throw new Error("Invalid token");
+				throw new AuthError(SECURITY_MESSAGES.INVALID_TOKEN);
 			});
 	}
 
@@ -332,7 +337,7 @@ export class TokenService {
 
 	public async revokeTokenInAuthPlatform(token: string): Promise<boolean> {
 		const bosCredential = await AuthentificationService.getInstance().getBosToAdminCredential();
-		if (!bosCredential || !bosCredential.urlAdmin) throw new Error("Invalid Token");
+		if (!bosCredential || !bosCredential.urlAdmin) throw new AuthError(SECURITY_MESSAGES.INVALID_TOKEN);
 
 		return axios
 			.post(`${bosCredential.urlAdmin}/tokens/revokeToken`, { token })
@@ -390,5 +395,36 @@ export class TokenService {
 			console.log(new Date().toUTCString(), "purge invalid tokens");
 			await this.purgeToken();
 		});
+	}
+
+	private _generateTokenCachedKey() {
+		const keys = this.TOKEN_CACHED_KEYS;
+		if (this.context && !this.context.info[keys]) {
+			this.context.info.add_attr({
+				[keys]: {},
+			});
+		}
+	}
+
+	public addTokenToCache(key: string, tokenData: any) {
+		this._generateTokenCachedKey();
+		if (this.context && this.context.info && this.context.info[this.TOKEN_CACHED_KEYS]) {
+			this.context.info[this.TOKEN_CACHED_KEYS].add_attr({
+				[key]: tokenData,
+			});
+		}
+	}
+
+	public getTokenFromCache(key: string): any {
+		if (this.context && this.context.info && this.context.info[this.TOKEN_CACHED_KEYS]) {
+			return this.context.info[this.TOKEN_CACHED_KEYS][key]?.get();
+		}
+		return null;
+	}
+
+	public deleteTokenFromCache(key: string) {
+		if (this.context && this.context.info && this.context.info[this.TOKEN_CACHED_KEYS] && this.context.info[this.TOKEN_CACHED_KEYS][key]) {
+			this.context.info[this.TOKEN_CACHED_KEYS].rem_attr(key);
+		}
 	}
 }

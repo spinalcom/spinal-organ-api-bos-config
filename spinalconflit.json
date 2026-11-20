@@ -1,0 +1,9 @@
+{
+	"spinal-env-viewer-plugin-documentation-service": {
+		"forceCommit": "documentary",
+		"found": {
+			"": ["spinal-organ-api-bos-config"],
+			"documentary": ["spinal-organ-api-server", "spinal-model-analysis"]
+		}
+	}
+}

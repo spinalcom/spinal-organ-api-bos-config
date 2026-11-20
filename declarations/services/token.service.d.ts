@@ -3,6 +3,7 @@ import { IApplicationToken, IUserToken } from "../interfaces";
 export declare class TokenService {
     private static instance;
     context: SpinalContext | undefined;
+    private TOKEN_CACHED_KEYS;
     private constructor();
     static getInstance(): TokenService;
     init(): Promise<SpinalContext>;
@@ -124,4 +125,8 @@ export declare class TokenService {
     private _generateString;
     private _getAllTokens;
     private _scheduleTokenPurge;
+    private _generateTokenCachedKey;
+    addTokenToCache(key: string, tokenData: any): void;
+    getTokenFromCache(key: string): any;
+    deleteTokenFromCache(key: string): void;
 }

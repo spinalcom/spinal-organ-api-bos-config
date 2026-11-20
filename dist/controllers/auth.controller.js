@@ -197,8 +197,8 @@ let AuthController = class AuthController extends tsoa_1.Controller {
             return response;
         }
         catch (error) {
-            this.setStatus(error.code || constant_1.HTTP_CODES.INTERNAL_ERROR);
-            return { message: error.message };
+            this.setStatus(constant_1.HTTP_CODES.UNAUTHORIZED);
+            return { message: constant_1.SECURITY_MESSAGES.INVALID_TOKEN };
         }
     }
     async tokenIsValid(data) {
